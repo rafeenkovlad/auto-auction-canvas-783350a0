@@ -1,7 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
-import { getReport, type CarReport, type InspectionElement, type FileRef } from "@/lib/report.functions";
-import { CarDiagram } from "@/components/CarDiagram";
+import {
+  getReport,
+  type CarReport,
+  type InspectionElement,
+  type FileRef,
+} from "@/lib/report.functions";
+import { BodyMap } from "@/components/CarDiagram";
 
 const reportQuery = (token?: string) =>
   queryOptions({
@@ -11,27 +16,44 @@ const reportQuery = (token?: string) =>
   });
 
 export const Route = createFileRoute("/")({
-  validateSearch: (s: Record<string, unknown>) => ({ token: typeof s.token === "string" ? s.token : undefined }),
+  validateSearch: (s: Record<string, unknown>) => ({
+    token: typeof s.token === "string" ? s.token : undefined,
+  }),
   loaderDeps: ({ search }) => ({ token: search.token }),
-  loader: ({ context, deps }) => context.queryClient.ensureQueryData(reportQuery(deps.token)),
+  loader: ({ context, deps }) =>
+    context.queryClient.ensureQueryData(reportQuery(deps.token)),
   head: () => ({
     meta: [
-      { title: "Аукционный лист — отчёт об осмотре автомобиля" },
-      { name: "description", content: "Подробный отчёт о техническом состоянии автомобиля в формате аукционного листа." },
+      { title: "Inspection Report — Аукционный лист" },
+      {
+        name: "description",
+        content:
+          "Подробный отчёт о техническом состоянии автомобиля в формате инспекционного листа.",
+      },
     ],
   }),
   component: AuctionSheetPage,
   errorComponent: ({ error }) => (
     <div className="min-h-screen flex items-center justify-center p-8">
-      <div className="sheet p-8 max-w-lg text-center">
+      <div className="panel p-8 max-w-lg text-center">
         <h1 className="text-2xl font-bold ink mb-2">Не удалось загрузить отчёт</h1>
-        <p className="text-muted-foreground">{error.message}</p>
+        <p className="text-muted-foreground text-sm">{error.message}</p>
       </div>
     </div>
   ),
 });
 
-// ---------- labels ----------
+const SECTIONS: Array<{ key: keyof CarReport["inspectionStep"]; label: string }> = [
+  { key: "bodyElements", label: "Кузов" },
+  { key: "bodyReinforcementElements", label: "Силовые элементы" },
+  { key: "glassElements", label: "Остекление" },
+  { key: "interiorElements", label: "Салон" },
+  { key: "underHoodElements", label: "Подкапотное" },
+  { key: "wheelsAndBrakesElements", label: "Колёса и тормоза" },
+  { key: "lightningElements", label: "Световые приборы" },
+  { key: "computerDiagnosticsElements", label: "Компьютерная диагностика" },
+];
+
 const ELEMENT_LABEL: Record<string, string> = {
   general_condition: "Общее состояние",
   hood: "Капот",
@@ -51,24 +73,19 @@ const ELEMENT_LABEL: Record<string, string> = {
   right_threshold: "Правый порог",
 };
 
-const SECTIONS: Array<{ key: keyof CarReport["inspectionStep"]; label: string }> = [
-  { key: "bodyElements", label: "Кузов" },
-  { key: "bodyReinforcementElements", label: "Силовые элементы" },
-  { key: "glassElements", label: "Остекление" },
-  { key: "interiorElements", label: "Салон" },
-  { key: "underHoodElements", label: "Подкапотное пространство" },
-  { key: "wheelsAndBrakesElements", label: "Колёса и тормоза" },
-  { key: "lightningElements", label: "Световые приборы" },
-  { key: "computerDiagnosticsElements", label: "Компьютерная диагностика" },
-];
-
-// ---------- helpers ----------
+type Status = "ok" | "minor" | "serious" | "skipped";
 function elementStatus(el: InspectionElement): "ok" | "minor" | "serious" {
   if (el.seriousDamageTags.length > 0) return "serious";
   if (!el.noDamage || el.noSeriousDamageTags.length > 0) return "minor";
   return "ok";
 }
-function sectionStatus(els: InspectionElement[]): "ok" | "minor" | "serious" | "skipped" {
+function elementScore(el: InspectionElement): number {
+  const s = elementStatus(el);
+  if (s === "serious") return 1.5;
+  if (s === "minor") return 2.5;
+  return 4.5;
+}
+function sectionStatus(els: InspectionElement[]): Status {
   if (els.length === 0) return "skipped";
   let s: "ok" | "minor" | "serious" = "ok";
   for (const e of els) {
@@ -78,6 +95,11 @@ function sectionStatus(els: InspectionElement[]): "ok" | "minor" | "serious" | "
   }
   return s;
 }
+function sectionScore(els: InspectionElement[]): number {
+  if (els.length === 0) return 0;
+  const sum = els.reduce((a, e) => a + elementScore(e), 0);
+  return Math.round((sum / els.length) * 10) / 10;
+}
 function fmtMileage(km: number | null | undefined) {
   if (km == null) return "—";
   return km.toLocaleString("ru-RU") + " км";
@@ -85,62 +107,104 @@ function fmtMileage(km: number | null | undefined) {
 function fmtDate(d?: string | null) {
   if (!d) return "—";
   try {
-    return new Date(d).toLocaleDateString("ru-RU", { year: "numeric", month: "long", day: "numeric" });
+    return new Date(d).toLocaleDateString("ru-RU", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
   } catch {
     return d;
   }
 }
-
-// ---------- score ----------
-function calcGrade(report: CarReport): { letter: string; score: number; tone: "good" | "warn" | "bad" } {
-  const ins = report.inspectionStep;
-  let serious = 0;
-  let minor = 0;
-  let total = 0;
+function overallReportScore(r: CarReport): number {
+  const scores: number[] = [];
   for (const { key } of SECTIONS) {
-    const arr = ins[key] as InspectionElement[];
-    for (const e of arr) {
-      total++;
-      const st = elementStatus(e);
-      if (st === "serious") serious++;
-      else if (st === "minor") minor++;
-    }
+    const arr = r.inspectionStep[key] as InspectionElement[];
+    if (arr.length) scores.push(sectionScore(arr));
   }
-  // 5.0 max, subtract 1.0 per serious, 0.2 per minor
-  let score = 5 - serious * 1 - minor * 0.2;
-  if (total === 0) score = 0;
-  score = Math.max(1, Math.min(5, score));
-  const letter = score >= 4.5 ? "A" : score >= 4 ? "4" : score >= 3.5 ? "3.5" : score >= 3 ? "3" : score >= 2 ? "2" : "R";
-  const tone = serious > 0 ? "bad" : minor > 0 ? "warn" : "good";
-  return { letter, score: Math.round(score * 10) / 10, tone };
+  if (!scores.length) return 0;
+  const s = scores.reduce((a, b) => a + b, 0) / scores.length;
+  return Math.round(s * 10) / 10;
+}
+function chipClass(s: Status) {
+  return s === "ok"
+    ? "grade-chip grade-good"
+    : s === "minor"
+      ? "grade-chip grade-warn"
+      : s === "serious"
+        ? "grade-chip grade-bad"
+        : "grade-chip grade-skip";
+}
+function plural(n: number, forms: [string, string, string]) {
+  const a = Math.abs(n) % 100;
+  const b = a % 10;
+  if (a > 10 && a < 20) return forms[2];
+  if (b > 1 && b < 5) return forms[1];
+  if (b === 1) return forms[0];
+  return forms[2];
 }
 
-// ---------- subcomponents ----------
-function StatusPill({ status }: { status: "ok" | "minor" | "serious" | "skipped" }) {
-  const map = {
-    ok: { label: "Без замечаний", color: "var(--grade-good)" },
-    minor: { label: "Незначительные", color: "var(--grade-warn)" },
-    serious: { label: "Серьёзные", color: "var(--grade-bad)" },
-    skipped: { label: "Не осмотрено", color: "var(--muted-foreground)" },
-  } as const;
-  const { label, color } = map[status];
+/* ===== Detail element card (compact) ===== */
+function ElementCard({ el }: { el: InspectionElement }) {
+  const st = elementStatus(el);
+  const label = ELEMENT_LABEL[el.elementType] ?? el.elementType.replace(/_/g, " ");
   return (
-    <span
-      className="mono inline-flex items-center gap-1.5 text-[11px] uppercase tracking-wider px-2 py-0.5 border"
-      style={{ borderColor: color, color }}
-    >
-      <span className="inline-block w-1.5 h-1.5 rounded-full" style={{ background: color }} />
-      {label}
-    </span>
+    <div className="panel overflow-hidden flex flex-col">
+      <Photo file={el.file} />
+      <div className="p-3 flex-1 flex flex-col gap-2">
+        <div className="flex items-start justify-between gap-2">
+          <h4 className="font-medium text-sm leading-tight">{label}</h4>
+          <span className={chipClass(st)}>{elementScore(el).toFixed(1)}</span>
+        </div>
+        {el.paintworkThicknessFrom != null && el.paintworkThicknessTo != null && (
+          <div className="mono text-[10px] text-muted-foreground">
+            ЛКП {el.paintworkThicknessFrom}–{el.paintworkThicknessTo} мкм
+          </div>
+        )}
+        {(el.seriousDamageTags.length > 0 || el.noSeriousDamageTags.length > 0) && (
+          <div className="flex flex-wrap gap-1">
+            {el.seriousDamageTags.map((t) => (
+              <span
+                key={t.id}
+                className="text-[10px] px-1.5 py-0.5 rounded mono"
+                style={{
+                  background: "color-mix(in oklab, var(--grade-bad) 15%, transparent)",
+                  color: "var(--grade-bad)",
+                }}
+              >
+                {t.name}
+              </span>
+            ))}
+            {el.noSeriousDamageTags.map((t) => (
+              <span
+                key={t.id}
+                className="text-[10px] px-1.5 py-0.5 rounded mono"
+                style={{
+                  background: "color-mix(in oklab, var(--grade-warn) 22%, transparent)",
+                  color: "oklch(0.4 0.12 70)",
+                }}
+              >
+                {t.name}
+              </span>
+            ))}
+          </div>
+        )}
+        {el.note && (
+          <p className="text-xs text-muted-foreground leading-snug line-clamp-3">
+            {el.note}
+          </p>
+        )}
+      </div>
+    </div>
   );
 }
 
-function Photo({ file, ratio = "4/3" }: { file: FileRef | null | undefined; ratio?: string }) {
+function Photo({ file }: { file: FileRef | null | undefined }) {
   if (!file?.url || file.type !== "image") {
     return (
       <div
         className="bg-muted flex items-center justify-center text-muted-foreground mono text-[10px] uppercase tracking-wider"
-        style={{ aspectRatio: ratio }}
+        style={{ aspectRatio: "4/3" }}
       >
         Нет фото
       </div>
@@ -151,317 +215,268 @@ function Photo({ file, ratio = "4/3" }: { file: FileRef | null | undefined; rati
       src={file.url}
       alt={file.filename}
       loading="lazy"
-      className="w-full h-full object-cover"
-      style={{ aspectRatio: ratio }}
+      className="w-full object-cover"
+      style={{ aspectRatio: "4/3" }}
     />
   );
 }
 
 function CheckRow({ label, ok }: { label: string; ok: boolean | null }) {
-  const color = ok == null ? "var(--muted-foreground)" : ok ? "var(--grade-good)" : "var(--grade-bad)";
+  const color =
+    ok == null ? "var(--grade-skip)" : ok ? "var(--grade-good)" : "var(--grade-bad)";
   const sym = ok == null ? "—" : ok ? "✓" : "✕";
   return (
     <div className="flex items-center justify-between gap-3 py-2 border-b border-dashed border-border last:border-0">
       <span className="text-sm">{label}</span>
-      <span className="mono text-base font-bold" style={{ color }}>{sym}</span>
+      <span className="mono text-base font-bold" style={{ color }}>
+        {sym}
+      </span>
     </div>
   );
 }
 
-function ElementCard({ el }: { el: InspectionElement }) {
-  const status = elementStatus(el);
-  const label = ELEMENT_LABEL[el.elementType] ?? el.elementType.replace(/_/g, " ");
-  return (
-    <div className="border border-border bg-card/60 overflow-hidden flex flex-col">
-      <div className="relative">
-        <Photo file={el.file} />
-        <div className="absolute top-2 left-2">
-          <StatusPill status={status} />
-        </div>
-      </div>
-      <div className="p-3 flex-1 flex flex-col gap-2">
-        <div className="flex items-baseline justify-between gap-2">
-          <h4 className="font-semibold text-sm ink">{label}</h4>
-          {el.paintworkThicknessFrom != null && el.paintworkThicknessTo != null && (
-            <span className="mono text-[10px] text-muted-foreground">
-              ЛКП {el.paintworkThicknessFrom}–{el.paintworkThicknessTo} мкм
-            </span>
-          )}
-        </div>
-        {(el.seriousDamageTags.length > 0 || el.noSeriousDamageTags.length > 0) && (
-          <div className="flex flex-wrap gap-1">
-            {el.seriousDamageTags.map((t) => (
-              <span key={t.id} className="text-[10px] px-1.5 py-0.5 mono uppercase tracking-wider"
-                style={{ background: "color-mix(in oklab, var(--grade-bad) 15%, transparent)", color: "var(--grade-bad)" }}>
-                {t.name}
-              </span>
-            ))}
-            {el.noSeriousDamageTags.map((t) => (
-              <span key={t.id} className="text-[10px] px-1.5 py-0.5 mono uppercase tracking-wider"
-                style={{ background: "color-mix(in oklab, var(--grade-warn) 18%, transparent)", color: "oklch(0.4 0.12 70)" }}>
-                {t.name}
-              </span>
-            ))}
-          </div>
-        )}
-        {el.note && (
-          <p className="text-xs text-muted-foreground leading-snug line-clamp-4">{el.note}</p>
-        )}
-      </div>
-    </div>
-  );
-}
-
-// ---------- main ----------
+/* ===== Page ===== */
 function AuctionSheetPage() {
   const { token } = Route.useSearch();
   const { data: report } = useSuspenseQuery(reportQuery(token));
-  const grade = calcGrade(report);
   const carName = report.reportName.replace(/^.*·\s*/, "");
+  const overall = overallReportScore(report);
 
   return (
-    <main className="min-h-screen py-8 px-4 md:px-8">
-      <article className="sheet mx-auto max-w-6xl relative">
-        {/* Header */}
-        <header className="border-b-2 border-ink p-6 md:p-10" style={{ borderColor: "var(--ink)" }}>
-          <div className="flex items-start justify-between gap-6 flex-wrap">
-            <div>
-              <div className="mono text-[11px] uppercase tracking-[0.3em] text-muted-foreground mb-2">
-                Аукционный лист · Отчёт об осмотре
-              </div>
-              <h1 className="text-3xl md:text-5xl font-bold leading-tight ink" style={{ fontFamily: "'Playfair Display', serif" }}>
-                {carName}
-              </h1>
-              <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1 mono text-xs text-muted-foreground">
-                <span>№ {report.reportNumber}</span>
-                <span>Осмотр: {fmtDate(report.carStep.dateInspection ?? report.reportDate)}</span>
-                <span>{report.carStep.cityInspection ?? "—"}</span>
-              </div>
+    <main className="min-h-screen py-6 px-3 md:px-6">
+      <div className="mx-auto max-w-6xl space-y-4">
+        {/* Header panel */}
+        <header className="panel p-5 md:p-6 flex flex-wrap items-center justify-between gap-4">
+          <div className="min-w-0">
+            <div className="mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1">
+              Inspection Report · {report.reportNumber}
             </div>
-
-            <div className="flex items-stretch gap-3">
-              <div
-                className="flex flex-col items-center justify-center px-5 py-3 border-2"
-                style={{
-                  borderColor: `var(--grade-${grade.tone === "good" ? "good" : grade.tone === "warn" ? "warn" : "bad"})`,
-                  color: `var(--grade-${grade.tone === "good" ? "good" : grade.tone === "warn" ? "warn" : "bad"})`,
-                }}
-              >
-                <span className="mono text-[10px] uppercase tracking-widest">Оценка</span>
-                <span className="text-5xl font-black leading-none mt-1" style={{ fontFamily: "'Playfair Display', serif" }}>
-                  {grade.letter}
-                </span>
-                <span className="mono text-xs mt-1">{grade.score.toFixed(1)} / 5</span>
-              </div>
-              {report.carStep.gosNumber && (
-                <div className="flex flex-col items-center justify-center px-4 py-2 border-2 border-ink bg-paper"
-                  style={{ borderColor: "var(--ink)" }}>
-                  <span className="mono text-[10px] uppercase tracking-widest text-muted-foreground">Гос. номер</span>
-                  <span className="mono text-lg md:text-xl font-bold ink tracking-wider">{report.carStep.gosNumber}</span>
-                </div>
-              )}
+            <h1 className="text-2xl md:text-3xl font-bold ink leading-tight">
+              {carName}
+            </h1>
+            <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-xs text-muted-foreground">
+              <span>
+                VIN: <span className="mono ink">{report.vin}</span>
+              </span>
+              <span>Пробег: {fmtMileage(report.carStep.mileage)}</span>
+              <span>{report.carStep.cityInspection ?? "—"}</span>
+              <span>{fmtDate(report.carStep.dateInspection ?? report.reportDate)}</span>
             </div>
           </div>
-
-          {/* Key facts grid */}
-          <dl className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-4 mono text-sm">
-            <Fact label="VIN" value={report.vin} mono />
-            <Fact label="Пробег" value={fmtMileage(report.carStep.mileage)} />
-            <Fact label="Владельцев" value={report.carStep.ownersCount?.toString() ?? "—"} />
-            <Fact label="Дата отчёта" value={fmtDate(report.reportDate)} />
-          </dl>
+          <div className="flex items-center gap-3">
+            {report.carStep.gosNumber && (
+              <div className="flex flex-col items-center justify-center px-3 py-1.5 border-2 border-foreground bg-white rounded-sm">
+                <span className="mono text-[9px] uppercase tracking-widest text-muted-foreground">
+                  Гос. номер
+                </span>
+                <span className="mono text-base font-bold ink tracking-wider">
+                  {report.carStep.gosNumber}
+                </span>
+              </div>
+            )}
+            <div className="flex items-center gap-2 pl-3 border-l border-border">
+              <span className="text-xs text-muted-foreground uppercase tracking-wider">
+                Overall
+              </span>
+              <span
+                className={`grade-chip ${
+                  overall >= 4
+                    ? "grade-good"
+                    : overall >= 2.5
+                      ? "grade-warn"
+                      : "grade-bad"
+                }`}
+                style={{ minWidth: 44, height: 28, fontSize: 13 }}
+              >
+                {overall.toFixed(1)}
+              </span>
+            </div>
+          </div>
         </header>
 
-        {/* Body diagram */}
-        <section className="p-6 md:p-10 border-b border-border">
-          <SectionTitle index="01" title="Карта кузова" subtitle="Визуальный осмотр элементов" />
-          <div className="grid md:grid-cols-[1fr_1.2fr] gap-8 items-start mt-6">
-            <CarDiagram elements={report.inspectionStep.bodyElements} />
-            <div>
-              <div className="grid grid-cols-3 gap-3 mb-6">
-                <Stat
-                  label="Толщина ЛКП"
-                  value={`${report.inspectionStep.bodyPaintworkThicknessFrom ?? "—"}–${report.inspectionStep.bodyPaintworkThicknessTo ?? "—"}`}
-                  unit="мкм"
-                />
-                <Stat
-                  label="Силовые"
-                  value={`${report.inspectionStep.bodyReinforcementPaintworkThicknessFrom ?? "—"}–${report.inspectionStep.bodyReinforcementPaintworkThicknessTo ?? "—"}`}
-                  unit="мкм"
-                />
-                <Stat
-                  label="Элементов"
-                  value={report.inspectionStep.bodyElements.length.toString()}
-                  unit="осмотрено"
-                />
-              </div>
-              <Legend />
-            </div>
-          </div>
-        </section>
-
-        {/* Sections overview */}
-        <section className="p-6 md:p-10 border-b border-border">
-          <SectionTitle index="02" title="Сводка по узлам" subtitle="Оценка каждого блока осмотра" />
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mt-6">
-            {SECTIONS.map(({ key, label }) => {
-              const els = report.inspectionStep[key] as InspectionElement[];
-              const st = sectionStatus(els);
-              return (
-                <div key={key} className="border border-border p-4 flex flex-col gap-2 bg-card/40">
-                  <span className="mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                    {String(SECTIONS.findIndex((s) => s.key === key) + 1).padStart(2, "0")}
-                  </span>
-                  <span className="font-semibold ink leading-snug">{label}</span>
-                  <div className="mt-auto pt-2 flex items-center justify-between">
-                    <StatusPill status={st} />
-                    <span className="mono text-xs text-muted-foreground">{els.length} эл.</span>
+        {/* Section status grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-2">
+          {SECTIONS.map(({ key, label }) => {
+            const arr = report.inspectionStep[key] as InspectionElement[];
+            const st = sectionStatus(arr);
+            const sc = sectionScore(arr);
+            return (
+              <div
+                key={key}
+                className="panel px-3 py-2.5 flex items-center justify-between gap-2"
+              >
+                <div className="min-w-0">
+                  <div className="text-[10px] uppercase tracking-wider text-muted-foreground truncate">
+                    {label}
                   </div>
+                  <div className="text-xs mono ink">{arr.length} эл.</div>
                 </div>
-              );
-            })}
-          </div>
-        </section>
+                {st === "skipped" ? (
+                  <span className="grade-chip grade-skip">—</span>
+                ) : (
+                  <span className={chipClass(st)}>{sc.toFixed(1)}</span>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Body map (Exterior Grading) */}
+        <BodyMap
+          elements={report.inspectionStep.bodyElements}
+          overallScore={sectionScore(report.inspectionStep.bodyElements)}
+        />
+
+        {/* Body / paint summary */}
+        <div className="grid sm:grid-cols-3 gap-2">
+          <Stat
+            label="ЛКП кузова"
+            value={`${report.inspectionStep.bodyPaintworkThicknessFrom ?? "—"}–${report.inspectionStep.bodyPaintworkThicknessTo ?? "—"}`}
+            unit="мкм"
+          />
+          <Stat
+            label="ЛКП силовых"
+            value={`${report.inspectionStep.bodyReinforcementPaintworkThicknessFrom ?? "—"}–${report.inspectionStep.bodyReinforcementPaintworkThicknessTo ?? "—"}`}
+            unit="мкм"
+          />
+          <Stat
+            label="Владельцев"
+            value={report.carStep.ownersCount?.toString() ?? "—"}
+          />
+        </div>
 
         {/* Document reconciliation */}
-        <section className="p-6 md:p-10 border-b border-border">
-          <SectionTitle index="03" title="Сверка документов" subtitle="ПТС / СТС" />
-          <div className="mt-4 grid md:grid-cols-2 gap-x-10">
-            <CheckRow label="ФИО владельца совпадает с ПТС/СТС" ok={report.documentReconciliationStep.ownerFullNameMatchWithPtsOrSts} />
-            <CheckRow label="VIN на кузове совпадает с ПТС/СТС" ok={report.documentReconciliationStep.vinOnBodyMatchWithPtsOrSts} />
-            <CheckRow label="Модель двигателя совпадает с ПТС/СТС" ok={report.documentReconciliationStep.engineModelMatchWithPtsOrSts} />
-            <CheckRow label="Количество владельцев"
-              ok={report.documentReconciliationStep.ownersCount != null ? true : null} />
+        <div className="panel p-5 md:p-6">
+          <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-3">
+            Сверка ПТС / СТС
+          </h3>
+          <div className="grid md:grid-cols-2 gap-x-8">
+            <CheckRow
+              label="ФИО владельца совпадает с ПТС/СТС"
+              ok={report.documentReconciliationStep.ownerFullNameMatchWithPtsOrSts}
+            />
+            <CheckRow
+              label="VIN на кузове совпадает с ПТС/СТС"
+              ok={report.documentReconciliationStep.vinOnBodyMatchWithPtsOrSts}
+            />
+            <CheckRow
+              label="Модель двигателя совпадает с ПТС/СТС"
+              ok={report.documentReconciliationStep.engineModelMatchWithPtsOrSts}
+            />
+            <CheckRow
+              label="Количество владельцев указано"
+              ok={
+                report.documentReconciliationStep.ownersCount != null ? true : null
+              }
+            />
           </div>
-        </section>
+        </div>
 
         {/* Test drive */}
         {report.testDriveStep.testDriveIsIncluded && (
-          <section className="p-6 md:p-10 border-b border-border">
-            <SectionTitle index="04" title="Тест-драйв" subtitle="Поведение узлов под нагрузкой" />
-            <div className="mt-4 grid md:grid-cols-2 gap-x-10">
-              <CheckRow label="Двигатель" ok={report.testDriveStep.testDriveEngineIsWorkingProperly} />
-              <CheckRow label="Коробка передач" ok={report.testDriveStep.testDriveTransmissionIsWorkingProperly} />
-              <CheckRow label="Рулевое управление" ok={report.testDriveStep.testDriveSteeringWheelIsWorkingProperly} />
-              <CheckRow label="Подвеска в движении" ok={report.testDriveStep.testDriveSuspensionInDriveIsWorkingProperly} />
-              <CheckRow label="Тормоза в движении" ok={report.testDriveStep.testDriveBrakesInDriveIsWorkingProperly} />
+          <div className="panel p-5 md:p-6">
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-3">
+              Тест-драйв
+            </h3>
+            <div className="grid md:grid-cols-2 gap-x-8">
+              <CheckRow
+                label="Двигатель"
+                ok={report.testDriveStep.testDriveEngineIsWorkingProperly}
+              />
+              <CheckRow
+                label="Коробка передач"
+                ok={report.testDriveStep.testDriveTransmissionIsWorkingProperly}
+              />
+              <CheckRow
+                label="Рулевое управление"
+                ok={report.testDriveStep.testDriveSteeringWheelIsWorkingProperly}
+              />
+              <CheckRow
+                label="Подвеска в движении"
+                ok={
+                  report.testDriveStep.testDriveSuspensionInDriveIsWorkingProperly
+                }
+              />
+              <CheckRow
+                label="Тормоза в движении"
+                ok={report.testDriveStep.testDriveBrakesInDriveIsWorkingProperly}
+              />
             </div>
             {report.testDriveStep.testDriveNote && (
-              <p className="mt-4 text-sm text-muted-foreground italic">{report.testDriveStep.testDriveNote}</p>
+              <p className="mt-3 text-sm text-muted-foreground italic">
+                {report.testDriveStep.testDriveNote}
+              </p>
             )}
-          </section>
+          </div>
         )}
 
-        {/* Detailed sections */}
-        {SECTIONS.map(({ key, label }, idx) => {
+        {/* Detailed inspection per section */}
+        {SECTIONS.map(({ key, label }) => {
           const els = report.inspectionStep[key] as InspectionElement[];
           if (els.length === 0) return null;
+          const st = sectionStatus(els);
+          const sc = sectionScore(els);
           return (
-            <section key={key} className="p-6 md:p-10 border-b border-border">
-              <SectionTitle
-                index={String(idx + 5).padStart(2, "0")}
-                title={label}
-                subtitle={`${els.length} ${plural(els.length, ["элемент", "элемента", "элементов"])} осмотрено`}
-                right={<StatusPill status={sectionStatus(els)} />}
-              />
-              <div className="mt-6 grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                {els.map((e) => <ElementCard key={e.id} el={e} />)}
+            <div key={key} className="panel p-5 md:p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+                    {label}
+                  </h3>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {els.length}{" "}
+                    {plural(els.length, ["элемент", "элемента", "элементов"])}{" "}
+                    осмотрено
+                  </p>
+                </div>
+                <span className={chipClass(st)} style={{ minWidth: 40, height: 24 }}>
+                  {sc.toFixed(1)}
+                </span>
               </div>
-            </section>
+              <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                {els.map((e) => (
+                  <ElementCard key={e.id} el={e} />
+                ))}
+              </div>
+            </div>
           );
         })}
 
         {/* Specialist note */}
         {report.resultStep.resultSpecialistNote && (
-          <section className="p-6 md:p-10 relative">
-            <SectionTitle index="99" title="Заключение специалиста" />
-            <div className="mt-4 relative border-l-4 pl-5 py-2"
-              style={{ borderColor: "var(--accent)" }}>
-              <p className="whitespace-pre-line text-sm leading-relaxed ink">
+          <div className="panel p-5 md:p-6">
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-3">
+              Заключение специалиста
+            </h3>
+            <div
+              className="border-l-4 pl-4 py-1"
+              style={{ borderColor: "var(--grade-good)" }}
+            >
+              <p className="whitespace-pre-line text-sm leading-relaxed">
                 {report.resultStep.resultSpecialistNote}
               </p>
             </div>
-            <div className="absolute right-8 bottom-8 stamp text-xs md:text-sm px-4 py-2 select-none hidden md:block">
-              осмотрено · {report.reportNumber}
-            </div>
-          </section>
+          </div>
         )}
 
-        <footer className="px-6 md:px-10 py-4 border-t border-border flex items-center justify-between mono text-[11px] text-muted-foreground">
-          <span>Аукционный лист сгенерирован на основе данных carreports.ru</span>
-          <span>{report.reportNumber}</span>
+        <footer className="text-center mono text-[11px] text-muted-foreground py-4">
+          Сгенерировано на основе данных carreports.ru · {report.reportNumber}
         </footer>
-      </article>
+      </div>
     </main>
-  );
-}
-
-function Fact({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
-  return (
-    <div className="flex flex-col">
-      <dt className="text-[10px] uppercase tracking-widest text-muted-foreground">{label}</dt>
-      <dd className={`mt-1 ink ${mono ? "mono text-sm md:text-base font-medium break-all" : "text-sm md:text-base font-semibold"}`}>
-        {value}
-      </dd>
-    </div>
   );
 }
 
 function Stat({ label, value, unit }: { label: string; value: string; unit?: string }) {
   return (
-    <div className="border border-border p-3 bg-card/40">
-      <div className="mono text-[10px] uppercase tracking-widest text-muted-foreground">{label}</div>
-      <div className="mt-1 flex items-baseline gap-1">
-        <span className="text-xl font-bold ink mono">{value}</span>
+    <div className="panel p-3 flex items-center justify-between">
+      <span className="text-xs uppercase tracking-wider text-muted-foreground">
+        {label}
+      </span>
+      <span className="flex items-baseline gap-1">
+        <span className="text-lg font-bold ink mono">{value}</span>
         {unit && <span className="mono text-[10px] text-muted-foreground">{unit}</span>}
-      </div>
+      </span>
     </div>
   );
-}
-
-function SectionTitle({
-  index, title, subtitle, right,
-}: { index: string; title: string; subtitle?: string; right?: React.ReactNode }) {
-  return (
-    <div className="flex items-end justify-between gap-4 flex-wrap">
-      <div className="flex items-end gap-4">
-        <span className="mono text-xs text-muted-foreground tracking-widest">{index}</span>
-        <div>
-          <h2 className="text-xl md:text-2xl font-bold ink leading-tight" style={{ fontFamily: "'Playfair Display', serif" }}>
-            {title}
-          </h2>
-          {subtitle && <p className="mono text-[11px] uppercase tracking-wider text-muted-foreground mt-0.5">{subtitle}</p>}
-        </div>
-      </div>
-      {right}
-    </div>
-  );
-}
-
-function Legend() {
-  return (
-    <div className="flex flex-wrap gap-4 mono text-[11px] uppercase tracking-wider">
-      <LegendItem color="var(--grade-good)" label="Без замечаний" />
-      <LegendItem color="var(--grade-warn)" label="Незначительные" />
-      <LegendItem color="var(--grade-bad)" label="Серьёзные" />
-      <LegendItem color="var(--muted-foreground)" label="Не осмотрено" />
-    </div>
-  );
-}
-function LegendItem({ color, label }: { color: string; label: string }) {
-  return (
-    <span className="flex items-center gap-2">
-      <span className="w-3 h-3 inline-block border" style={{ background: color, borderColor: color }} />
-      {label}
-    </span>
-  );
-}
-
-function plural(n: number, forms: [string, string, string]) {
-  const a = Math.abs(n) % 100;
-  const b = a % 10;
-  if (a > 10 && a < 20) return forms[2];
-  if (b > 1 && b < 5) return forms[1];
-  if (b === 1) return forms[0];
-  return forms[2];
 }
