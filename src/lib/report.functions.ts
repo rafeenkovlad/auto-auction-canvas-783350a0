@@ -36,7 +36,7 @@ export interface InspectionElement {
   seriousDamageTags: DamageTag[];
   noSeriousDamageTags: DamageTag[];
   note: string | null;
-  audioNotes: unknown[];
+  audioNotes: FileRef[];
   file: FileRef | null;
   paintworkThicknessFrom?: number | null;
   paintworkThicknessTo?: number | null;
