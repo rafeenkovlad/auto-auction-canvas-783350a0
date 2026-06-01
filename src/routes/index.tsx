@@ -520,124 +520,13 @@ function AuctionSheetPage() {
         </footer>
       </div>
 
-      {/* Detail drawer */}
-      <Sheet
-        open={active != null}
-        onOpenChange={(o) => {
-          if (!o) handleSheetClose();
-        }}
-      >
-        <SheetContent
-          side="right"
-          className="w-full sm:max-w-lg overflow-y-auto p-0"
-        >
-          {active && (
-            <>
-              <SheetHeader className="p-4 border-b border-border bg-[var(--row-bg)] sticky top-0 z-10">
-                <div className="mono text-[10px] uppercase tracking-wider text-muted-foreground">
-                  {active._category}
-                </div>
-                <SheetTitle className="text-lg">{active._displayName}</SheetTitle>
-              </SheetHeader>
-
-              <div className="flex gap-2 p-3 border-b border-border sticky top-[73px] z-[9] bg-card">
-                <button
-                  type="button"
-                  onClick={goPrev}
-                  disabled={activeIdx === 0}
-                  className="flex-1 py-2 px-3 rounded-md border border-border text-sm font-medium hover:bg-secondary disabled:opacity-40 disabled:cursor-not-allowed transition"
-                >
-                  ← Предыдущий
-                </button>
-                <button
-                  type="button"
-                  onClick={goNext}
-                  disabled={activeIdx === allElements.length - 1}
-                  className="flex-1 py-2 px-3 rounded-md border border-border text-sm font-medium hover:bg-secondary disabled:opacity-40 disabled:cursor-not-allowed transition"
-                >
-                  Следующий →
-                </button>
-              </div>
-
-              <div className="p-4 space-y-5">
-                <DetailBlock label="Статус">
-                  {(() => {
-                    const m = statusMeta(active._status);
-                    return (
-                      <span
-                        className="inline-flex items-center gap-2 px-2.5 py-1 rounded-md text-xs font-semibold"
-                        style={{ background: m.bg, color: m.fg }}
-                      >
-                        <span>{m.icon}</span>
-                        {m.label}
-                      </span>
-                    );
-                  })()}
-                </DetailBlock>
-
-                <DetailBlock label="Толщина ЛКП">
-                  <span className="text-base font-semibold ink">
-                    {active.paintworkThicknessFrom != null &&
-                    active.paintworkThicknessTo != null
-                      ? `${active.paintworkThicknessFrom}–${active.paintworkThicknessTo} мкм`
-                      : "—"}
-                  </span>
-                </DetailBlock>
-
-                {(active.seriousDamageTags.length > 0 ||
-                  active.noSeriousDamageTags.length > 0) && (
-                  <DetailBlock label="Повреждения">
-                    <ul className="space-y-2">
-                      {active.seriousDamageTags.map((t) => (
-                        <li
-                          key={t.id}
-                          className="px-3 py-2 rounded-md text-sm border-l-[3px]"
-                          style={{
-                            background: "oklch(0.98 0.01 28)",
-                            borderLeftColor: "var(--grade-bad)",
-                          }}
-                        >
-                          {t.name}
-                        </li>
-                      ))}
-                      {active.noSeriousDamageTags.map((t) => (
-                        <li
-                          key={t.id}
-                          className="px-3 py-2 rounded-md text-sm border-l-[3px]"
-                          style={{
-                            background: "oklch(0.98 0.01 85)",
-                            borderLeftColor: "var(--grade-warn)",
-                          }}
-                        >
-                          {t.name}
-                        </li>
-                      ))}
-                    </ul>
-                  </DetailBlock>
-                )}
-
-                {active.note && (
-                  <DetailBlock label="Примечание">
-                    <p className="text-sm leading-relaxed whitespace-pre-line">
-                      {active.note}
-                    </p>
-                  </DetailBlock>
-                )}
-
-                <DetailBlock label="Медиа">
-                  {active.file?.url ? (
-                    <Photo file={active.file} />
-                  ) : (
-                    <div className="text-sm text-muted-foreground rounded-md border border-border p-4 text-center bg-[var(--row-bg)]">
-                      Фото отсутствует
-                    </div>
-                  )}
-                </DetailBlock>
-              </div>
-            </>
-          )}
-        </SheetContent>
-      </Sheet>
+      <ElementViewer
+        elements={allElements}
+        index={activeIdx}
+        onClose={handleSheetClose}
+        onChange={(i) => setActiveIdx(i)}
+        statusMeta={statusMeta}
+      />
     </main>
   );
 }
