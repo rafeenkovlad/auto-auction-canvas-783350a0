@@ -1,3 +1,4 @@
+import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import {
@@ -6,7 +7,12 @@ import {
   type InspectionElement,
   type FileRef,
 } from "@/lib/report.functions";
-import { BodyMap } from "@/components/CarDiagram";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 
 const reportQuery = (token?: string) =>
   queryOptions({
@@ -43,22 +49,34 @@ export const Route = createFileRoute("/")({
   ),
 });
 
-const SECTIONS: Array<{ key: keyof CarReport["inspectionStep"]; label: string }> = [
-  { key: "bodyElements", label: "Кузов" },
-  { key: "bodyReinforcementElements", label: "Силовые элементы" },
-  { key: "glassElements", label: "Остекление" },
-  { key: "interiorElements", label: "Салон" },
-  { key: "underHoodElements", label: "Подкапотное" },
-  { key: "wheelsAndBrakesElements", label: "Колёса и тормоза" },
-  { key: "lightningElements", label: "Световые приборы" },
-  { key: "computerDiagnosticsElements", label: "Компьютерная диагностика" },
-];
+const SECTION_LABELS: Record<keyof CarReport["inspectionStep"] | string, string> = {
+  bodyElements: "Кузов",
+  bodyReinforcementElements: "Усиление кузова",
+  glassElements: "Стёкла",
+  interiorElements: "Салон",
+  underHoodElements: "Под капотом",
+  wheelsAndBrakesElements: "Колёса и тормоза",
+  lightningElements: "Освещение",
+  computerDiagnosticsElements: "Компьютерная диагностика",
+};
+
+const SECTION_KEYS = [
+  "bodyElements",
+  "bodyReinforcementElements",
+  "glassElements",
+  "interiorElements",
+  "underHoodElements",
+  "wheelsAndBrakesElements",
+  "lightningElements",
+  "computerDiagnosticsElements",
+] as const;
 
 const ELEMENT_LABEL: Record<string, string> = {
   general_condition: "Общее состояние",
   hood: "Капот",
   roof: "Крыша",
   trunk: "Крышка багажника",
+  trunk_lid: "Крышка багажника",
   front_bumper: "Передний бампер",
   rear_bumper: "Задний бампер",
   front_left_fender: "Переднее левое крыло",
@@ -71,35 +89,22 @@ const ELEMENT_LABEL: Record<string, string> = {
   rear_right_door: "Задняя правая дверь",
   left_threshold: "Левый порог",
   right_threshold: "Правый порог",
+  srs_airbag: "SRS / Подушки безопасности",
 };
 
-type Status = "ok" | "minor" | "serious" | "skipped";
-function elementStatus(el: InspectionElement): "ok" | "minor" | "serious" {
-  if (el.seriousDamageTags.length > 0) return "serious";
+type Status = "ok" | "minor" | "major";
+type EnrichedElement = InspectionElement & {
+  _status: Status;
+  _category: string;
+  _displayName: string;
+};
+
+function elementStatus(el: InspectionElement): Status {
+  if (el.seriousDamageTags.length > 0) return "major";
   if (!el.noDamage || el.noSeriousDamageTags.length > 0) return "minor";
   return "ok";
 }
-function elementScore(el: InspectionElement): number {
-  const s = elementStatus(el);
-  if (s === "serious") return 1.5;
-  if (s === "minor") return 2.5;
-  return 4.5;
-}
-function sectionStatus(els: InspectionElement[]): Status {
-  if (els.length === 0) return "skipped";
-  let s: "ok" | "minor" | "serious" = "ok";
-  for (const e of els) {
-    const st = elementStatus(e);
-    if (st === "serious") return "serious";
-    if (st === "minor") s = "minor";
-  }
-  return s;
-}
-function sectionScore(els: InspectionElement[]): number {
-  if (els.length === 0) return 0;
-  const sum = els.reduce((a, e) => a + elementScore(e), 0);
-  return Math.round((sum / els.length) * 10) / 10;
-}
+
 function fmtMileage(km: number | null | undefined) {
   if (km == null) return "—";
   return km.toLocaleString("ru-RU") + " км";
@@ -116,107 +121,119 @@ function fmtDate(d?: string | null) {
     return d;
   }
 }
-function overallReportScore(r: CarReport): number {
-  const scores: number[] = [];
-  for (const { key } of SECTIONS) {
-    const arr = r.inspectionStep[key] as InspectionElement[];
-    if (arr.length) scores.push(sectionScore(arr));
-  }
-  if (!scores.length) return 0;
-  const s = scores.reduce((a, b) => a + b, 0) / scores.length;
-  return Math.round(s * 10) / 10;
-}
-function chipClass(s: Status) {
-  return s === "ok"
-    ? "grade-chip grade-good"
-    : s === "minor"
-      ? "grade-chip grade-warn"
-      : s === "serious"
-        ? "grade-chip grade-bad"
-        : "grade-chip grade-skip";
-}
-function plural(n: number, forms: [string, string, string]) {
-  const a = Math.abs(n) % 100;
-  const b = a % 10;
-  if (a > 10 && a < 20) return forms[2];
-  if (b > 1 && b < 5) return forms[1];
-  if (b === 1) return forms[0];
-  return forms[2];
+
+function statusMeta(s: Status) {
+  if (s === "ok")
+    return { icon: "✓", label: "Норма", bg: "var(--grade-good)", fg: "white" };
+  if (s === "minor")
+    return {
+      icon: "!",
+      label: "Незначительные повреждения",
+      bg: "var(--grade-warn)",
+      fg: "oklch(0.25 0.05 70)",
+    };
+  return {
+    icon: "✕",
+    label: "Серьёзные повреждения",
+    bg: "var(--grade-bad)",
+    fg: "white",
+  };
 }
 
-/* ===== Detail element card (compact) ===== */
-function ElementCard({ el }: { el: InspectionElement }) {
-  const st = elementStatus(el);
-  const label = ELEMENT_LABEL[el.elementType] ?? el.elementType.replace(/_/g, " ");
+/* ===== Card ===== */
+function ElementCard({
+  el,
+  active,
+  onClick,
+}: {
+  el: EnrichedElement;
+  active: boolean;
+  onClick: () => void;
+}) {
+  const meta = statusMeta(el._status);
+  const damageCount =
+    el.seriousDamageTags.length + el.noSeriousDamageTags.length;
+  const hasMedia = el.file?.url != null;
+  const paint =
+    el.paintworkThicknessFrom != null && el.paintworkThicknessTo != null
+      ? `${el.paintworkThicknessFrom}–${el.paintworkThicknessTo}`
+      : null;
+
   return (
-    <div className="panel overflow-hidden flex flex-col">
-      <Photo file={el.file} />
-      <div className="p-3 flex-1 flex flex-col gap-2">
-        <div className="flex items-start justify-between gap-2">
-          <h4 className="font-medium text-sm leading-tight">{label}</h4>
-          <span className={chipClass(st)}>{elementScore(el).toFixed(1)}</span>
+    <button
+      type="button"
+      onClick={onClick}
+      className="panel text-left p-3 md:p-4 transition-all hover:-translate-y-px hover:shadow-sm"
+      style={{
+        borderColor: active ? "var(--accent)" : undefined,
+        background: active ? "var(--row-bg)" : undefined,
+      }}
+    >
+      <div className="flex items-start justify-between gap-2 mb-2">
+        <div className="min-w-0">
+          <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-0.5">
+            {el._category}
+          </div>
+          <div className="text-sm font-semibold ink leading-tight">
+            {el._displayName}
+          </div>
         </div>
-        {el.paintworkThicknessFrom != null && el.paintworkThicknessTo != null && (
-          <div className="mono text-[10px] text-muted-foreground">
-            ЛКП {el.paintworkThicknessFrom}–{el.paintworkThicknessTo} мкм
-          </div>
+        <span
+          className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[11px] font-bold shrink-0"
+          style={{ background: meta.bg, color: meta.fg }}
+          aria-label={meta.label}
+        >
+          {meta.icon}
+        </span>
+      </div>
+      <div className="flex items-center gap-3 text-xs text-muted-foreground">
+        {paint && (
+          <span className="mono text-[12px]">{paint} мкм</span>
         )}
-        {(el.seriousDamageTags.length > 0 || el.noSeriousDamageTags.length > 0) && (
-          <div className="flex flex-wrap gap-1">
-            {el.seriousDamageTags.map((t) => (
-              <span
-                key={t.id}
-                className="text-[10px] px-1.5 py-0.5 rounded mono"
-                style={{
-                  background: "color-mix(in oklab, var(--grade-bad) 15%, transparent)",
-                  color: "var(--grade-bad)",
-                }}
-              >
-                {t.name}
-              </span>
-            ))}
-            {el.noSeriousDamageTags.map((t) => (
-              <span
-                key={t.id}
-                className="text-[10px] px-1.5 py-0.5 rounded mono"
-                style={{
-                  background: "color-mix(in oklab, var(--grade-warn) 22%, transparent)",
-                  color: "oklch(0.4 0.12 70)",
-                }}
-              >
-                {t.name}
-              </span>
-            ))}
-          </div>
+        {damageCount > 0 && (
+          <span className="inline-flex items-center gap-1">
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 14 14"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.6"
+            >
+              <circle cx="7" cy="7" r="5" />
+              <path d="M7 4v3M7 9.5v.5" />
+            </svg>
+            {damageCount}
+          </span>
         )}
-        {el.note && (
-          <p className="text-xs text-muted-foreground leading-snug line-clamp-3">
-            {el.note}
-          </p>
+        {hasMedia && (
+          <svg
+            width="12"
+            height="12"
+            viewBox="0 0 14 14"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.6"
+          >
+            <rect x="2" y="3" width="10" height="8" rx="1" />
+            <circle cx="5" cy="6" r="1" />
+            <path d="M10 9L8 7L5 10" />
+          </svg>
         )}
       </div>
-    </div>
+    </button>
   );
 }
 
 function Photo({ file }: { file: FileRef | null | undefined }) {
-  if (!file?.url || file.type !== "image") {
-    return (
-      <div
-        className="bg-muted flex items-center justify-center text-muted-foreground mono text-[10px] uppercase tracking-wider"
-        style={{ aspectRatio: "4/3" }}
-      >
-        Нет фото
-      </div>
-    );
-  }
+  if (!file?.url || file.type !== "image") return null;
   return (
     <img
       src={file.url}
       alt={file.filename}
       loading="lazy"
-      className="w-full object-cover"
-      style={{ aspectRatio: "4/3" }}
+      className="w-full rounded-md border border-border object-cover"
+      style={{ maxHeight: 360 }}
     />
   );
 }
@@ -236,16 +253,67 @@ function CheckRow({ label, ok }: { label: string; ok: boolean | null }) {
 }
 
 /* ===== Page ===== */
+const FILTERS: Array<{ key: "all" | Status; label: string }> = [
+  { key: "all", label: "Все" },
+  { key: "ok", label: "Норма" },
+  { key: "minor", label: "Незначит." },
+  { key: "major", label: "Серьёзные" },
+];
+
 function AuctionSheetPage() {
   const { token } = Route.useSearch();
   const { data: report } = useSuspenseQuery(reportQuery(token));
   const carName = report.reportName.replace(/^.*·\s*/, "");
-  const overall = overallReportScore(report);
+
+  const [filter, setFilter] = useState<"all" | Status>("all");
+  const [activeIdx, setActiveIdx] = useState<number | null>(null);
+
+  const allElements = useMemo<EnrichedElement[]>(() => {
+    const out: EnrichedElement[] = [];
+    for (const key of SECTION_KEYS) {
+      const arr = report.inspectionStep[key] as InspectionElement[] | undefined;
+      if (!arr) continue;
+      for (const el of arr) {
+        out.push({
+          ...el,
+          _status: elementStatus(el),
+          _category: SECTION_LABELS[key] ?? key,
+          _displayName:
+            ELEMENT_LABEL[el.elementType] ??
+            el.elementType.replace(/_/g, " "),
+        });
+      }
+    }
+    return out;
+  }, [report]);
+
+  const visible = useMemo(
+    () =>
+      filter === "all"
+        ? allElements
+        : allElements.filter((e) => e._status === filter),
+    [allElements, filter],
+  );
+
+  const counts = useMemo(() => {
+    const c = { all: allElements.length, ok: 0, minor: 0, major: 0 };
+    for (const e of allElements) c[e._status]++;
+    return c;
+  }, [allElements]);
+
+  const active = activeIdx != null ? allElements[activeIdx] : null;
+
+  const goPrev = () =>
+    setActiveIdx((i) => (i == null || i <= 0 ? i : i - 1));
+  const goNext = () =>
+    setActiveIdx((i) =>
+      i == null || i >= allElements.length - 1 ? i : i + 1,
+    );
 
   return (
     <main className="min-h-screen py-6 px-3 md:px-6">
       <div className="mx-auto max-w-6xl space-y-4">
-        {/* Header panel */}
+        {/* Header */}
         <header className="panel p-5 md:p-6 flex flex-wrap items-center justify-between gap-4">
           <div className="min-w-0">
             <div className="mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1">
@@ -263,69 +331,17 @@ function AuctionSheetPage() {
               <span>{fmtDate(report.carStep.dateInspection ?? report.reportDate)}</span>
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            {report.carStep.gosNumber && (
-              <div className="flex flex-col items-center justify-center px-3 py-1.5 border-2 border-foreground bg-white rounded-sm">
-                <span className="mono text-[9px] uppercase tracking-widest text-muted-foreground">
-                  Гос. номер
-                </span>
-                <span className="mono text-base font-bold ink tracking-wider">
-                  {report.carStep.gosNumber}
-                </span>
-              </div>
-            )}
-            <div className="flex items-center gap-2 pl-3 border-l border-border">
-              <span className="text-xs text-muted-foreground uppercase tracking-wider">
-                Overall
+          {report.carStep.gosNumber && (
+            <div className="flex flex-col items-center justify-center px-3 py-1.5 border-2 border-foreground bg-white rounded-sm">
+              <span className="mono text-[9px] uppercase tracking-widest text-muted-foreground">
+                Гос. номер
               </span>
-              <span
-                className={`grade-chip ${
-                  overall >= 4
-                    ? "grade-good"
-                    : overall >= 2.5
-                      ? "grade-warn"
-                      : "grade-bad"
-                }`}
-                style={{ minWidth: 44, height: 28, fontSize: 13 }}
-              >
-                {overall.toFixed(1)}
+              <span className="mono text-base font-bold ink tracking-wider">
+                {report.carStep.gosNumber}
               </span>
             </div>
-          </div>
+          )}
         </header>
-
-        {/* Section status grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-2">
-          {SECTIONS.map(({ key, label }) => {
-            const arr = report.inspectionStep[key] as InspectionElement[];
-            const st = sectionStatus(arr);
-            const sc = sectionScore(arr);
-            return (
-              <div
-                key={key}
-                className="panel px-3 py-2.5 flex items-center justify-between gap-2"
-              >
-                <div className="min-w-0">
-                  <div className="text-[10px] uppercase tracking-wider text-muted-foreground truncate">
-                    {label}
-                  </div>
-                  <div className="text-xs mono ink">{arr.length} эл.</div>
-                </div>
-                {st === "skipped" ? (
-                  <span className="grade-chip grade-skip">—</span>
-                ) : (
-                  <span className={chipClass(st)}>{sc.toFixed(1)}</span>
-                )}
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Body map (Exterior Grading) */}
-        <BodyMap
-          elements={report.inspectionStep.bodyElements}
-          overallScore={sectionScore(report.inspectionStep.bodyElements)}
-        />
 
         {/* Body / paint summary */}
         <div className="grid sm:grid-cols-3 gap-2">
@@ -344,6 +360,59 @@ function AuctionSheetPage() {
             value={report.carStep.ownersCount?.toString() ?? "—"}
           />
         </div>
+
+        {/* Inspection elements */}
+        <section className="panel p-5 md:p-6">
+          <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
+            <h2 className="text-lg md:text-xl font-bold ink">
+              Осмотр элементов кузова
+            </h2>
+            <div className="flex flex-wrap gap-1.5">
+              {FILTERS.map((f) => {
+                const isActive = filter === f.key;
+                const count = counts[f.key];
+                return (
+                  <button
+                    key={f.key}
+                    type="button"
+                    onClick={() => setFilter(f.key)}
+                    className="px-3 py-1.5 rounded-md text-xs font-medium border transition-colors"
+                    style={{
+                      background: isActive ? "var(--accent)" : "var(--card)",
+                      color: isActive
+                        ? "var(--accent-foreground)"
+                        : "var(--foreground)",
+                      borderColor: isActive ? "var(--accent)" : "var(--border)",
+                    }}
+                  >
+                    {f.label}
+                    <span className="ml-1.5 mono opacity-70">{count}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {visible.length === 0 ? (
+            <div className="text-center text-muted-foreground py-12 text-sm">
+              Нет элементов в этой категории
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {visible.map((el) => {
+                const idx = allElements.indexOf(el);
+                return (
+                  <ElementCard
+                    key={el.id}
+                    el={el}
+                    active={activeIdx === idx}
+                    onClick={() => setActiveIdx(idx)}
+                  />
+                );
+              })}
+            </div>
+          )}
+        </section>
 
         {/* Document reconciliation */}
         <div className="panel p-5 md:p-6">
@@ -410,38 +479,6 @@ function AuctionSheetPage() {
           </div>
         )}
 
-        {/* Detailed inspection per section */}
-        {SECTIONS.map(({ key, label }) => {
-          const els = report.inspectionStep[key] as InspectionElement[];
-          if (els.length === 0) return null;
-          const st = sectionStatus(els);
-          const sc = sectionScore(els);
-          return (
-            <div key={key} className="panel p-5 md:p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-                    {label}
-                  </h3>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    {els.length}{" "}
-                    {plural(els.length, ["элемент", "элемента", "элементов"])}{" "}
-                    осмотрено
-                  </p>
-                </div>
-                <span className={chipClass(st)} style={{ minWidth: 40, height: 24 }}>
-                  {sc.toFixed(1)}
-                </span>
-              </div>
-              <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                {els.map((e) => (
-                  <ElementCard key={e.id} el={e} />
-                ))}
-              </div>
-            </div>
-          );
-        })}
-
         {/* Specialist note */}
         {report.resultStep.resultSpecialistNote && (
           <div className="panel p-5 md:p-6">
@@ -463,7 +500,143 @@ function AuctionSheetPage() {
           Сгенерировано на основе данных carreports.ru · {report.reportNumber}
         </footer>
       </div>
+
+      {/* Detail drawer */}
+      <Sheet
+        open={active != null}
+        onOpenChange={(o) => {
+          if (!o) setActiveIdx(null);
+        }}
+      >
+        <SheetContent
+          side="right"
+          className="w-full sm:max-w-lg overflow-y-auto p-0"
+        >
+          {active && (
+            <>
+              <SheetHeader className="p-4 border-b border-border bg-[var(--row-bg)] sticky top-0 z-10">
+                <div className="mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                  {active._category}
+                </div>
+                <SheetTitle className="text-lg">{active._displayName}</SheetTitle>
+              </SheetHeader>
+
+              <div className="flex gap-2 p-3 border-b border-border sticky top-[73px] z-[9] bg-card">
+                <button
+                  type="button"
+                  onClick={goPrev}
+                  disabled={activeIdx === 0}
+                  className="flex-1 py-2 px-3 rounded-md border border-border text-sm font-medium hover:bg-secondary disabled:opacity-40 disabled:cursor-not-allowed transition"
+                >
+                  ← Предыдущий
+                </button>
+                <button
+                  type="button"
+                  onClick={goNext}
+                  disabled={activeIdx === allElements.length - 1}
+                  className="flex-1 py-2 px-3 rounded-md border border-border text-sm font-medium hover:bg-secondary disabled:opacity-40 disabled:cursor-not-allowed transition"
+                >
+                  Следующий →
+                </button>
+              </div>
+
+              <div className="p-4 space-y-5">
+                <DetailBlock label="Статус">
+                  {(() => {
+                    const m = statusMeta(active._status);
+                    return (
+                      <span
+                        className="inline-flex items-center gap-2 px-2.5 py-1 rounded-md text-xs font-semibold"
+                        style={{ background: m.bg, color: m.fg }}
+                      >
+                        <span>{m.icon}</span>
+                        {m.label}
+                      </span>
+                    );
+                  })()}
+                </DetailBlock>
+
+                <DetailBlock label="Толщина ЛКП">
+                  <span className="text-base font-semibold ink">
+                    {active.paintworkThicknessFrom != null &&
+                    active.paintworkThicknessTo != null
+                      ? `${active.paintworkThicknessFrom}–${active.paintworkThicknessTo} мкм`
+                      : "—"}
+                  </span>
+                </DetailBlock>
+
+                {(active.seriousDamageTags.length > 0 ||
+                  active.noSeriousDamageTags.length > 0) && (
+                  <DetailBlock label="Повреждения">
+                    <ul className="space-y-2">
+                      {active.seriousDamageTags.map((t) => (
+                        <li
+                          key={t.id}
+                          className="px-3 py-2 rounded-md text-sm border-l-[3px]"
+                          style={{
+                            background: "oklch(0.98 0.01 28)",
+                            borderLeftColor: "var(--grade-bad)",
+                          }}
+                        >
+                          {t.name}
+                        </li>
+                      ))}
+                      {active.noSeriousDamageTags.map((t) => (
+                        <li
+                          key={t.id}
+                          className="px-3 py-2 rounded-md text-sm border-l-[3px]"
+                          style={{
+                            background: "oklch(0.98 0.01 85)",
+                            borderLeftColor: "var(--grade-warn)",
+                          }}
+                        >
+                          {t.name}
+                        </li>
+                      ))}
+                    </ul>
+                  </DetailBlock>
+                )}
+
+                {active.note && (
+                  <DetailBlock label="Примечание">
+                    <p className="text-sm leading-relaxed whitespace-pre-line">
+                      {active.note}
+                    </p>
+                  </DetailBlock>
+                )}
+
+                <DetailBlock label="Медиа">
+                  {active.file?.url ? (
+                    <Photo file={active.file} />
+                  ) : (
+                    <div className="text-sm text-muted-foreground rounded-md border border-border p-4 text-center bg-[var(--row-bg)]">
+                      Фото отсутствует
+                    </div>
+                  )}
+                </DetailBlock>
+              </div>
+            </>
+          )}
+        </SheetContent>
+      </Sheet>
     </main>
+  );
+}
+
+function DetailBlock({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div>
+      <div className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold mb-1.5">
+        {label}
+      </div>
+      <div>{children}</div>
+    </div>
   );
 }
 
