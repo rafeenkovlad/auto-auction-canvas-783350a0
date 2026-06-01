@@ -646,6 +646,20 @@ function AuctionSheetPage() {
         })()}
 
 
+        {/* Summary inspection note */}
+        {report.resultStep.summaryInspectionNote &&
+          report.resultStep.summaryInspectionNote !==
+            report.resultStep.resultSpecialistNote && (
+            <div className="panel p-5 md:p-6">
+              <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-3">
+                Итог осмотра
+              </h3>
+              <p className="whitespace-pre-line text-sm leading-relaxed">
+                {report.resultStep.summaryInspectionNote}
+              </p>
+            </div>
+          )}
+
         {/* Specialist note */}
         {report.resultStep.resultSpecialistNote && (
           <div className="panel p-5 md:p-6">
@@ -662,6 +676,7 @@ function AuctionSheetPage() {
             </div>
           </div>
         )}
+
 
         {/* Files & documents */}
         {sectionFiles.length > 0 && (
