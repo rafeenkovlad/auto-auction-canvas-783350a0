@@ -319,45 +319,44 @@ function AuctionSheetPage() {
     }
   };
 
-  const { bodyElements, fileElements, sectionFiles } = useMemo(() => {
+  const { inspectionSections, bodyElements, allElements, stepFiles } = useMemo(() => {
+    const sections: Array<{ key: string; label: string; elements: EnrichedElement[] }> = [];
     const body: EnrichedElement[] = [];
     for (const key of SECTION_KEYS) {
       const arr = report.inspectionStep[key] as InspectionElement[] | undefined;
-      if (!arr) continue;
-      for (const el of arr) {
-        body.push({
-          ...el,
-          _status: elementStatus(el),
-          _category: SECTION_LABELS[key] ?? key,
-          _displayName:
-            ELEMENT_LABEL[el.elementType] ??
-            el.elementType.replace(/_/g, " "),
-        });
-      }
+      if (!arr || arr.length === 0) continue;
+      const enriched: EnrichedElement[] = arr.map((el) => ({
+        ...el,
+        _status: elementStatus(el),
+        _category: SECTION_LABELS[key] ?? key,
+        _displayName:
+          ELEMENT_LABEL[el.elementType] ?? el.elementType.replace(/_/g, " "),
+      }));
+      body.push(...enriched);
+      sections.push({ key, label: SECTION_LABELS[key] ?? key, elements: enriched });
     }
 
-    // Collect ALL extra files across all steps (not tied to inspection cards)
-    const fileSources: Array<{ category: string; files: (FileRef | null | undefined)[] }> = [
-      { category: "Объявление", files: [report.carStep.listingFile] },
-      { category: "Общее (фото авто)", files: report.carStep.files ?? [] },
-      { category: "Характеристики", files: report.characteristicsStep?.files ?? [] },
-      { category: "Сверка ПТС/СТС", files: report.documentReconciliationStep.files ?? [] },
-      { category: "Юридическая проверка", files: report.legalReviewStep?.files ?? [] },
-      { category: "Осмотр (общие файлы)", files: report.inspectionStep.files ?? [] },
-      { category: "Тест-драйв", files: report.testDriveStep.files ?? [] },
-      { category: "Заключение", files: report.resultStep.files ?? [] },
+    // Per-step file groups (kept inside each step's own panel)
+    const fileSources: Array<{ key: string; files: (FileRef | null | undefined)[] }> = [
+      { key: "car", files: [report.carStep.listingFile, ...(report.carStep.files ?? [])] },
+      { key: "characteristics", files: report.characteristicsStep?.files ?? [] },
+      { key: "documents", files: report.documentReconciliationStep.files ?? [] },
+      { key: "legal", files: report.legalReviewStep?.files ?? [] },
+      { key: "inspection", files: report.inspectionStep.files ?? [] },
+      { key: "testDrive", files: report.testDriveStep.files ?? [] },
+      { key: "result", files: report.resultStep.files ?? [] },
     ];
 
-    const fileEls: EnrichedElement[] = [];
-    const sectionFilesOut: Array<{ category: string; items: Array<{ file: FileRef; idx: number }> }> = [];
-    let cursor = body.length;
+    const all: EnrichedElement[] = [...body];
+    const filesMap: Record<string, Array<{ file: FileRef; idx: number }>> = {};
     for (const src of fileSources) {
       const items: Array<{ file: FileRef; idx: number }> = [];
       for (const f of src.files) {
         if (!f || !f.url) continue;
+        const idx = all.length;
         const pseudo: EnrichedElement = {
-          id: -1 - cursor, // stable negative id to avoid collisions
-          elementType: src.category,
+          id: -1 - idx,
+          elementType: src.key,
           noDamage: true,
           seriousDamageTags: [],
           noSeriousDamageTags: [],
@@ -365,31 +364,29 @@ function AuctionSheetPage() {
           audioNotes: [],
           file: f,
           _status: "ok",
-          _category: src.category,
-          _displayName: f.filename || src.category,
+          _category: src.key,
+          _displayName: f.filename || src.key,
         };
-        fileEls.push(pseudo);
-        items.push({ file: f, idx: cursor });
-        cursor++;
+        all.push(pseudo);
+        items.push({ file: f, idx });
       }
-      if (items.length) sectionFilesOut.push({ category: src.category, items });
+      filesMap[src.key] = items;
     }
 
-    return { bodyElements: body, fileElements: fileEls, sectionFiles: sectionFilesOut };
+    return {
+      inspectionSections: sections,
+      bodyElements: body,
+      allElements: all,
+      stepFiles: filesMap,
+    };
   }, [report]);
 
-  const allElements = useMemo<EnrichedElement[]>(
-    () => [...bodyElements, ...fileElements],
-    [bodyElements, fileElements],
-  );
-
-  const visible = useMemo(
-    () =>
-      filter === "all"
-        ? bodyElements
-        : bodyElements.filter((e) => e._status === filter),
-    [bodyElements, filter],
-  );
+  const visibleSections = useMemo(() => {
+    if (filter === "all") return inspectionSections;
+    return inspectionSections
+      .map((s) => ({ ...s, elements: s.elements.filter((e) => e._status === filter) }))
+      .filter((s) => s.elements.length > 0);
+  }, [inspectionSections, filter]);
 
   const counts = useMemo(() => {
     const c = { all: bodyElements.length, ok: 0, minor: 0, major: 0 };
@@ -480,31 +477,41 @@ function AuctionSheetPage() {
         </div>
 
         {/* Characteristics */}
-        {report.characteristicsStep && (() => {
+        {(() => {
           const c = report.characteristicsStep;
-          const rows: Array<[string, string | null | undefined]> = [
-            ["Двигатель", c.engineType],
-            ["Объём", c.engineVolume],
-            ["КПП", c.transmission],
-            ["Привод", c.driveType],
-            ["Цвет", c.color],
-            ["Комплектация", c.equipment],
-          ];
+          const rows: Array<[string, string | null | undefined]> = c
+            ? [
+                ["Двигатель", c.engineType],
+                ["Объём", c.engineVolume],
+                ["КПП", c.transmission],
+                ["Привод", c.driveType],
+                ["Цвет", c.color],
+                ["Комплектация", c.equipment],
+              ]
+            : [];
           const filled = rows.filter(([, v]) => v != null && v !== "");
-          if (filled.length === 0) return null;
+          const files = stepFiles.characteristics ?? [];
+          if (filled.length === 0 && files.length === 0) return null;
           return (
             <div className="panel p-5 md:p-6">
               <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-3">
                 Характеристики
               </h3>
-              <dl className="grid sm:grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-2 text-sm">
-                {filled.map(([k, v]) => (
-                  <div key={k} className="flex items-baseline justify-between gap-3 border-b border-dashed border-border pb-1.5">
-                    <dt className="text-muted-foreground text-xs">{k}</dt>
-                    <dd className="ink font-medium text-right">{v}</dd>
-                  </div>
-                ))}
-              </dl>
+              {filled.length > 0 && (
+                <dl className="grid sm:grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-2 text-sm">
+                  {filled.map(([k, v]) => (
+                    <div key={k} className="flex items-baseline justify-between gap-3 border-b border-dashed border-border pb-1.5">
+                      <dt className="text-muted-foreground text-xs">{k}</dt>
+                      <dd className="ink font-medium text-right">{v}</dd>
+                    </div>
+                  ))}
+                </dl>
+              )}
+              {files.length > 0 && (
+                <div className={filled.length > 0 ? "mt-4" : ""}>
+                  <FilesGrid items={files} onOpen={setActiveIdx} />
+                </div>
+              )}
             </div>
           );
         })()}
@@ -542,27 +549,60 @@ function AuctionSheetPage() {
             </div>
           </div>
 
-          {visible.length === 0 ? (
+          {visibleSections.length === 0 ? (
             <div className="text-center text-muted-foreground py-12 text-sm">
               Нет элементов в этой категории
             </div>
           ) : (
-            <div className="columns-1 sm:columns-2 lg:columns-3 gap-3 [column-fill:_balance]">
-              {visible.map((el) => {
-                const idx = allElements.indexOf(el);
-                return (
-                  <ElementCard
-                    key={el.id}
-                    el={el}
-                    active={activeIdx === idx}
-                    onClick={() => setActiveIdx(idx)}
-                    cardRef={setCardRef(el.id)}
-                  />
-                );
-              })}
+            <div className="space-y-6">
+              {visibleSections.map((sec) => (
+                <div key={sec.key}>
+                  <div className="flex items-baseline justify-between mb-2 pb-1.5 border-b border-border">
+                    <h3 className="text-sm font-semibold uppercase tracking-wider ink">
+                      {sec.label}
+                    </h3>
+                    <span className="mono text-[11px] text-muted-foreground">
+                      {sec.elements.length}
+                    </span>
+                  </div>
+                  <div className="columns-1 sm:columns-2 lg:columns-3 gap-3 [column-fill:_balance]">
+                    {sec.elements.map((el) => {
+                      const idx = allElements.indexOf(el);
+                      return (
+                        <ElementCard
+                          key={el.id}
+                          el={el}
+                          active={activeIdx === idx}
+                          onClick={() => setActiveIdx(idx)}
+                          cardRef={setCardRef(el.id)}
+                        />
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {stepFiles.inspection && stepFiles.inspection.length > 0 && (
+            <div className="mt-6 pt-4 border-t border-border">
+              <div className="text-[11px] uppercase tracking-wider text-muted-foreground mb-2">
+                Общие файлы осмотра
+              </div>
+              <FilesGrid items={stepFiles.inspection} onOpen={setActiveIdx} />
             </div>
           )}
         </section>
+
+        {/* Car step files */}
+        {stepFiles.car && stepFiles.car.length > 0 && (
+          <div className="panel p-5 md:p-6">
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-3">
+              Объявление и фото авто
+            </h3>
+            <FilesGrid items={stepFiles.car} onOpen={setActiveIdx} />
+          </div>
+        )}
 
         {/* Document reconciliation */}
         <div className="panel p-5 md:p-6">
@@ -589,7 +629,22 @@ function AuctionSheetPage() {
               </span>
             </div>
           </div>
+          {stepFiles.documents && stepFiles.documents.length > 0 && (
+            <div className="mt-4">
+              <FilesGrid items={stepFiles.documents} onOpen={setActiveIdx} />
+            </div>
+          )}
         </div>
+
+        {/* Legal review (files-only step) */}
+        {stepFiles.legal && stepFiles.legal.length > 0 && (
+          <div className="panel p-5 md:p-6">
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-3">
+              Юридическая проверка
+            </h3>
+            <FilesGrid items={stepFiles.legal} onOpen={setActiveIdx} />
+          </div>
+        )}
 
 
         {/* Test drive */}
@@ -641,6 +696,11 @@ function AuctionSheetPage() {
                   {td.testDriveNote}
                 </p>
               )}
+              {stepFiles.testDrive && stepFiles.testDrive.length > 0 && (
+                <div className="mt-4">
+                  <FilesGrid items={stepFiles.testDrive} onOpen={setActiveIdx} />
+                </div>
+              )}
             </div>
           );
         })()}
@@ -661,55 +721,36 @@ function AuctionSheetPage() {
           )}
 
         {/* Specialist note */}
-        {report.resultStep.resultSpecialistNote && (
+        {(report.resultStep.resultSpecialistNote ||
+          (stepFiles.result && stepFiles.result.length > 0)) && (
           <div className="panel p-5 md:p-6">
             <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-3">
               Заключение специалиста
             </h3>
-            <div
-              className="border-l-4 pl-4 py-1"
-              style={{ borderColor: "var(--grade-good)" }}
-            >
-              <p className="whitespace-pre-line text-sm leading-relaxed">
-                {report.resultStep.resultSpecialistNote}
-              </p>
-            </div>
+            {report.resultStep.resultSpecialistNote && (
+              <div
+                className="border-l-4 pl-4 py-1"
+                style={{ borderColor: "var(--grade-good)" }}
+              >
+                <p className="whitespace-pre-line text-sm leading-relaxed">
+                  {report.resultStep.resultSpecialistNote}
+                </p>
+              </div>
+            )}
+            {stepFiles.result && stepFiles.result.length > 0 && (
+              <div className={report.resultStep.resultSpecialistNote ? "mt-4" : ""}>
+                <FilesGrid items={stepFiles.result} onOpen={setActiveIdx} />
+              </div>
+            )}
           </div>
-        )}
-
-
-        {/* Files & documents */}
-        {sectionFiles.length > 0 && (
-          <section className="panel p-5 md:p-6">
-            <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-3">
-              Документы и медиа
-            </h3>
-            <div className="space-y-4">
-              {sectionFiles.map((sec) => (
-                <div key={sec.category}>
-                  <div className="text-[11px] uppercase tracking-wider text-muted-foreground mb-2">
-                    {sec.category}
-                    <span className="ml-1.5 mono opacity-70">{sec.items.length}</span>
-                  </div>
-                  <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
-                    {sec.items.map(({ file, idx }) => (
-                      <FileTile
-                        key={`${sec.category}-${file.id}-${idx}`}
-                        file={file}
-                        onClick={() => setActiveIdx(idx)}
-                      />
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
         )}
 
         <footer className="text-center mono text-[11px] text-muted-foreground py-4">
           Сгенерировано на основе данных carreports.ru · {report.reportNumber}
         </footer>
       </div>
+
+
 
       <ElementViewer
         elements={allElements}
@@ -815,3 +856,25 @@ function FileTile({ file, onClick }: { file: FileRef; onClick: () => void }) {
     </button>
   );
 }
+
+function FilesGrid({
+  items,
+  onOpen,
+}: {
+  items: Array<{ file: FileRef; idx: number }>;
+  onOpen: (idx: number) => void;
+}) {
+  if (!items.length) return null;
+  return (
+    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
+      {items.map(({ file, idx }) => (
+        <FileTile
+          key={`${file.id}-${idx}`}
+          file={file}
+          onClick={() => onOpen(idx)}
+        />
+      ))}
+    </div>
+  );
+}
+
