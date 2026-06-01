@@ -319,45 +319,44 @@ function AuctionSheetPage() {
     }
   };
 
-  const { bodyElements, fileElements, sectionFiles } = useMemo(() => {
+  const { inspectionSections, bodyElements, allElements, stepFiles } = useMemo(() => {
+    const sections: Array<{ key: string; label: string; elements: EnrichedElement[] }> = [];
     const body: EnrichedElement[] = [];
     for (const key of SECTION_KEYS) {
       const arr = report.inspectionStep[key] as InspectionElement[] | undefined;
-      if (!arr) continue;
-      for (const el of arr) {
-        body.push({
-          ...el,
-          _status: elementStatus(el),
-          _category: SECTION_LABELS[key] ?? key,
-          _displayName:
-            ELEMENT_LABEL[el.elementType] ??
-            el.elementType.replace(/_/g, " "),
-        });
-      }
+      if (!arr || arr.length === 0) continue;
+      const enriched: EnrichedElement[] = arr.map((el) => ({
+        ...el,
+        _status: elementStatus(el),
+        _category: SECTION_LABELS[key] ?? key,
+        _displayName:
+          ELEMENT_LABEL[el.elementType] ?? el.elementType.replace(/_/g, " "),
+      }));
+      body.push(...enriched);
+      sections.push({ key, label: SECTION_LABELS[key] ?? key, elements: enriched });
     }
 
-    // Collect ALL extra files across all steps (not tied to inspection cards)
-    const fileSources: Array<{ category: string; files: (FileRef | null | undefined)[] }> = [
-      { category: "Объявление", files: [report.carStep.listingFile] },
-      { category: "Общее (фото авто)", files: report.carStep.files ?? [] },
-      { category: "Характеристики", files: report.characteristicsStep?.files ?? [] },
-      { category: "Сверка ПТС/СТС", files: report.documentReconciliationStep.files ?? [] },
-      { category: "Юридическая проверка", files: report.legalReviewStep?.files ?? [] },
-      { category: "Осмотр (общие файлы)", files: report.inspectionStep.files ?? [] },
-      { category: "Тест-драйв", files: report.testDriveStep.files ?? [] },
-      { category: "Заключение", files: report.resultStep.files ?? [] },
+    // Per-step file groups (kept inside each step's own panel)
+    const fileSources: Array<{ key: string; files: (FileRef | null | undefined)[] }> = [
+      { key: "car", files: [report.carStep.listingFile, ...(report.carStep.files ?? [])] },
+      { key: "characteristics", files: report.characteristicsStep?.files ?? [] },
+      { key: "documents", files: report.documentReconciliationStep.files ?? [] },
+      { key: "legal", files: report.legalReviewStep?.files ?? [] },
+      { key: "inspection", files: report.inspectionStep.files ?? [] },
+      { key: "testDrive", files: report.testDriveStep.files ?? [] },
+      { key: "result", files: report.resultStep.files ?? [] },
     ];
 
-    const fileEls: EnrichedElement[] = [];
-    const sectionFilesOut: Array<{ category: string; items: Array<{ file: FileRef; idx: number }> }> = [];
-    let cursor = body.length;
+    const all: EnrichedElement[] = [...body];
+    const filesMap: Record<string, Array<{ file: FileRef; idx: number }>> = {};
     for (const src of fileSources) {
       const items: Array<{ file: FileRef; idx: number }> = [];
       for (const f of src.files) {
         if (!f || !f.url) continue;
+        const idx = all.length;
         const pseudo: EnrichedElement = {
-          id: -1 - cursor, // stable negative id to avoid collisions
-          elementType: src.category,
+          id: -1 - idx,
+          elementType: src.key,
           noDamage: true,
           seriousDamageTags: [],
           noSeriousDamageTags: [],
@@ -365,31 +364,29 @@ function AuctionSheetPage() {
           audioNotes: [],
           file: f,
           _status: "ok",
-          _category: src.category,
-          _displayName: f.filename || src.category,
+          _category: src.key,
+          _displayName: f.filename || src.key,
         };
-        fileEls.push(pseudo);
-        items.push({ file: f, idx: cursor });
-        cursor++;
+        all.push(pseudo);
+        items.push({ file: f, idx });
       }
-      if (items.length) sectionFilesOut.push({ category: src.category, items });
+      filesMap[src.key] = items;
     }
 
-    return { bodyElements: body, fileElements: fileEls, sectionFiles: sectionFilesOut };
+    return {
+      inspectionSections: sections,
+      bodyElements: body,
+      allElements: all,
+      stepFiles: filesMap,
+    };
   }, [report]);
 
-  const allElements = useMemo<EnrichedElement[]>(
-    () => [...bodyElements, ...fileElements],
-    [bodyElements, fileElements],
-  );
-
-  const visible = useMemo(
-    () =>
-      filter === "all"
-        ? bodyElements
-        : bodyElements.filter((e) => e._status === filter),
-    [bodyElements, filter],
-  );
+  const visibleSections = useMemo(() => {
+    if (filter === "all") return inspectionSections;
+    return inspectionSections
+      .map((s) => ({ ...s, elements: s.elements.filter((e) => e._status === filter) }))
+      .filter((s) => s.elements.length > 0);
+  }, [inspectionSections, filter]);
 
   const counts = useMemo(() => {
     const c = { all: bodyElements.length, ok: 0, minor: 0, major: 0 };
