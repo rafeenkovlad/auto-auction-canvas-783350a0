@@ -539,27 +539,60 @@ function AuctionSheetPage() {
             </div>
           </div>
 
-          {visible.length === 0 ? (
+          {visibleSections.length === 0 ? (
             <div className="text-center text-muted-foreground py-12 text-sm">
               Нет элементов в этой категории
             </div>
           ) : (
-            <div className="columns-1 sm:columns-2 lg:columns-3 gap-3 [column-fill:_balance]">
-              {visible.map((el) => {
-                const idx = allElements.indexOf(el);
-                return (
-                  <ElementCard
-                    key={el.id}
-                    el={el}
-                    active={activeIdx === idx}
-                    onClick={() => setActiveIdx(idx)}
-                    cardRef={setCardRef(el.id)}
-                  />
-                );
-              })}
+            <div className="space-y-6">
+              {visibleSections.map((sec) => (
+                <div key={sec.key}>
+                  <div className="flex items-baseline justify-between mb-2 pb-1.5 border-b border-border">
+                    <h3 className="text-sm font-semibold uppercase tracking-wider ink">
+                      {sec.label}
+                    </h3>
+                    <span className="mono text-[11px] text-muted-foreground">
+                      {sec.elements.length}
+                    </span>
+                  </div>
+                  <div className="columns-1 sm:columns-2 lg:columns-3 gap-3 [column-fill:_balance]">
+                    {sec.elements.map((el) => {
+                      const idx = allElements.indexOf(el);
+                      return (
+                        <ElementCard
+                          key={el.id}
+                          el={el}
+                          active={activeIdx === idx}
+                          onClick={() => setActiveIdx(idx)}
+                          cardRef={setCardRef(el.id)}
+                        />
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {stepFiles.inspection && stepFiles.inspection.length > 0 && (
+            <div className="mt-6 pt-4 border-t border-border">
+              <div className="text-[11px] uppercase tracking-wider text-muted-foreground mb-2">
+                Общие файлы осмотра
+              </div>
+              <FilesGrid items={stepFiles.inspection} onOpen={setActiveIdx} />
             </div>
           )}
         </section>
+
+        {/* Car step files */}
+        {stepFiles.car && stepFiles.car.length > 0 && (
+          <div className="panel p-5 md:p-6">
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-3">
+              Объявление и фото авто
+            </h3>
+            <FilesGrid items={stepFiles.car} onOpen={setActiveIdx} />
+          </div>
+        )}
 
         {/* Document reconciliation */}
         <div className="panel p-5 md:p-6">
