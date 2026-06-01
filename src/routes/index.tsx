@@ -156,8 +156,10 @@ function ElementCard({
       ? `${el.paintworkThicknessFrom}–${el.paintworkThicknessTo}`
       : null;
 
-  const isImage = el.file?.type === "image" && !!el.file?.url;
-  const isVideo = el.file?.type === "video" && !!el.file?.url;
+  const tags = [
+    ...el.seriousDamageTags.map((t) => ({ id: t.id, name: t.name, severe: true })),
+    ...el.noSeriousDamageTags.map((t) => ({ id: t.id, name: t.name, severe: false })),
+  ];
 
   return (
     <button
@@ -188,45 +190,25 @@ function ElementCard({
         </span>
       </div>
 
-      {hasMedia && (
-        <div className="relative mt-1 mb-2 overflow-hidden rounded-md border border-border bg-muted/40 aspect-[16/10]">
-          {isImage && (
-            <img
-              src={el.file!.url}
-              alt={el.file!.filename}
-              loading="lazy"
-              className="w-full h-full object-cover"
-            />
-          )}
-          {isVideo && (
-            <>
-              <video
-                src={el.file!.url}
-                muted
-                playsInline
-                preload="metadata"
-                className="w-full h-full object-cover"
-              />
-              <span className="absolute inset-0 flex items-center justify-center bg-black/20">
-                <span className="w-7 h-7 rounded-full bg-black/55 backdrop-blur-sm flex items-center justify-center">
-                  <svg width="10" height="10" viewBox="0 0 10 10" fill="white">
-                    <path d="M2 1l7 4-7 4z" />
-                  </svg>
-                </span>
-              </span>
-            </>
-          )}
-          {!isImage && !isVideo && (
-            <span className="absolute inset-0 flex items-center justify-center text-xs text-muted-foreground">
-              {el.file!.type}
-            </span>
-          )}
-        </div>
-      )}
-
       <div className="flex items-center gap-3 text-xs text-muted-foreground">
         {paint && (
           <span className="mono text-[12px]">{paint} мкм</span>
+        )}
+        {hasMedia && (
+          <span className="inline-flex items-center gap-1" title="Есть медиа">
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 14 14"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.6"
+            >
+              <rect x="2" y="3" width="10" height="8" rx="1" />
+              <circle cx="5" cy="6" r="1" />
+              <path d="M10 9L8 7L5 10" />
+            </svg>
+          </span>
         )}
         {damageCount > 0 && (
           <span className="inline-flex items-center gap-1">
@@ -245,6 +227,26 @@ function ElementCard({
           </span>
         )}
       </div>
+
+      {tags.length > 0 && (
+        <div className="mt-2 flex flex-wrap gap-1">
+          {tags.map((t) => (
+            <span
+              key={t.id}
+              className="inline-block px-1.5 py-0.5 rounded text-[11px] leading-tight border"
+              style={{
+                borderColor: t.severe
+                  ? "var(--grade-bad)"
+                  : "var(--grade-warn)",
+                color: t.severe ? "var(--grade-bad)" : "var(--grade-warn)",
+                background: "transparent",
+              }}
+            >
+              {t.name}
+            </span>
+          ))}
+        </div>
+      )}
       {el.note && (
         <p className="mt-2 pt-2 border-t border-dashed border-border text-xs leading-snug text-muted-foreground whitespace-pre-line">
           {el.note}
