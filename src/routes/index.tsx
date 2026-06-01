@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import {
@@ -145,10 +145,12 @@ function ElementCard({
   el,
   active,
   onClick,
+  cardRef,
 }: {
   el: EnrichedElement;
   active: boolean;
   onClick: () => void;
+  cardRef?: (node: HTMLButtonElement | null) => void;
 }) {
   const meta = statusMeta(el._status);
   const damageCount =
@@ -161,6 +163,7 @@ function ElementCard({
 
   return (
     <button
+      ref={cardRef}
       type="button"
       onClick={onClick}
       className="panel text-left p-3 md:p-4 transition-all hover:-translate-y-px hover:shadow-sm"
@@ -267,6 +270,26 @@ function AuctionSheetPage() {
 
   const [filter, setFilter] = useState<"all" | Status>("all");
   const [activeIdx, setActiveIdx] = useState<number | null>(null);
+  const cardRefs = useRef<Map<number, HTMLButtonElement>>(new Map());
+
+  const setCardRef = (id: number) => (node: HTMLButtonElement | null) => {
+    if (node) cardRefs.current.set(id, node);
+    else cardRefs.current.delete(id);
+  };
+
+  const handleSheetClose = () => {
+    const el = activeIdx != null ? allElements[activeIdx] : null;
+    setActiveIdx(null);
+    if (el) {
+      requestAnimationFrame(() => {
+        const node = cardRefs.current.get(el.id);
+        if (node) {
+          node.scrollIntoView({ behavior: "smooth", block: "center" });
+          node.focus({ preventScroll: true });
+        }
+      });
+    }
+  };
 
   const allElements = useMemo<EnrichedElement[]>(() => {
     const out: EnrichedElement[] = [];
@@ -407,6 +430,7 @@ function AuctionSheetPage() {
                     el={el}
                     active={activeIdx === idx}
                     onClick={() => setActiveIdx(idx)}
+                    cardRef={setCardRef(el.id)}
                   />
                 );
               })}
@@ -505,7 +529,7 @@ function AuctionSheetPage() {
       <Sheet
         open={active != null}
         onOpenChange={(o) => {
-          if (!o) setActiveIdx(null);
+          if (!o) handleSheetClose();
         }}
       >
         <SheetContent
