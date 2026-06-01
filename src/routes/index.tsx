@@ -267,6 +267,26 @@ function AuctionSheetPage() {
 
   const [filter, setFilter] = useState<"all" | Status>("all");
   const [activeIdx, setActiveIdx] = useState<number | null>(null);
+  const cardRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
+
+  const setCardRef = (id: string) => (node: HTMLButtonElement | null) => {
+    if (node) cardRefs.current.set(id, node);
+    else cardRefs.current.delete(id);
+  };
+
+  const handleSheetClose = () => {
+    const el = activeIdx != null ? allElements[activeIdx] : null;
+    setActiveIdx(null);
+    if (el) {
+      requestAnimationFrame(() => {
+        const node = cardRefs.current.get(el.id);
+        if (node) {
+          node.scrollIntoView({ behavior: "smooth", block: "center" });
+          node.focus({ preventScroll: true });
+        }
+      });
+    }
+  };
 
   const allElements = useMemo<EnrichedElement[]>(() => {
     const out: EnrichedElement[] = [];
