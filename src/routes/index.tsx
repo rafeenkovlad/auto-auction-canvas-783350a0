@@ -479,6 +479,37 @@ function AuctionSheetPage() {
           />
         </div>
 
+        {/* Characteristics */}
+        {report.characteristicsStep && (() => {
+          const c = report.characteristicsStep;
+          const rows: Array<[string, string | null | undefined]> = [
+            ["Двигатель", c.engineType],
+            ["Объём", c.engineVolume],
+            ["КПП", c.transmission],
+            ["Привод", c.driveType],
+            ["Цвет", c.color],
+            ["Комплектация", c.equipment],
+          ];
+          const filled = rows.filter(([, v]) => v != null && v !== "");
+          if (filled.length === 0) return null;
+          return (
+            <div className="panel p-5 md:p-6">
+              <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-3">
+                Характеристики
+              </h3>
+              <dl className="grid sm:grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-2 text-sm">
+                {filled.map(([k, v]) => (
+                  <div key={k} className="flex items-baseline justify-between gap-3 border-b border-dashed border-border pb-1.5">
+                    <dt className="text-muted-foreground text-xs">{k}</dt>
+                    <dd className="ink font-medium text-right">{v}</dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+          );
+        })()}
+
+
         {/* Inspection elements */}
         <section className="panel p-5 md:p-6">
           <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
