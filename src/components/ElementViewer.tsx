@@ -55,7 +55,6 @@ export function ElementViewer({
     el.paintworkThicknessTo != null ||
     el.seriousDamageTags.length > 0 ||
     el.noSeriousDamageTags.length > 0 ||
-    !!el.note ||
     (el.audioNotes && el.audioNotes.length > 0);
 
   return createPortal(
@@ -253,11 +252,6 @@ function InfoPanel({
                     </li>
                   ))}
                 </ul>
-              )}
-              {el.note && (
-                <p className="text-xs leading-relaxed whitespace-pre-line text-white/80">
-                  {el.note}
-                </p>
               )}
               {el.audioNotes && el.audioNotes.length > 0 && (
                 <div className="space-y-2">

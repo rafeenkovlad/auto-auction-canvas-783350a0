@@ -219,6 +219,11 @@ function ElementCard({
           </svg>
         )}
       </div>
+      {el.note && (
+        <p className="mt-2 pt-2 border-t border-dashed border-border text-xs leading-snug text-muted-foreground whitespace-pre-line line-clamp-3">
+          {el.note}
+        </p>
+      )}
     </button>
   );
 }
