@@ -50,13 +50,26 @@ export interface CarReport {
   createdAt: string;
   carStep: {
     vin: string;
+    unreadableVin?: boolean;
     gosNumber: string | null;
     uriListing: string | null;
     mileage: number | null;
+    visuallyMileageNotMatchCondition?: boolean;
     cityInspection: string | null;
     dateInspection: string | null;
     ownersCount: number | null;
     listingFile: FileRef | null;
+    files: FileRef[];
+  };
+  characteristicsStep?: {
+    modelGenerationRestylingFrameId?: number | null;
+    modelCarId?: number | null;
+    engineVolume?: string | null;
+    engineType?: string | null;
+    transmission?: string | null;
+    driveType?: string | null;
+    color?: string | null;
+    equipment?: string | null;
     files: FileRef[];
   };
   documentReconciliationStep: {
@@ -64,6 +77,10 @@ export interface CarReport {
     ownerFullNameMatchWithPtsOrSts: boolean | null;
     vinOnBodyMatchWithPtsOrSts: boolean | null;
     engineModelMatchWithPtsOrSts: boolean | null;
+    files: FileRef[];
+  };
+  legalReviewStep?: {
+    id?: number;
     files: FileRef[];
   };
   inspectionStep: {
