@@ -593,42 +593,58 @@ function AuctionSheetPage() {
 
 
         {/* Test drive */}
-        {report.testDriveStep.testDriveIsIncluded && (
-          <div className="panel p-5 md:p-6">
-            <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-3">
-              Тест-драйв
-            </h3>
-            <div className="grid md:grid-cols-2 gap-x-8">
-              <CheckRow
-                label="Двигатель"
-                ok={report.testDriveStep.testDriveEngineIsWorkingProperly}
-              />
-              <CheckRow
-                label="Коробка передач"
-                ok={report.testDriveStep.testDriveTransmissionIsWorkingProperly}
-              />
-              <CheckRow
-                label="Рулевое управление"
-                ok={report.testDriveStep.testDriveSteeringWheelIsWorkingProperly}
-              />
-              <CheckRow
-                label="Подвеска в движении"
-                ok={
-                  report.testDriveStep.testDriveSuspensionInDriveIsWorkingProperly
-                }
-              />
-              <CheckRow
-                label="Тормоза в движении"
-                ok={report.testDriveStep.testDriveBrakesInDriveIsWorkingProperly}
-              />
+        {report.testDriveStep.testDriveIsIncluded && (() => {
+          const td = report.testDriveStep;
+          const rows: Array<{ label: string; ok: boolean | null; tags: typeof td.testDriveEngineTags }> = [
+            { label: "Двигатель", ok: td.testDriveEngineIsWorkingProperly, tags: td.testDriveEngineTags },
+            { label: "Коробка передач", ok: td.testDriveTransmissionIsWorkingProperly, tags: td.testDriveTransmissionTags },
+            { label: "Рулевое управление", ok: td.testDriveSteeringWheelIsWorkingProperly, tags: td.testDriveSteeringWheelTags },
+            { label: "Подвеска в движении", ok: td.testDriveSuspensionInDriveIsWorkingProperly, tags: td.testDriveSuspensionInDriveTags },
+            { label: "Тормоза в движении", ok: td.testDriveBrakesInDriveIsWorkingProperly, tags: td.testDriveBrakesInDriveTags },
+          ];
+          return (
+            <div className="panel p-5 md:p-6">
+              <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-3">
+                Тест-драйв
+              </h3>
+              <div className="space-y-2">
+                {rows.map((r) => (
+                  <div key={r.label} className="py-2 border-b border-dashed border-border last:border-0">
+                    <CheckRow label={r.label} ok={r.ok} />
+                    {r.tags && r.tags.length > 0 && (
+                      <div className="mt-1.5 flex flex-wrap gap-1">
+                        {r.tags.map((t) => (
+                          <span
+                            key={t.id}
+                            className="inline-block px-1.5 py-0.5 rounded text-[11px] border"
+                            style={{
+                              borderColor:
+                                t.type === "serious"
+                                  ? "var(--grade-bad)"
+                                  : "var(--grade-warn)",
+                              color:
+                                t.type === "serious"
+                                  ? "var(--grade-bad)"
+                                  : "var(--grade-warn)",
+                            }}
+                          >
+                            {t.name}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+              {td.testDriveNote && (
+                <p className="mt-3 text-sm text-muted-foreground italic whitespace-pre-line">
+                  {td.testDriveNote}
+                </p>
+              )}
             </div>
-            {report.testDriveStep.testDriveNote && (
-              <p className="mt-3 text-sm text-muted-foreground italic">
-                {report.testDriveStep.testDriveNote}
-              </p>
-            )}
-          </div>
-        )}
+          );
+        })()}
+
 
         {/* Specialist note */}
         {report.resultStep.resultSpecialistNote && (
