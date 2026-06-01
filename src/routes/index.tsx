@@ -319,13 +319,13 @@ function AuctionSheetPage() {
     }
   };
 
-  const allElements = useMemo<EnrichedElement[]>(() => {
-    const out: EnrichedElement[] = [];
+  const { bodyElements, fileElements, sectionFiles } = useMemo(() => {
+    const body: EnrichedElement[] = [];
     for (const key of SECTION_KEYS) {
       const arr = report.inspectionStep[key] as InspectionElement[] | undefined;
       if (!arr) continue;
       for (const el of arr) {
-        out.push({
+        body.push({
           ...el,
           _status: elementStatus(el),
           _category: SECTION_LABELS[key] ?? key,
@@ -335,22 +335,68 @@ function AuctionSheetPage() {
         });
       }
     }
-    return out;
+
+    // Collect ALL extra files across all steps (not tied to inspection cards)
+    const fileSources: Array<{ category: string; files: (FileRef | null | undefined)[] }> = [
+      { category: "Объявление", files: [report.carStep.listingFile] },
+      { category: "Общее (фото авто)", files: report.carStep.files ?? [] },
+      { category: "Характеристики", files: report.characteristicsStep?.files ?? [] },
+      { category: "Сверка ПТС/СТС", files: report.documentReconciliationStep.files ?? [] },
+      { category: "Юридическая проверка", files: report.legalReviewStep?.files ?? [] },
+      { category: "Осмотр (общие файлы)", files: report.inspectionStep.files ?? [] },
+      { category: "Тест-драйв", files: report.testDriveStep.files ?? [] },
+      { category: "Заключение", files: report.resultStep.files ?? [] },
+    ];
+
+    const fileEls: EnrichedElement[] = [];
+    const sectionFilesOut: Array<{ category: string; items: Array<{ file: FileRef; idx: number }> }> = [];
+    let cursor = body.length;
+    for (const src of fileSources) {
+      const items: Array<{ file: FileRef; idx: number }> = [];
+      for (const f of src.files) {
+        if (!f || !f.url) continue;
+        const pseudo: EnrichedElement = {
+          id: -1 - cursor, // stable negative id to avoid collisions
+          elementType: src.category,
+          noDamage: true,
+          seriousDamageTags: [],
+          noSeriousDamageTags: [],
+          note: null,
+          audioNotes: [],
+          file: f,
+          _status: "ok",
+          _category: src.category,
+          _displayName: f.filename || src.category,
+        };
+        fileEls.push(pseudo);
+        items.push({ file: f, idx: cursor });
+        cursor++;
+      }
+      if (items.length) sectionFilesOut.push({ category: src.category, items });
+    }
+
+    return { bodyElements: body, fileElements: fileEls, sectionFiles: sectionFilesOut };
   }, [report]);
+
+  const allElements = useMemo<EnrichedElement[]>(
+    () => [...bodyElements, ...fileElements],
+    [bodyElements, fileElements],
+  );
 
   const visible = useMemo(
     () =>
       filter === "all"
-        ? allElements
-        : allElements.filter((e) => e._status === filter),
-    [allElements, filter],
+        ? bodyElements
+        : bodyElements.filter((e) => e._status === filter),
+    [bodyElements, filter],
   );
 
   const counts = useMemo(() => {
-    const c = { all: allElements.length, ok: 0, minor: 0, major: 0 };
-    for (const e of allElements) c[e._status]++;
+    const c = { all: bodyElements.length, ok: 0, minor: 0, major: 0 };
+    for (const e of bodyElements) c[e._status]++;
     return c;
-  }, [allElements]);
+  }, [bodyElements]);
+
 
 
   return (
@@ -540,6 +586,34 @@ function AuctionSheetPage() {
           </div>
         )}
 
+        {/* Files & documents */}
+        {sectionFiles.length > 0 && (
+          <section className="panel p-5 md:p-6">
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-3">
+              Документы и медиа
+            </h3>
+            <div className="space-y-4">
+              {sectionFiles.map((sec) => (
+                <div key={sec.category}>
+                  <div className="text-[11px] uppercase tracking-wider text-muted-foreground mb-2">
+                    {sec.category}
+                    <span className="ml-1.5 mono opacity-70">{sec.items.length}</span>
+                  </div>
+                  <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
+                    {sec.items.map(({ file, idx }) => (
+                      <FileTile
+                        key={`${sec.category}-${file.id}-${idx}`}
+                        file={file}
+                        onClick={() => setActiveIdx(idx)}
+                      />
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
         <footer className="text-center mono text-[11px] text-muted-foreground py-4">
           Сгенерировано на основе данных carreports.ru · {report.reportNumber}
         </footer>
@@ -584,5 +658,68 @@ function Stat({ label, value, unit }: { label: string; value: string; unit?: str
         {unit && <span className="mono text-[10px] text-muted-foreground">{unit}</span>}
       </span>
     </div>
+  );
+}
+
+function FileTile({ file, onClick }: { file: FileRef; onClick: () => void }) {
+  const t = (file.type || "").toLowerCase();
+  const url = file.url;
+  const ext = url.split("?")[0].split(".").pop()?.toLowerCase() ?? "";
+  const isPdf = t.includes("pdf") || ext === "pdf";
+  const isHls = ext === "m3u8" || url.includes(".m3u8");
+  const isVideo = t.includes("video") || isHls || ["mp4", "webm", "mov"].includes(ext);
+  const isAudio = t.includes("audio") || ["mp3", "wav", "m4a", "ogg"].includes(ext);
+  const isImage = !isPdf && !isVideo && !isAudio && (t.includes("image") || ["jpg", "jpeg", "png", "webp", "gif", "avif"].includes(ext));
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="relative aspect-square overflow-hidden rounded-md border border-border bg-muted/40 hover:border-accent transition-colors"
+      title={file.filename}
+    >
+      {isImage ? (
+        <img src={url} alt={file.filename} loading="lazy" className="w-full h-full object-cover" />
+      ) : isVideo && !isHls ? (
+        <>
+          <video src={url} muted playsInline preload="metadata" className="w-full h-full object-cover" />
+          <span className="absolute inset-0 flex items-center justify-center bg-black/20">
+            <span className="w-7 h-7 rounded-full bg-black/60 backdrop-blur-sm flex items-center justify-center">
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="white"><path d="M2 1l7 4-7 4z" /></svg>
+            </span>
+          </span>
+        </>
+      ) : (
+        <span className="absolute inset-0 flex flex-col items-center justify-center gap-1 text-muted-foreground">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
+            {isPdf ? (
+              <>
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <path d="M14 2v6h6" />
+              </>
+            ) : isVideo ? (
+              <>
+                <rect x="3" y="6" width="14" height="12" rx="1.5" />
+                <path d="M17 10l4-2v8l-4-2z" />
+              </>
+            ) : isAudio ? (
+              <>
+                <path d="M9 18V5l12-2v13" />
+                <circle cx="6" cy="18" r="3" />
+                <circle cx="18" cy="16" r="3" />
+              </>
+            ) : (
+              <>
+                <rect x="4" y="4" width="16" height="16" rx="2" />
+                <path d="M4 14l4-4 4 4 4-4 4 4" />
+              </>
+            )}
+          </svg>
+          <span className="mono text-[9px] uppercase tracking-wider">
+            {isPdf ? "PDF" : isVideo ? (isHls ? "HLS" : "Видео") : isAudio ? "Аудио" : ext || "файл"}
+          </span>
+        </span>
+      )}
+    </button>
   );
 }
