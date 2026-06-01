@@ -253,11 +253,6 @@ function InfoPanel({
                   ))}
                 </ul>
               )}
-              {el.note && (
-                <p className="text-xs leading-relaxed whitespace-pre-line text-white/80">
-                  {el.note}
-                </p>
-              )}
               {el.audioNotes && el.audioNotes.length > 0 && (
                 <div className="space-y-2">
                   {el.audioNotes.map((a) => (
