@@ -319,14 +319,6 @@ function AuctionSheetPage() {
     return c;
   }, [allElements]);
 
-  const active = activeIdx != null ? allElements[activeIdx] : null;
-
-  const goPrev = () =>
-    setActiveIdx((i) => (i == null || i <= 0 ? i : i - 1));
-  const goNext = () =>
-    setActiveIdx((i) =>
-      i == null || i >= allElements.length - 1 ? i : i + 1,
-    );
 
   return (
     <main className="min-h-screen py-6 px-3 md:px-6">
