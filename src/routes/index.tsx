@@ -7,12 +7,7 @@ import {
   type InspectionElement,
   type FileRef,
 } from "@/lib/report.functions";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+import { ElementViewer } from "@/components/ElementViewer";
 
 const reportQuery = (token?: string) =>
   queryOptions({
