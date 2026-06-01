@@ -529,7 +529,7 @@ function AuctionSheetPage() {
       <Sheet
         open={active != null}
         onOpenChange={(o) => {
-          if (!o) setActiveIdx(null);
+          if (!o) handleSheetClose();
         }}
       >
         <SheetContent
