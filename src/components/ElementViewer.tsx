@@ -55,7 +55,6 @@ export function ElementViewer({
     el.paintworkThicknessTo != null ||
     el.seriousDamageTags.length > 0 ||
     el.noSeriousDamageTags.length > 0 ||
-    !!el.note ||
     (el.audioNotes && el.audioNotes.length > 0);
 
   return createPortal(
