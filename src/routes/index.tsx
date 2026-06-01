@@ -414,10 +414,38 @@ function AuctionSheetPage() {
             <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-xs text-muted-foreground">
               <span>
                 VIN: <span className="mono ink">{report.vin}</span>
+                {report.carStep.unreadableVin && (
+                  <span
+                    className="ml-1.5 inline-block px-1.5 py-0.5 rounded text-[10px] border align-middle"
+                    style={{ borderColor: "var(--grade-bad)", color: "var(--grade-bad)" }}
+                  >
+                    нечитаемый
+                  </span>
+                )}
               </span>
-              <span>Пробег: {fmtMileage(report.carStep.mileage)}</span>
+              <span>
+                Пробег: {fmtMileage(report.carStep.mileage)}
+                {report.carStep.visuallyMileageNotMatchCondition && (
+                  <span
+                    className="ml-1.5 inline-block px-1.5 py-0.5 rounded text-[10px] border align-middle"
+                    style={{ borderColor: "var(--grade-warn)", color: "var(--grade-warn)" }}
+                  >
+                    не соответствует состоянию
+                  </span>
+                )}
+              </span>
               <span>{report.carStep.cityInspection ?? "—"}</span>
               <span>{fmtDate(report.carStep.dateInspection ?? report.reportDate)}</span>
+              {report.carStep.uriListing && (
+                <a
+                  href={report.carStep.uriListing}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="underline hover:text-foreground"
+                >
+                  Объявление ↗
+                </a>
+              )}
             </div>
           </div>
           {report.carStep.gosNumber && (
@@ -431,6 +459,7 @@ function AuctionSheetPage() {
             </div>
           )}
         </header>
+
 
         {/* Body / paint summary */}
         <div className="grid sm:grid-cols-3 gap-2">
@@ -449,6 +478,37 @@ function AuctionSheetPage() {
             value={report.carStep.ownersCount?.toString() ?? "—"}
           />
         </div>
+
+        {/* Characteristics */}
+        {report.characteristicsStep && (() => {
+          const c = report.characteristicsStep;
+          const rows: Array<[string, string | null | undefined]> = [
+            ["Двигатель", c.engineType],
+            ["Объём", c.engineVolume],
+            ["КПП", c.transmission],
+            ["Привод", c.driveType],
+            ["Цвет", c.color],
+            ["Комплектация", c.equipment],
+          ];
+          const filled = rows.filter(([, v]) => v != null && v !== "");
+          if (filled.length === 0) return null;
+          return (
+            <div className="panel p-5 md:p-6">
+              <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-3">
+                Характеристики
+              </h3>
+              <dl className="grid sm:grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-2 text-sm">
+                {filled.map(([k, v]) => (
+                  <div key={k} className="flex items-baseline justify-between gap-3 border-b border-dashed border-border pb-1.5">
+                    <dt className="text-muted-foreground text-xs">{k}</dt>
+                    <dd className="ink font-medium text-right">{v}</dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+          );
+        })()}
+
 
         {/* Inspection elements */}
         <section className="panel p-5 md:p-6">
@@ -522,52 +582,83 @@ function AuctionSheetPage() {
               label="Модель двигателя совпадает с ПТС/СТС"
               ok={report.documentReconciliationStep.engineModelMatchWithPtsOrSts}
             />
-            <CheckRow
-              label="Количество владельцев указано"
-              ok={
-                report.documentReconciliationStep.ownersCount != null ? true : null
-              }
-            />
+            <div className="flex items-center justify-between gap-3 py-2 border-b border-dashed border-border last:border-0">
+              <span className="text-sm">Количество владельцев</span>
+              <span className="mono text-sm font-semibold ink">
+                {report.documentReconciliationStep.ownersCount ?? "—"}
+              </span>
+            </div>
           </div>
         </div>
 
+
         {/* Test drive */}
-        {report.testDriveStep.testDriveIsIncluded && (
-          <div className="panel p-5 md:p-6">
-            <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-3">
-              Тест-драйв
-            </h3>
-            <div className="grid md:grid-cols-2 gap-x-8">
-              <CheckRow
-                label="Двигатель"
-                ok={report.testDriveStep.testDriveEngineIsWorkingProperly}
-              />
-              <CheckRow
-                label="Коробка передач"
-                ok={report.testDriveStep.testDriveTransmissionIsWorkingProperly}
-              />
-              <CheckRow
-                label="Рулевое управление"
-                ok={report.testDriveStep.testDriveSteeringWheelIsWorkingProperly}
-              />
-              <CheckRow
-                label="Подвеска в движении"
-                ok={
-                  report.testDriveStep.testDriveSuspensionInDriveIsWorkingProperly
-                }
-              />
-              <CheckRow
-                label="Тормоза в движении"
-                ok={report.testDriveStep.testDriveBrakesInDriveIsWorkingProperly}
-              />
+        {report.testDriveStep.testDriveIsIncluded && (() => {
+          const td = report.testDriveStep;
+          const rows: Array<{ label: string; ok: boolean | null; tags: typeof td.testDriveEngineTags }> = [
+            { label: "Двигатель", ok: td.testDriveEngineIsWorkingProperly, tags: td.testDriveEngineTags },
+            { label: "Коробка передач", ok: td.testDriveTransmissionIsWorkingProperly, tags: td.testDriveTransmissionTags },
+            { label: "Рулевое управление", ok: td.testDriveSteeringWheelIsWorkingProperly, tags: td.testDriveSteeringWheelTags },
+            { label: "Подвеска в движении", ok: td.testDriveSuspensionInDriveIsWorkingProperly, tags: td.testDriveSuspensionInDriveTags },
+            { label: "Тормоза в движении", ok: td.testDriveBrakesInDriveIsWorkingProperly, tags: td.testDriveBrakesInDriveTags },
+          ];
+          return (
+            <div className="panel p-5 md:p-6">
+              <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-3">
+                Тест-драйв
+              </h3>
+              <div className="space-y-2">
+                {rows.map((r) => (
+                  <div key={r.label} className="py-2 border-b border-dashed border-border last:border-0">
+                    <CheckRow label={r.label} ok={r.ok} />
+                    {r.tags && r.tags.length > 0 && (
+                      <div className="mt-1.5 flex flex-wrap gap-1">
+                        {r.tags.map((t) => (
+                          <span
+                            key={t.id}
+                            className="inline-block px-1.5 py-0.5 rounded text-[11px] border"
+                            style={{
+                              borderColor:
+                                t.type === "serious"
+                                  ? "var(--grade-bad)"
+                                  : "var(--grade-warn)",
+                              color:
+                                t.type === "serious"
+                                  ? "var(--grade-bad)"
+                                  : "var(--grade-warn)",
+                            }}
+                          >
+                            {t.name}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+              {td.testDriveNote && (
+                <p className="mt-3 text-sm text-muted-foreground italic whitespace-pre-line">
+                  {td.testDriveNote}
+                </p>
+              )}
             </div>
-            {report.testDriveStep.testDriveNote && (
-              <p className="mt-3 text-sm text-muted-foreground italic">
-                {report.testDriveStep.testDriveNote}
+          );
+        })()}
+
+
+        {/* Summary inspection note */}
+        {report.resultStep.summaryInspectionNote &&
+          report.resultStep.summaryInspectionNote !==
+            report.resultStep.resultSpecialistNote && (
+            <div className="panel p-5 md:p-6">
+              <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-3">
+                Итог осмотра
+              </h3>
+              <p className="whitespace-pre-line text-sm leading-relaxed">
+                {report.resultStep.summaryInspectionNote}
               </p>
-            )}
-          </div>
-        )}
+            </div>
+          )}
 
         {/* Specialist note */}
         {report.resultStep.resultSpecialistNote && (
@@ -585,6 +676,7 @@ function AuctionSheetPage() {
             </div>
           </div>
         )}
+
 
         {/* Files & documents */}
         {sectionFiles.length > 0 && (
