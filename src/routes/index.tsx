@@ -582,14 +582,15 @@ function AuctionSheetPage() {
               label="Модель двигателя совпадает с ПТС/СТС"
               ok={report.documentReconciliationStep.engineModelMatchWithPtsOrSts}
             />
-            <CheckRow
-              label="Количество владельцев указано"
-              ok={
-                report.documentReconciliationStep.ownersCount != null ? true : null
-              }
-            />
+            <div className="flex items-center justify-between gap-3 py-2 border-b border-dashed border-border last:border-0">
+              <span className="text-sm">Количество владельцев</span>
+              <span className="mono text-sm font-semibold ink">
+                {report.documentReconciliationStep.ownersCount ?? "—"}
+              </span>
+            </div>
           </div>
         </div>
+
 
         {/* Test drive */}
         {report.testDriveStep.testDriveIsIncluded && (
