@@ -27,7 +27,6 @@ export function ElementViewer({
 }: Props) {
   const open = index != null && elements[index] != null;
 
-  // keyboard nav
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -51,175 +50,241 @@ export function ElementViewer({
   const canPrev = index! > 0;
   const canNext = index! < elements.length - 1;
 
+  const hasDetails =
+    el.paintworkThicknessFrom != null ||
+    el.paintworkThicknessTo != null ||
+    el.seriousDamageTags.length > 0 ||
+    el.noSeriousDamageTags.length > 0 ||
+    !!el.note ||
+    (el.audioNotes && el.audioNotes.length > 0);
+
   return createPortal(
     <div
-      className="fixed inset-0 z-[100] flex flex-col bg-black/95 text-white animate-in fade-in duration-150"
+      className="fixed inset-0 z-[100] bg-black text-white animate-in fade-in duration-150"
       role="dialog"
       aria-modal="true"
     >
-      {/* Top bar */}
-      <div className="flex items-center gap-3 px-3 md:px-5 h-14 border-b border-white/10 shrink-0">
-        <button
-          type="button"
-          onClick={() => canPrev && onChange(index! - 1)}
-          disabled={!canPrev}
-          className="h-9 w-9 rounded-md border border-white/15 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center"
-          aria-label="Предыдущий"
-        >
-          ‹
-        </button>
-        <button
-          type="button"
-          onClick={() => canNext && onChange(index! + 1)}
-          disabled={!canNext}
-          className="h-9 w-9 rounded-md border border-white/15 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center"
-          aria-label="Следующий"
-        >
-          ›
-        </button>
-        <div className="text-xs text-white/60 mono tabular-nums">
+      {/* Media fills the whole viewport */}
+      <MediaStage
+        key={el.id}
+        file={el.file}
+      />
+
+      {/* Minimal top bar: counter left, close right */}
+      <div className="absolute top-0 inset-x-0 h-12 flex items-center justify-between px-3 pointer-events-none z-10">
+        <div className="mono text-xs text-white/70 tabular-nums px-2 py-1 rounded bg-black/40 backdrop-blur pointer-events-auto">
           {index! + 1} / {elements.length}
         </div>
-        <div className="min-w-0 flex-1 ml-2">
-          <div className="text-[10px] uppercase tracking-wider text-white/50 truncate">
-            {el._category}
-          </div>
-          <div className="text-sm font-semibold truncate">{el._displayName}</div>
-        </div>
-        <span
-          className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold"
-          style={{ background: m.bg, color: m.fg }}
-        >
-          <span>{m.icon}</span>
-          {m.label}
-        </span>
         <button
           type="button"
           onClick={onClose}
-          className="h-9 w-9 rounded-md border border-white/15 hover:bg-white/10 flex items-center justify-center"
+          className="h-9 w-9 rounded-full bg-black/40 hover:bg-black/60 backdrop-blur flex items-center justify-center pointer-events-auto"
           aria-label="Закрыть"
         >
           ✕
         </button>
       </div>
 
-      {/* Body: media + details */}
-      <div className="flex-1 min-h-0 flex flex-col md:flex-row">
-        <div className="flex-1 min-h-0 relative bg-black flex items-center justify-center">
-          <MediaStage
-            key={el.id}
-            file={el.file}
-            onPrev={canPrev ? () => onChange(index! - 1) : undefined}
-            onNext={canNext ? () => onChange(index! + 1) : undefined}
-          />
-        </div>
+      {/* Side nav (desktop only, subtle) */}
+      {canPrev && (
+        <button
+          type="button"
+          onClick={() => onChange(index! - 1)}
+          className="hidden md:flex absolute left-3 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-black/40 hover:bg-black/60 backdrop-blur items-center justify-center z-10"
+          aria-label="Предыдущий"
+        >
+          ‹
+        </button>
+      )}
+      {canNext && (
+        <button
+          type="button"
+          onClick={() => onChange(index! + 1)}
+          className="hidden md:flex absolute right-3 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-black/40 hover:bg-black/60 backdrop-blur items-center justify-center z-10"
+          aria-label="Следующий"
+        >
+          ›
+        </button>
+      )}
 
-        <aside className="md:w-[340px] md:border-l border-white/10 border-t md:border-t-0 overflow-y-auto bg-zinc-950 p-4 space-y-4 text-sm shrink-0 max-h-[45vh] md:max-h-none">
-          <span
-            className="sm:hidden inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold"
-            style={{ background: m.bg, color: m.fg }}
-          >
-            <span>{m.icon}</span>
-            {m.label}
-          </span>
+      {/* Bottom info panel: compact, contains all useful data */}
+      <InfoPanel el={el} m={m} hasDetails={hasDetails} />
 
-          {(el.paintworkThicknessFrom != null ||
-            el.paintworkThicknessTo != null) && (
-            <Block label="Толщина ЛКП">
-              <span className="mono text-base font-semibold">
-                {el.paintworkThicknessFrom ?? "—"}–
-                {el.paintworkThicknessTo ?? "—"} мкм
-              </span>
-            </Block>
-          )}
-
-          {(el.seriousDamageTags.length > 0 ||
-            el.noSeriousDamageTags.length > 0) && (
-            <Block label="Повреждения">
-              <ul className="space-y-1.5">
-                {el.seriousDamageTags.map((t) => (
-                  <li
-                    key={t.id}
-                    className="px-2.5 py-1.5 rounded text-xs border-l-[3px] bg-white/5"
-                    style={{ borderLeftColor: "var(--grade-bad)" }}
-                  >
-                    {t.name}
-                  </li>
-                ))}
-                {el.noSeriousDamageTags.map((t) => (
-                  <li
-                    key={t.id}
-                    className="px-2.5 py-1.5 rounded text-xs border-l-[3px] bg-white/5"
-                    style={{ borderLeftColor: "var(--grade-warn)" }}
-                  >
-                    {t.name}
-                  </li>
-                ))}
-              </ul>
-            </Block>
-          )}
-
-          {el.note && (
-            <Block label="Примечание">
-              <p className="text-xs leading-relaxed whitespace-pre-line text-white/80">
-                {el.note}
-              </p>
-            </Block>
-          )}
-
-          {el.audioNotes && el.audioNotes.length > 0 && (
-            <Block label="Аудио-заметки">
-              <div className="space-y-2">
-                {el.audioNotes.map((a) => (
-                  <audio
-                    key={a.id}
-                    src={a.url}
-                    controls
-                    preload="metadata"
-                    className="w-full h-9"
-                  />
-                ))}
-              </div>
-            </Block>
-          )}
-        </aside>
-      </div>
+      {/* Mobile swipe nav buttons in info panel header — handled via tap targets below */}
+      <MobileNav
+        canPrev={canPrev}
+        canNext={canNext}
+        onPrev={() => onChange(index! - 1)}
+        onNext={() => onChange(index! + 1)}
+      />
     </div>,
     document.body,
   );
 }
 
-function Block({
-  label,
-  children,
+function MobileNav({
+  canPrev,
+  canNext,
+  onPrev,
+  onNext,
 }: {
-  label: string;
-  children: React.ReactNode;
+  canPrev: boolean;
+  canNext: boolean;
+  onPrev: () => void;
+  onNext: () => void;
 }) {
   return (
-    <div>
-      <div className="text-[10px] uppercase tracking-wider text-white/50 font-semibold mb-1.5">
-        {label}
-      </div>
-      {children}
+    <div className="md:hidden absolute top-1/2 -translate-y-1/2 inset-x-0 flex justify-between px-2 pointer-events-none z-[5]">
+      <button
+        type="button"
+        onClick={onPrev}
+        disabled={!canPrev}
+        className="h-10 w-10 rounded-full bg-black/30 disabled:opacity-0 backdrop-blur flex items-center justify-center pointer-events-auto"
+        aria-label="Предыдущий"
+      >
+        ‹
+      </button>
+      <button
+        type="button"
+        onClick={onNext}
+        disabled={!canNext}
+        className="h-10 w-10 rounded-full bg-black/30 disabled:opacity-0 backdrop-blur flex items-center justify-center pointer-events-auto"
+        aria-label="Следующий"
+      >
+        ›
+      </button>
     </div>
   );
 }
 
-/* ===== Media stage: zoom + pan for images, native player for video/audio ===== */
-function MediaStage({
-  file,
-  onPrev,
-  onNext,
+function InfoPanel({
+  el,
+  m,
+  hasDetails,
 }: {
-  file: FileRef | null | undefined;
-  onPrev?: () => void;
-  onNext?: () => void;
+  el: ViewerElement;
+  m: StatusMeta;
+  hasDetails: boolean;
 }) {
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <div className="absolute inset-x-0 bottom-0 z-10">
+      <div className="bg-gradient-to-t from-black via-black/85 to-transparent pt-8">
+        <div className="px-4 pb-[max(env(safe-area-inset-bottom),12px)] max-w-3xl mx-auto">
+          {/* Header row */}
+          <div className="flex items-center gap-2 mb-1">
+            <span
+              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold"
+              style={{ background: m.bg, color: m.fg }}
+            >
+              <span>{m.icon}</span>
+              {m.label}
+            </span>
+            <span className="text-[10px] uppercase tracking-wider text-white/50 truncate">
+              {el._category}
+            </span>
+          </div>
+          <div className="flex items-end gap-3">
+            <h2 className="text-base md:text-lg font-semibold leading-tight truncate flex-1">
+              {el._displayName}
+            </h2>
+            {hasDetails && (
+              <button
+                type="button"
+                onClick={() => setExpanded((v) => !v)}
+                className="text-xs text-white/60 hover:text-white shrink-0"
+              >
+                {expanded ? "Скрыть" : "Подробнее"}
+              </button>
+            )}
+          </div>
+
+          {/* Compact inline meta (always visible) */}
+          {(el.paintworkThicknessFrom != null ||
+            el.paintworkThicknessTo != null ||
+            el.seriousDamageTags.length + el.noSeriousDamageTags.length > 0) && (
+            <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1.5 text-xs text-white/70">
+              {(el.paintworkThicknessFrom != null ||
+                el.paintworkThicknessTo != null) && (
+                <span>
+                  ЛКП:{" "}
+                  <span className="mono text-white">
+                    {el.paintworkThicknessFrom ?? "—"}–
+                    {el.paintworkThicknessTo ?? "—"} мкм
+                  </span>
+                </span>
+              )}
+              {el.seriousDamageTags.length + el.noSeriousDamageTags.length >
+                0 && (
+                <span>
+                  Повреждений:{" "}
+                  <span className="mono text-white">
+                    {el.seriousDamageTags.length +
+                      el.noSeriousDamageTags.length}
+                  </span>
+                </span>
+              )}
+            </div>
+          )}
+
+          {/* Expanded details */}
+          {expanded && hasDetails && (
+            <div className="mt-3 space-y-3 max-h-[40vh] overflow-y-auto text-sm">
+              {(el.seriousDamageTags.length > 0 ||
+                el.noSeriousDamageTags.length > 0) && (
+                <ul className="space-y-1">
+                  {el.seriousDamageTags.map((t) => (
+                    <li
+                      key={t.id}
+                      className="px-2 py-1 rounded text-xs border-l-[3px] bg-white/5"
+                      style={{ borderLeftColor: "var(--grade-bad)" }}
+                    >
+                      {t.name}
+                    </li>
+                  ))}
+                  {el.noSeriousDamageTags.map((t) => (
+                    <li
+                      key={t.id}
+                      className="px-2 py-1 rounded text-xs border-l-[3px] bg-white/5"
+                      style={{ borderLeftColor: "var(--grade-warn)" }}
+                    >
+                      {t.name}
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {el.note && (
+                <p className="text-xs leading-relaxed whitespace-pre-line text-white/80">
+                  {el.note}
+                </p>
+              )}
+              {el.audioNotes && el.audioNotes.length > 0 && (
+                <div className="space-y-2">
+                  {el.audioNotes.map((a) => (
+                    <audio
+                      key={a.id}
+                      src={a.url}
+                      controls
+                      preload="metadata"
+                      className="w-full h-8"
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ===== Media stage ===== */
+function MediaStage({ file }: { file: FileRef | null | undefined }) {
   if (!file?.url) {
     return (
-      <div className="text-white/40 text-sm flex flex-col items-center gap-2">
-        <span className="text-3xl">∅</span>
+      <div className="absolute inset-0 flex items-center justify-center text-white/40 text-sm">
         Медиа отсутствует
       </div>
     );
@@ -227,38 +292,27 @@ function MediaStage({
   const t = (file.type || "").toLowerCase();
   if (t.includes("video")) {
     return (
-      <video
-        src={file.url}
-        controls
-        playsInline
-        className="max-w-full max-h-full"
-      />
+      <div className="absolute inset-0 flex items-center justify-center">
+        <video
+          src={file.url}
+          controls
+          playsInline
+          className="max-w-full max-h-full"
+        />
+      </div>
     );
   }
   if (t.includes("audio")) {
     return (
-      <div className="w-full max-w-md px-6">
-        <audio src={file.url} controls className="w-full" />
-        <div className="mt-2 text-xs text-white/50 text-center truncate">
-          {file.filename}
-        </div>
+      <div className="absolute inset-0 flex items-center justify-center px-6">
+        <audio src={file.url} controls className="w-full max-w-md" />
       </div>
     );
   }
-  return <ZoomImage src={file.url} alt={file.filename} onPrev={onPrev} onNext={onNext} />;
+  return <ZoomImage src={file.url} alt={file.filename} />;
 }
 
-function ZoomImage({
-  src,
-  alt,
-  onPrev,
-  onNext,
-}: {
-  src: string;
-  alt: string;
-  onPrev?: () => void;
-  onNext?: () => void;
-}) {
+function ZoomImage({ src, alt }: { src: string; alt: string }) {
   const [scale, setScale] = useState(1);
   const [tx, setTx] = useState(0);
   const [ty, setTy] = useState(0);
@@ -308,7 +362,6 @@ function ZoomImage({
     dragRef.current = null;
   };
 
-  // Pinch-to-zoom (touch)
   const onTouchStart = (e: React.TouchEvent) => {
     if (e.touches.length === 2) {
       const dx = e.touches[0].clientX - e.touches[1].clientX;
@@ -336,10 +389,11 @@ function ZoomImage({
     if (e.touches.length < 2) pinchRef.current = null;
   };
 
-  // Reset on src change
   useEffect(() => {
     reset();
   }, [src, reset]);
+
+  const zoomed = scale > 1.01;
 
   return (
     <div
@@ -372,58 +426,17 @@ function ZoomImage({
         }}
       />
 
-      {/* Side nav (desktop) */}
-      {onPrev && (
+      {/* Zoom indicator: only shown when actually zoomed */}
+      {zoomed && (
         <button
           type="button"
-          onClick={onPrev}
-          className="hidden md:flex absolute left-3 top-1/2 -translate-y-1/2 h-11 w-11 rounded-full bg-black/50 hover:bg-black/70 border border-white/15 items-center justify-center text-xl"
-          aria-label="Предыдущий"
+          onClick={reset}
+          className="absolute top-3 left-1/2 -translate-x-1/2 mono text-[11px] text-white/80 tabular-nums bg-black/50 hover:bg-black/70 backdrop-blur rounded-full px-3 py-1 z-10"
+          title="Сбросить масштаб"
         >
-          ‹
+          {Math.round(scale * 100)}% · сброс
         </button>
       )}
-      {onNext && (
-        <button
-          type="button"
-          onClick={onNext}
-          className="hidden md:flex absolute right-3 top-1/2 -translate-y-1/2 h-11 w-11 rounded-full bg-black/50 hover:bg-black/70 border border-white/15 items-center justify-center text-xl"
-          aria-label="Следующий"
-        >
-          ›
-        </button>
-      )}
-
-      {/* Zoom toolbar */}
-      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1 bg-black/60 border border-white/15 rounded-full px-1 py-1 backdrop-blur">
-        <ZoomBtn label="−" onClick={() => zoomBy(1 / 1.4)} />
-        <span className="mono text-xs text-white/70 w-12 text-center tabular-nums">
-          {Math.round(scale * 100)}%
-        </span>
-        <ZoomBtn label="+" onClick={() => zoomBy(1.4)} />
-        <ZoomBtn label="↺" onClick={reset} title="Сбросить" />
-      </div>
     </div>
-  );
-}
-
-function ZoomBtn({
-  label,
-  onClick,
-  title,
-}: {
-  label: string;
-  onClick: () => void;
-  title?: string;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      title={title}
-      className="h-8 w-8 rounded-full hover:bg-white/10 flex items-center justify-center text-sm"
-    >
-      {label}
-    </button>
   );
 }
