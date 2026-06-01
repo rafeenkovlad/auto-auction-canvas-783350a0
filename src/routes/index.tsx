@@ -439,7 +439,7 @@ function AuctionSheetPage() {
               Нет элементов в этой категории
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div className="columns-1 sm:columns-2 lg:columns-3 gap-3 [column-fill:_balance]">
               {visible.map((el) => {
                 const idx = allElements.indexOf(el);
                 return (
