@@ -721,55 +721,29 @@ function AuctionSheetPage() {
           )}
 
         {/* Specialist note */}
-        {report.resultStep.resultSpecialistNote && (
+        {(report.resultStep.resultSpecialistNote ||
+          (stepFiles.result && stepFiles.result.length > 0)) && (
           <div className="panel p-5 md:p-6">
             <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-3">
               Заключение специалиста
             </h3>
-            <div
-              className="border-l-4 pl-4 py-1"
-              style={{ borderColor: "var(--grade-good)" }}
-            >
-              <p className="whitespace-pre-line text-sm leading-relaxed">
-                {report.resultStep.resultSpecialistNote}
-              </p>
-            </div>
+            {report.resultStep.resultSpecialistNote && (
+              <div
+                className="border-l-4 pl-4 py-1"
+                style={{ borderColor: "var(--grade-good)" }}
+              >
+                <p className="whitespace-pre-line text-sm leading-relaxed">
+                  {report.resultStep.resultSpecialistNote}
+                </p>
+              </div>
+            )}
+            {stepFiles.result && stepFiles.result.length > 0 && (
+              <div className={report.resultStep.resultSpecialistNote ? "mt-4" : ""}>
+                <FilesGrid items={stepFiles.result} onOpen={setActiveIdx} />
+              </div>
+            )}
           </div>
         )}
-
-
-        {/* Files & documents */}
-        {sectionFiles.length > 0 && (
-          <section className="panel p-5 md:p-6">
-            <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-3">
-              Документы и медиа
-            </h3>
-            <div className="space-y-4">
-              {sectionFiles.map((sec) => (
-                <div key={sec.category}>
-                  <div className="text-[11px] uppercase tracking-wider text-muted-foreground mb-2">
-                    {sec.category}
-                    <span className="ml-1.5 mono opacity-70">{sec.items.length}</span>
-                  </div>
-                  <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
-                    {sec.items.map(({ file, idx }) => (
-                      <FileTile
-                        key={`${sec.category}-${file.id}-${idx}`}
-                        file={file}
-                        onClick={() => setActiveIdx(idx)}
-                      />
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
-        <footer className="text-center mono text-[11px] text-muted-foreground py-4">
-          Сгенерировано на основе данных carreports.ru · {report.reportNumber}
-        </footer>
-      </div>
 
       <ElementViewer
         elements={allElements}
