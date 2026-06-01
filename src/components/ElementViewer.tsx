@@ -255,26 +255,91 @@ function MediaStage({ file }: { file: FileRef | null | undefined }) {
     );
   }
   const t = (file.type || "").toLowerCase();
-  if (t.includes("video")) {
+  const url = file.url;
+  const ext = url.split("?")[0].split(".").pop()?.toLowerCase() ?? "";
+  const isPdf = t.includes("pdf") || ext === "pdf";
+  const isHls = ext === "m3u8" || url.includes(".m3u8");
+  const isVideo = t.includes("video") || isHls || ext === "mp4" || ext === "webm" || ext === "mov";
+  const isAudio = t.includes("audio") || ext === "mp3" || ext === "wav" || ext === "m4a" || ext === "ogg";
+
+  if (isPdf) {
+    return (
+      <div className="absolute inset-0 flex flex-col">
+        <iframe
+          src={url}
+          title={file.filename}
+          className="flex-1 w-full bg-white"
+        />
+        <a
+          href={url}
+          target="_blank"
+          rel="noreferrer"
+          className="absolute bottom-20 right-3 z-10 mono text-[11px] text-white/90 bg-black/50 hover:bg-black/70 backdrop-blur rounded-full px-3 py-1"
+        >
+          Открыть PDF ↗
+        </a>
+      </div>
+    );
+  }
+  if (isVideo) {
     return (
       <div className="absolute inset-0 flex items-center justify-center">
-        <video
-          src={file.url}
-          controls
-          playsInline
-          className="max-w-full max-h-full"
-        />
+        <VideoPlayer src={url} hls={isHls} />
       </div>
     );
   }
-  if (t.includes("audio")) {
+  if (isAudio) {
     return (
       <div className="absolute inset-0 flex items-center justify-center px-6">
-        <audio src={file.url} controls className="w-full max-w-md" />
+        <audio src={url} controls className="w-full max-w-md" />
       </div>
     );
   }
-  return <ZoomImage src={file.url} alt={file.filename} />;
+  return <ZoomImage src={url} alt={file.filename} />;
+}
+
+function VideoPlayer({ src, hls }: { src: string; hls: boolean }) {
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    // Native HLS (Safari/iOS)
+    if (!hls || video.canPlayType("application/vnd.apple.mpegurl")) {
+      video.src = src;
+      return;
+    }
+
+    let destroyed = false;
+    let hlsInstance: { destroy: () => void } | null = null;
+
+    import("hls.js").then(({ default: Hls }) => {
+      if (destroyed) return;
+      if (Hls.isSupported()) {
+        const instance = new Hls({ enableWorker: true });
+        instance.loadSource(src);
+        instance.attachMedia(video);
+        hlsInstance = instance;
+      } else {
+        video.src = src;
+      }
+    });
+
+    return () => {
+      destroyed = true;
+      hlsInstance?.destroy();
+    };
+  }, [src, hls]);
+
+  return (
+    <video
+      ref={videoRef}
+      controls
+      playsInline
+      className="max-w-full max-h-full"
+    />
+  );
 }
 
 function ZoomImage({ src, alt }: { src: string; alt: string }) {
