@@ -319,13 +319,13 @@ function AuctionSheetPage() {
     }
   };
 
-  const allElements = useMemo<EnrichedElement[]>(() => {
-    const out: EnrichedElement[] = [];
+  const { bodyElements, fileElements, sectionFiles } = useMemo(() => {
+    const body: EnrichedElement[] = [];
     for (const key of SECTION_KEYS) {
       const arr = report.inspectionStep[key] as InspectionElement[] | undefined;
       if (!arr) continue;
       for (const el of arr) {
-        out.push({
+        body.push({
           ...el,
           _status: elementStatus(el),
           _category: SECTION_LABELS[key] ?? key,
@@ -335,22 +335,68 @@ function AuctionSheetPage() {
         });
       }
     }
-    return out;
+
+    // Collect ALL extra files across all steps (not tied to inspection cards)
+    const fileSources: Array<{ category: string; files: (FileRef | null | undefined)[] }> = [
+      { category: "Объявление", files: [report.carStep.listingFile] },
+      { category: "Общее (фото авто)", files: report.carStep.files ?? [] },
+      { category: "Характеристики", files: report.characteristicsStep?.files ?? [] },
+      { category: "Сверка ПТС/СТС", files: report.documentReconciliationStep.files ?? [] },
+      { category: "Юридическая проверка", files: report.legalReviewStep?.files ?? [] },
+      { category: "Осмотр (общие файлы)", files: report.inspectionStep.files ?? [] },
+      { category: "Тест-драйв", files: report.testDriveStep.files ?? [] },
+      { category: "Заключение", files: report.resultStep.files ?? [] },
+    ];
+
+    const fileEls: EnrichedElement[] = [];
+    const sectionFilesOut: Array<{ category: string; items: Array<{ file: FileRef; idx: number }> }> = [];
+    let cursor = body.length;
+    for (const src of fileSources) {
+      const items: Array<{ file: FileRef; idx: number }> = [];
+      for (const f of src.files) {
+        if (!f || !f.url) continue;
+        const pseudo: EnrichedElement = {
+          id: -1 - cursor, // stable negative id to avoid collisions
+          elementType: src.category,
+          noDamage: true,
+          seriousDamageTags: [],
+          noSeriousDamageTags: [],
+          note: null,
+          audioNotes: [],
+          file: f,
+          _status: "ok",
+          _category: src.category,
+          _displayName: f.filename || src.category,
+        };
+        fileEls.push(pseudo);
+        items.push({ file: f, idx: cursor });
+        cursor++;
+      }
+      if (items.length) sectionFilesOut.push({ category: src.category, items });
+    }
+
+    return { bodyElements: body, fileElements: fileEls, sectionFiles: sectionFilesOut };
   }, [report]);
+
+  const allElements = useMemo<EnrichedElement[]>(
+    () => [...bodyElements, ...fileElements],
+    [bodyElements, fileElements],
+  );
 
   const visible = useMemo(
     () =>
       filter === "all"
-        ? allElements
-        : allElements.filter((e) => e._status === filter),
-    [allElements, filter],
+        ? bodyElements
+        : bodyElements.filter((e) => e._status === filter),
+    [bodyElements, filter],
   );
 
   const counts = useMemo(() => {
-    const c = { all: allElements.length, ok: 0, minor: 0, major: 0 };
-    for (const e of allElements) c[e._status]++;
+    const c = { all: bodyElements.length, ok: 0, minor: 0, major: 0 };
+    for (const e of bodyElements) c[e._status]++;
     return c;
-  }, [allElements]);
+  }, [bodyElements]);
+
 
 
   return (
