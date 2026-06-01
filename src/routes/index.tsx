@@ -629,7 +629,22 @@ function AuctionSheetPage() {
               </span>
             </div>
           </div>
+          {stepFiles.documents && stepFiles.documents.length > 0 && (
+            <div className="mt-4">
+              <FilesGrid items={stepFiles.documents} onOpen={setActiveIdx} />
+            </div>
+          )}
         </div>
+
+        {/* Legal review (files-only step) */}
+        {stepFiles.legal && stepFiles.legal.length > 0 && (
+          <div className="panel p-5 md:p-6">
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-3">
+              Юридическая проверка
+            </h3>
+            <FilesGrid items={stepFiles.legal} onOpen={setActiveIdx} />
+          </div>
+        )}
 
 
         {/* Test drive */}
