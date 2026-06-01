@@ -430,6 +430,7 @@ function AuctionSheetPage() {
                     el={el}
                     active={activeIdx === idx}
                     onClick={() => setActiveIdx(idx)}
+                    cardRef={setCardRef(el.id)}
                   />
                 );
               })}
