@@ -414,10 +414,38 @@ function AuctionSheetPage() {
             <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-xs text-muted-foreground">
               <span>
                 VIN: <span className="mono ink">{report.vin}</span>
+                {report.carStep.unreadableVin && (
+                  <span
+                    className="ml-1.5 inline-block px-1.5 py-0.5 rounded text-[10px] border align-middle"
+                    style={{ borderColor: "var(--grade-bad)", color: "var(--grade-bad)" }}
+                  >
+                    нечитаемый
+                  </span>
+                )}
               </span>
-              <span>Пробег: {fmtMileage(report.carStep.mileage)}</span>
+              <span>
+                Пробег: {fmtMileage(report.carStep.mileage)}
+                {report.carStep.visuallyMileageNotMatchCondition && (
+                  <span
+                    className="ml-1.5 inline-block px-1.5 py-0.5 rounded text-[10px] border align-middle"
+                    style={{ borderColor: "var(--grade-warn)", color: "var(--grade-warn)" }}
+                  >
+                    не соответствует состоянию
+                  </span>
+                )}
+              </span>
               <span>{report.carStep.cityInspection ?? "—"}</span>
               <span>{fmtDate(report.carStep.dateInspection ?? report.reportDate)}</span>
+              {report.carStep.uriListing && (
+                <a
+                  href={report.carStep.uriListing}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="underline hover:text-foreground"
+                >
+                  Объявление ↗
+                </a>
+              )}
             </div>
           </div>
           {report.carStep.gosNumber && (
@@ -431,6 +459,7 @@ function AuctionSheetPage() {
             </div>
           )}
         </header>
+
 
         {/* Body / paint summary */}
         <div className="grid sm:grid-cols-3 gap-2">
