@@ -856,3 +856,25 @@ function FileTile({ file, onClick }: { file: FileRef; onClick: () => void }) {
     </button>
   );
 }
+
+function FilesGrid({
+  items,
+  onOpen,
+}: {
+  items: Array<{ file: FileRef; idx: number }>;
+  onOpen: (idx: number) => void;
+}) {
+  if (!items.length) return null;
+  return (
+    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
+      {items.map(({ file, idx }) => (
+        <FileTile
+          key={`${file.id}-${idx}`}
+          file={file}
+          onClick={() => onOpen(idx)}
+        />
+      ))}
+    </div>
+  );
+}
+
