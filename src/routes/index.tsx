@@ -145,10 +145,12 @@ function ElementCard({
   el,
   active,
   onClick,
+  cardRef,
 }: {
   el: EnrichedElement;
   active: boolean;
   onClick: () => void;
+  cardRef?: (node: HTMLButtonElement | null) => void;
 }) {
   const meta = statusMeta(el._status);
   const damageCount =
@@ -161,6 +163,7 @@ function ElementCard({
 
   return (
     <button
+      ref={cardRef}
       type="button"
       onClick={onClick}
       className="panel text-left p-3 md:p-4 transition-all hover:-translate-y-px hover:shadow-sm"
