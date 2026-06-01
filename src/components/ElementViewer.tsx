@@ -165,7 +165,12 @@ function InfoPanel({
   m: StatusMeta;
   hasDetails: boolean;
 }) {
-  const [expanded, setExpanded] = useState(false);
+  const tags = [
+    ...el.seriousDamageTags.map((t) => ({ ...t, severe: true })),
+    ...el.noSeriousDamageTags.map((t) => ({ ...t, severe: false })),
+  ];
+  const hasAudio = el.audioNotes && el.audioNotes.length > 0;
+  void hasDetails;
 
   return (
     <div className="absolute inset-x-0 bottom-0 z-10">
@@ -184,88 +189,54 @@ function InfoPanel({
               {el._category}
             </span>
           </div>
-          <div className="flex items-end gap-3">
-            <h2 className="text-base md:text-lg font-semibold leading-tight truncate flex-1">
-              {el._displayName}
-            </h2>
-            {hasDetails && (
-              <button
-                type="button"
-                onClick={() => setExpanded((v) => !v)}
-                className="text-xs text-white/60 hover:text-white shrink-0"
-              >
-                {expanded ? "Скрыть" : "Подробнее"}
-              </button>
-            )}
-          </div>
+          <h2 className="text-base md:text-lg font-semibold leading-tight truncate">
+            {el._displayName}
+          </h2>
 
-          {/* Compact inline meta (always visible) */}
+          {/* Compact inline meta */}
           {(el.paintworkThicknessFrom != null ||
-            el.paintworkThicknessTo != null ||
-            el.seriousDamageTags.length + el.noSeriousDamageTags.length > 0) && (
-            <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1.5 text-xs text-white/70">
-              {(el.paintworkThicknessFrom != null ||
-                el.paintworkThicknessTo != null) && (
-                <span>
-                  ЛКП:{" "}
-                  <span className="mono text-white">
-                    {el.paintworkThicknessFrom ?? "—"}–
-                    {el.paintworkThicknessTo ?? "—"} мкм
-                  </span>
-                </span>
-              )}
-              {el.seriousDamageTags.length + el.noSeriousDamageTags.length >
-                0 && (
-                <span>
-                  Повреждений:{" "}
-                  <span className="mono text-white">
-                    {el.seriousDamageTags.length +
-                      el.noSeriousDamageTags.length}
-                  </span>
-                </span>
-              )}
+            el.paintworkThicknessTo != null) && (
+            <div className="mt-1.5 text-xs text-white/70">
+              ЛКП:{" "}
+              <span className="mono text-white">
+                {el.paintworkThicknessFrom ?? "—"}–
+                {el.paintworkThicknessTo ?? "—"} мкм
+              </span>
             </div>
           )}
 
-          {/* Expanded details */}
-          {expanded && hasDetails && (
-            <div className="mt-3 space-y-3 max-h-[40vh] overflow-y-auto text-sm">
-              {(el.seriousDamageTags.length > 0 ||
-                el.noSeriousDamageTags.length > 0) && (
-                <ul className="space-y-1">
-                  {el.seriousDamageTags.map((t) => (
-                    <li
-                      key={t.id}
-                      className="px-2 py-1 rounded text-xs border-l-[3px] bg-white/5"
-                      style={{ borderLeftColor: "var(--grade-bad)" }}
-                    >
-                      {t.name}
-                    </li>
-                  ))}
-                  {el.noSeriousDamageTags.map((t) => (
-                    <li
-                      key={t.id}
-                      className="px-2 py-1 rounded text-xs border-l-[3px] bg-white/5"
-                      style={{ borderLeftColor: "var(--grade-warn)" }}
-                    >
-                      {t.name}
-                    </li>
-                  ))}
-                </ul>
-              )}
-              {el.audioNotes && el.audioNotes.length > 0 && (
-                <div className="space-y-2">
-                  {el.audioNotes.map((a) => (
-                    <audio
-                      key={a.id}
-                      src={a.url}
-                      controls
-                      preload="metadata"
-                      className="w-full h-8"
-                    />
-                  ))}
-                </div>
-              )}
+          {/* Tags — always visible, minimal chips */}
+          {tags.length > 0 && (
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {tags.map((t) => (
+                <span
+                  key={t.id}
+                  className="inline-block px-2 py-0.5 rounded-full text-[11px] border"
+                  style={{
+                    borderColor: t.severe
+                      ? "var(--grade-bad)"
+                      : "var(--grade-warn)",
+                    color: t.severe ? "var(--grade-bad)" : "var(--grade-warn)",
+                    background: "rgba(255,255,255,0.04)",
+                  }}
+                >
+                  {t.name}
+                </span>
+              ))}
+            </div>
+          )}
+
+          {hasAudio && (
+            <div className="mt-2 space-y-1.5">
+              {el.audioNotes!.map((a) => (
+                <audio
+                  key={a.id}
+                  src={a.url}
+                  controls
+                  preload="metadata"
+                  className="w-full h-8"
+                />
+              ))}
             </div>
           )}
         </div>
