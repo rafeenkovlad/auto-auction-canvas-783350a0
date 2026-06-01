@@ -477,31 +477,41 @@ function AuctionSheetPage() {
         </div>
 
         {/* Characteristics */}
-        {report.characteristicsStep && (() => {
+        {(() => {
           const c = report.characteristicsStep;
-          const rows: Array<[string, string | null | undefined]> = [
-            ["Двигатель", c.engineType],
-            ["Объём", c.engineVolume],
-            ["КПП", c.transmission],
-            ["Привод", c.driveType],
-            ["Цвет", c.color],
-            ["Комплектация", c.equipment],
-          ];
+          const rows: Array<[string, string | null | undefined]> = c
+            ? [
+                ["Двигатель", c.engineType],
+                ["Объём", c.engineVolume],
+                ["КПП", c.transmission],
+                ["Привод", c.driveType],
+                ["Цвет", c.color],
+                ["Комплектация", c.equipment],
+              ]
+            : [];
           const filled = rows.filter(([, v]) => v != null && v !== "");
-          if (filled.length === 0) return null;
+          const files = stepFiles.characteristics ?? [];
+          if (filled.length === 0 && files.length === 0) return null;
           return (
             <div className="panel p-5 md:p-6">
               <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-3">
                 Характеристики
               </h3>
-              <dl className="grid sm:grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-2 text-sm">
-                {filled.map(([k, v]) => (
-                  <div key={k} className="flex items-baseline justify-between gap-3 border-b border-dashed border-border pb-1.5">
-                    <dt className="text-muted-foreground text-xs">{k}</dt>
-                    <dd className="ink font-medium text-right">{v}</dd>
-                  </div>
-                ))}
-              </dl>
+              {filled.length > 0 && (
+                <dl className="grid sm:grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-2 text-sm">
+                  {filled.map(([k, v]) => (
+                    <div key={k} className="flex items-baseline justify-between gap-3 border-b border-dashed border-border pb-1.5">
+                      <dt className="text-muted-foreground text-xs">{k}</dt>
+                      <dd className="ink font-medium text-right">{v}</dd>
+                    </div>
+                  ))}
+                </dl>
+              )}
+              {files.length > 0 && (
+                <div className={filled.length > 0 ? "mt-4" : ""}>
+                  <FilesGrid items={files} onOpen={setActiveIdx} />
+                </div>
+              )}
             </div>
           );
         })()}
