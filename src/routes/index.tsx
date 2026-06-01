@@ -745,6 +745,13 @@ function AuctionSheetPage() {
           </div>
         )}
 
+        <footer className="text-center mono text-[11px] text-muted-foreground py-4">
+          Сгенерировано на основе данных carreports.ru · {report.reportNumber}
+        </footer>
+      </div>
+
+
+
       <ElementViewer
         elements={allElements}
         index={activeIdx}
