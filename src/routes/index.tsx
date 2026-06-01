@@ -696,6 +696,11 @@ function AuctionSheetPage() {
                   {td.testDriveNote}
                 </p>
               )}
+              {stepFiles.testDrive && stepFiles.testDrive.length > 0 && (
+                <div className="mt-4">
+                  <FilesGrid items={stepFiles.testDrive} onOpen={setActiveIdx} />
+                </div>
+              )}
             </div>
           );
         })()}
