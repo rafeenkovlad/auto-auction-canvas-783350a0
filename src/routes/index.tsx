@@ -267,9 +267,9 @@ function AuctionSheetPage() {
 
   const [filter, setFilter] = useState<"all" | Status>("all");
   const [activeIdx, setActiveIdx] = useState<number | null>(null);
-  const cardRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
+  const cardRefs = useRef<Map<number, HTMLButtonElement>>(new Map());
 
-  const setCardRef = (id: string) => (node: HTMLButtonElement | null) => {
+  const setCardRef = (id: number) => (node: HTMLButtonElement | null) => {
     if (node) cardRefs.current.set(id, node);
     else cardRefs.current.delete(id);
   };
