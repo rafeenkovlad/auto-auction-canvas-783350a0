@@ -92,6 +92,8 @@ type EnrichedElement = InspectionElement & {
   _status: Status;
   _category: string;
   _displayName: string;
+  _sectionKey: string;
+
 };
 
 function elementStatus(el: InspectionElement): Status {
@@ -135,6 +137,21 @@ function statusMeta(s: Status) {
   };
 }
 
+const SECTION_HUE: Record<string, string> = {
+  bodyElements: "oklch(0.7 0.16 240)",
+  bodyReinforcementElements: "oklch(0.65 0.18 285)",
+  glassElements: "oklch(0.75 0.13 210)",
+  interiorElements: "oklch(0.72 0.14 60)",
+  underHoodElements: "oklch(0.65 0.2 30)",
+  wheelsAndBrakesElements: "oklch(0.55 0.04 250)",
+  lightningElements: "oklch(0.82 0.16 95)",
+  computerDiagnosticsElements: "oklch(0.7 0.16 145)",
+};
+function sectionColor(key: string) {
+  return SECTION_HUE[key] ?? "oklch(0.7 0.02 250)";
+}
+
+
 /* ===== Card ===== */
 function ElementCard({
   el,
@@ -147,7 +164,6 @@ function ElementCard({
   onClick: () => void;
   cardRef?: (node: HTMLButtonElement | null) => void;
 }) {
-  const meta = statusMeta(el._status);
   const damageCount =
     el.seriousDamageTags.length + el.noSeriousDamageTags.length;
   const hasMedia = el.file?.url != null;
@@ -161,18 +177,9 @@ function ElementCard({
     ...el.noSeriousDamageTags.map((t) => ({ id: t.id, name: t.name, severe: false })),
   ];
 
-  const tint =
-    el._status === "major"
-      ? "color-mix(in oklab, var(--grade-bad) 14%, var(--card))"
-      : el._status === "minor"
-        ? "color-mix(in oklab, var(--grade-warn) 18%, var(--card))"
-        : "color-mix(in oklab, var(--grade-good) 10%, var(--card))";
-  const borderTint =
-    el._status === "major"
-      ? "color-mix(in oklab, var(--grade-bad) 40%, var(--border))"
-      : el._status === "minor"
-        ? "color-mix(in oklab, var(--grade-warn) 45%, var(--border))"
-        : "color-mix(in oklab, var(--grade-good) 30%, var(--border))";
+  const hue = sectionColor(el._sectionKey);
+  const tint = `color-mix(in oklab, ${hue} 14%, var(--card))`;
+  const borderTint = `color-mix(in oklab, ${hue} 45%, var(--border))`;
 
   return (
     <button
@@ -187,21 +194,18 @@ function ElementCard({
     >
       <div className="flex items-start justify-between gap-2 mb-2">
         <div className="min-w-0">
-          <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-0.5">
+          <div
+            className="text-[10px] uppercase tracking-wider mb-0.5 font-semibold"
+            style={{ color: hue }}
+          >
             {el._category}
           </div>
           <div className="text-sm font-semibold ink leading-tight">
             {el._displayName}
           </div>
         </div>
-        <span
-          className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[11px] font-bold shrink-0"
-          style={{ background: meta.bg, color: meta.fg }}
-          aria-label={meta.label}
-        >
-          {meta.icon}
-        </span>
       </div>
+
 
       <div className="flex items-center gap-3 text-xs text-muted-foreground">
         {paint && (
@@ -285,16 +289,17 @@ function Photo({ file }: { file: FileRef | null | undefined }) {
 function CheckRow({ label, ok }: { label: string; ok: boolean | null }) {
   const color =
     ok == null ? "var(--grade-skip)" : ok ? "var(--grade-good)" : "var(--grade-bad)";
-  const sym = ok == null ? "—" : ok ? "✓" : "✕";
+  const text = ok == null ? "Не указано" : ok ? "Соответствует" : "Не соответствует";
   return (
     <div className="flex items-center justify-between gap-3 py-2 border-b border-dashed border-border last:border-0">
       <span className="text-sm">{label}</span>
-      <span className="mono text-base font-bold" style={{ color }}>
-        {sym}
+      <span className="text-xs font-semibold uppercase tracking-wider" style={{ color }}>
+        {text}
       </span>
     </div>
   );
 }
+
 
 /* ===== Page ===== */
 const FILTERS: Array<{ key: "all" | Status; label: string }> = [
@@ -344,7 +349,9 @@ function AuctionSheetPage() {
         _category: SECTION_LABELS[key] ?? key,
         _displayName:
           ELEMENT_LABEL[el.elementType] ?? el.elementType.replace(/_/g, " "),
+        _sectionKey: key,
       }));
+
       body.push(...enriched);
       sections.push({ key, label: SECTION_LABELS[key] ?? key, elements: enriched });
     }
@@ -379,6 +386,8 @@ function AuctionSheetPage() {
           _status: "ok",
           _category: src.key,
           _displayName: f.filename || src.key,
+          _sectionKey: src.key,
+
         };
         all.push(pseudo);
         items.push({ file: f, idx });
