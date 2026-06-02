@@ -92,6 +92,8 @@ type EnrichedElement = InspectionElement & {
   _status: Status;
   _category: string;
   _displayName: string;
+  _sectionKey: string;
+
 };
 
 function elementStatus(el: InspectionElement): Status {
