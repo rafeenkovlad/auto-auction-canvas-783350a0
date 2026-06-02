@@ -394,12 +394,11 @@ function AuctionSheetPage() {
     };
   }, [report]);
 
-  const visibleSections = useMemo(() => {
-    if (filter === "all") return inspectionSections;
-    return inspectionSections
-      .map((s) => ({ ...s, elements: s.elements.filter((e) => e._status === filter) }))
-      .filter((s) => s.elements.length > 0);
-  }, [inspectionSections, filter]);
+  const visibleElements = useMemo(() => {
+    if (filter === "all") return bodyElements;
+    return bodyElements.filter((e) => e._status === filter);
+  }, [bodyElements, filter]);
+
 
   const counts = useMemo(() => {
     const c = { all: bodyElements.length, ok: 0, minor: 0, major: 0 };
