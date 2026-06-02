@@ -161,6 +161,19 @@ function ElementCard({
     ...el.noSeriousDamageTags.map((t) => ({ id: t.id, name: t.name, severe: false })),
   ];
 
+  const tint =
+    el._status === "major"
+      ? "color-mix(in oklab, var(--grade-bad) 14%, var(--card))"
+      : el._status === "minor"
+        ? "color-mix(in oklab, var(--grade-warn) 18%, var(--card))"
+        : "color-mix(in oklab, var(--grade-good) 10%, var(--card))";
+  const borderTint =
+    el._status === "major"
+      ? "color-mix(in oklab, var(--grade-bad) 40%, var(--border))"
+      : el._status === "minor"
+        ? "color-mix(in oklab, var(--grade-warn) 45%, var(--border))"
+        : "color-mix(in oklab, var(--grade-good) 30%, var(--border))";
+
   return (
     <button
       ref={cardRef}
@@ -168,8 +181,8 @@ function ElementCard({
       onClick={onClick}
       className="panel text-left p-3 md:p-4 transition-all hover:-translate-y-px hover:shadow-sm w-full mb-3 break-inside-avoid inline-block align-top"
       style={{
-        borderColor: active ? "var(--accent)" : undefined,
-        background: active ? "var(--row-bg)" : undefined,
+        background: tint,
+        borderColor: active ? "var(--accent)" : borderTint,
       }}
     >
       <div className="flex items-start justify-between gap-2 mb-2">
@@ -381,12 +394,11 @@ function AuctionSheetPage() {
     };
   }, [report]);
 
-  const visibleSections = useMemo(() => {
-    if (filter === "all") return inspectionSections;
-    return inspectionSections
-      .map((s) => ({ ...s, elements: s.elements.filter((e) => e._status === filter) }))
-      .filter((s) => s.elements.length > 0);
-  }, [inspectionSections, filter]);
+  const visibleElements = useMemo(() => {
+    if (filter === "all") return bodyElements;
+    return bodyElements.filter((e) => e._status === filter);
+  }, [bodyElements, filter]);
+
 
   const counts = useMemo(() => {
     const c = { all: bodyElements.length, ok: 0, minor: 0, major: 0 };
@@ -549,40 +561,27 @@ function AuctionSheetPage() {
             </div>
           </div>
 
-          {visibleSections.length === 0 ? (
+          {visibleElements.length === 0 ? (
             <div className="text-center text-muted-foreground py-12 text-sm">
               Нет элементов в этой категории
             </div>
           ) : (
-            <div className="space-y-6">
-              {visibleSections.map((sec) => (
-                <div key={sec.key}>
-                  <div className="flex items-baseline justify-between mb-2 pb-1.5 border-b border-border">
-                    <h3 className="text-sm font-semibold uppercase tracking-wider ink">
-                      {sec.label}
-                    </h3>
-                    <span className="mono text-[11px] text-muted-foreground">
-                      {sec.elements.length}
-                    </span>
-                  </div>
-                  <div className="columns-1 sm:columns-2 lg:columns-3 gap-3 [column-fill:_balance]">
-                    {sec.elements.map((el) => {
-                      const idx = allElements.indexOf(el);
-                      return (
-                        <ElementCard
-                          key={el.id}
-                          el={el}
-                          active={activeIdx === idx}
-                          onClick={() => setActiveIdx(idx)}
-                          cardRef={setCardRef(el.id)}
-                        />
-                      );
-                    })}
-                  </div>
-                </div>
-              ))}
+            <div className="columns-1 sm:columns-2 lg:columns-3 gap-3 [column-fill:_balance]">
+              {visibleElements.map((el) => {
+                const idx = allElements.indexOf(el);
+                return (
+                  <ElementCard
+                    key={el.id}
+                    el={el}
+                    active={activeIdx === idx}
+                    onClick={() => setActiveIdx(idx)}
+                    cardRef={setCardRef(el.id)}
+                  />
+                );
+              })}
             </div>
           )}
+
 
           {stepFiles.inspection && stepFiles.inspection.length > 0 && (
             <div className="mt-6 pt-4 border-t border-border">
