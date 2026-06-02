@@ -137,6 +137,21 @@ function statusMeta(s: Status) {
   };
 }
 
+const SECTION_HUE: Record<string, string> = {
+  bodyElements: "oklch(0.7 0.16 240)",
+  bodyReinforcementElements: "oklch(0.65 0.18 285)",
+  glassElements: "oklch(0.75 0.13 210)",
+  interiorElements: "oklch(0.72 0.14 60)",
+  underHoodElements: "oklch(0.65 0.2 30)",
+  wheelsAndBrakesElements: "oklch(0.55 0.04 250)",
+  lightningElements: "oklch(0.82 0.16 95)",
+  computerDiagnosticsElements: "oklch(0.7 0.16 145)",
+};
+function sectionColor(key: string) {
+  return SECTION_HUE[key] ?? "oklch(0.7 0.02 250)";
+}
+
+
 /* ===== Card ===== */
 function ElementCard({
   el,
