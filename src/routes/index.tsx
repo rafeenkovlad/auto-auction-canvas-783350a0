@@ -383,6 +383,8 @@ function AuctionSheetPage() {
           _status: "ok",
           _category: src.key,
           _displayName: f.filename || src.key,
+          _sectionKey: src.key,
+
         };
         all.push(pseudo);
         items.push({ file: f, idx });
