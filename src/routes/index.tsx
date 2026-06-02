@@ -164,7 +164,6 @@ function ElementCard({
   onClick: () => void;
   cardRef?: (node: HTMLButtonElement | null) => void;
 }) {
-  const meta = statusMeta(el._status);
   const damageCount =
     el.seriousDamageTags.length + el.noSeriousDamageTags.length;
   const hasMedia = el.file?.url != null;
@@ -178,18 +177,9 @@ function ElementCard({
     ...el.noSeriousDamageTags.map((t) => ({ id: t.id, name: t.name, severe: false })),
   ];
 
-  const tint =
-    el._status === "major"
-      ? "color-mix(in oklab, var(--grade-bad) 14%, var(--card))"
-      : el._status === "minor"
-        ? "color-mix(in oklab, var(--grade-warn) 18%, var(--card))"
-        : "color-mix(in oklab, var(--grade-good) 10%, var(--card))";
-  const borderTint =
-    el._status === "major"
-      ? "color-mix(in oklab, var(--grade-bad) 40%, var(--border))"
-      : el._status === "minor"
-        ? "color-mix(in oklab, var(--grade-warn) 45%, var(--border))"
-        : "color-mix(in oklab, var(--grade-good) 30%, var(--border))";
+  const hue = sectionColor(el._sectionKey);
+  const tint = `color-mix(in oklab, ${hue} 14%, var(--card))`;
+  const borderTint = `color-mix(in oklab, ${hue} 45%, var(--border))`;
 
   return (
     <button
@@ -204,21 +194,18 @@ function ElementCard({
     >
       <div className="flex items-start justify-between gap-2 mb-2">
         <div className="min-w-0">
-          <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-0.5">
+          <div
+            className="text-[10px] uppercase tracking-wider mb-0.5 font-semibold"
+            style={{ color: hue }}
+          >
             {el._category}
           </div>
           <div className="text-sm font-semibold ink leading-tight">
             {el._displayName}
           </div>
         </div>
-        <span
-          className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[11px] font-bold shrink-0"
-          style={{ background: meta.bg, color: meta.fg }}
-          aria-label={meta.label}
-        >
-          {meta.icon}
-        </span>
       </div>
+
 
       <div className="flex items-center gap-3 text-xs text-muted-foreground">
         {paint && (
