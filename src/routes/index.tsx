@@ -289,16 +289,17 @@ function Photo({ file }: { file: FileRef | null | undefined }) {
 function CheckRow({ label, ok }: { label: string; ok: boolean | null }) {
   const color =
     ok == null ? "var(--grade-skip)" : ok ? "var(--grade-good)" : "var(--grade-bad)";
-  const sym = ok == null ? "—" : ok ? "✓" : "✕";
+  const text = ok == null ? "Не указано" : ok ? "Соответствует" : "Не соответствует";
   return (
     <div className="flex items-center justify-between gap-3 py-2 border-b border-dashed border-border last:border-0">
       <span className="text-sm">{label}</span>
-      <span className="mono text-base font-bold" style={{ color }}>
-        {sym}
+      <span className="text-xs font-semibold uppercase tracking-wider" style={{ color }}>
+        {text}
       </span>
     </div>
   );
 }
+
 
 /* ===== Page ===== */
 const FILTERS: Array<{ key: "all" | Status; label: string }> = [
