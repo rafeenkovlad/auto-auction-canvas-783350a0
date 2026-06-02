@@ -161,6 +161,19 @@ function ElementCard({
     ...el.noSeriousDamageTags.map((t) => ({ id: t.id, name: t.name, severe: false })),
   ];
 
+  const tint =
+    el._status === "major"
+      ? "color-mix(in oklab, var(--grade-bad) 14%, var(--card))"
+      : el._status === "minor"
+        ? "color-mix(in oklab, var(--grade-warn) 18%, var(--card))"
+        : "color-mix(in oklab, var(--grade-good) 10%, var(--card))";
+  const borderTint =
+    el._status === "major"
+      ? "color-mix(in oklab, var(--grade-bad) 40%, var(--border))"
+      : el._status === "minor"
+        ? "color-mix(in oklab, var(--grade-warn) 45%, var(--border))"
+        : "color-mix(in oklab, var(--grade-good) 30%, var(--border))";
+
   return (
     <button
       ref={cardRef}
@@ -168,8 +181,8 @@ function ElementCard({
       onClick={onClick}
       className="panel text-left p-3 md:p-4 transition-all hover:-translate-y-px hover:shadow-sm w-full mb-3 break-inside-avoid inline-block align-top"
       style={{
-        borderColor: active ? "var(--accent)" : undefined,
-        background: active ? "var(--row-bg)" : undefined,
+        background: tint,
+        borderColor: active ? "var(--accent)" : borderTint,
       }}
     >
       <div className="flex items-start justify-between gap-2 mb-2">
