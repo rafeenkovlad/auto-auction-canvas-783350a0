@@ -346,7 +346,9 @@ function AuctionSheetPage() {
         _category: SECTION_LABELS[key] ?? key,
         _displayName:
           ELEMENT_LABEL[el.elementType] ?? el.elementType.replace(/_/g, " "),
+        _sectionKey: key,
       }));
+
       body.push(...enriched);
       sections.push({ key, label: SECTION_LABELS[key] ?? key, elements: enriched });
     }
