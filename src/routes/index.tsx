@@ -561,40 +561,27 @@ function AuctionSheetPage() {
             </div>
           </div>
 
-          {visibleSections.length === 0 ? (
+          {visibleElements.length === 0 ? (
             <div className="text-center text-muted-foreground py-12 text-sm">
               Нет элементов в этой категории
             </div>
           ) : (
-            <div className="space-y-6">
-              {visibleSections.map((sec) => (
-                <div key={sec.key}>
-                  <div className="flex items-baseline justify-between mb-2 pb-1.5 border-b border-border">
-                    <h3 className="text-sm font-semibold uppercase tracking-wider ink">
-                      {sec.label}
-                    </h3>
-                    <span className="mono text-[11px] text-muted-foreground">
-                      {sec.elements.length}
-                    </span>
-                  </div>
-                  <div className="columns-1 sm:columns-2 lg:columns-3 gap-3 [column-fill:_balance]">
-                    {sec.elements.map((el) => {
-                      const idx = allElements.indexOf(el);
-                      return (
-                        <ElementCard
-                          key={el.id}
-                          el={el}
-                          active={activeIdx === idx}
-                          onClick={() => setActiveIdx(idx)}
-                          cardRef={setCardRef(el.id)}
-                        />
-                      );
-                    })}
-                  </div>
-                </div>
-              ))}
+            <div className="columns-1 sm:columns-2 lg:columns-3 gap-3 [column-fill:_balance]">
+              {visibleElements.map((el) => {
+                const idx = allElements.indexOf(el);
+                return (
+                  <ElementCard
+                    key={el.id}
+                    el={el}
+                    active={activeIdx === idx}
+                    onClick={() => setActiveIdx(idx)}
+                    cardRef={setCardRef(el.id)}
+                  />
+                );
+              })}
             </div>
           )}
+
 
           {stepFiles.inspection && stepFiles.inspection.length > 0 && (
             <div className="mt-6 pt-4 border-t border-border">
