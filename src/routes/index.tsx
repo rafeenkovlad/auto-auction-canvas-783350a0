@@ -858,7 +858,7 @@ function Stat({ label, value, unit }: { label: string; value: string; unit?: str
   );
 }
 
-function FileTile({ file, onClick }: { file: FileRef; onClick: () => void }) {
+function FileTile({ file, caption, onClick }: { file: FileRef; caption?: string; onClick: () => void }) {
   const t = (file.type || "").toLowerCase();
   const url = file.url;
   const ext = url.split("?")[0].split(".").pop()?.toLowerCase() ?? "";
