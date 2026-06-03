@@ -382,9 +382,10 @@ function AuctionSheetPage() {
     ];
 
     const all: EnrichedElement[] = [...body];
-    const filesMap: Record<string, Array<{ file: FileRef; idx: number }>> = {};
+    const filesMap: Record<string, Array<{ file: FileRef; idx: number; caption: string }>> = {};
     for (const src of fileSources) {
-      const items: Array<{ file: FileRef; idx: number }> = [];
+      const caption = STEP_LABELS[src.key] ?? src.key;
+      const items: Array<{ file: FileRef; idx: number; caption: string }> = [];
       for (const f of src.files) {
         if (!f || !f.url) continue;
         const idx = all.length;
@@ -398,13 +399,12 @@ function AuctionSheetPage() {
           audioNotes: [],
           file: f,
           _status: "ok",
-          _category: src.key,
-          _displayName: f.filename || src.key,
+          _category: caption,
+          _displayName: caption,
           _sectionKey: src.key,
-
         };
         all.push(pseudo);
-        items.push({ file: f, idx });
+        items.push({ file: f, idx, caption });
       }
       filesMap[src.key] = items;
     }
