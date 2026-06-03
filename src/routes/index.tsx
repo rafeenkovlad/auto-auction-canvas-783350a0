@@ -177,10 +177,6 @@ function ElementCard({
     ...el.noSeriousDamageTags.map((t) => ({ id: t.id, name: t.name, severe: false })),
   ];
 
-  const hue = sectionColor(el._sectionKey);
-  const tint = `color-mix(in oklab, ${hue} 14%, var(--card))`;
-  const borderTint = `color-mix(in oklab, ${hue} 45%, var(--border))`;
-
   return (
     <button
       ref={cardRef}
@@ -188,16 +184,12 @@ function ElementCard({
       onClick={onClick}
       className="panel text-left p-3 md:p-4 transition-all hover:-translate-y-px hover:shadow-sm w-full mb-3 break-inside-avoid inline-block align-top"
       style={{
-        background: tint,
-        borderColor: active ? "var(--accent)" : borderTint,
+        borderColor: active ? "var(--accent)" : "var(--border)",
       }}
     >
       <div className="flex items-start justify-between gap-2 mb-2">
         <div className="min-w-0">
-          <div
-            className="text-[10px] uppercase tracking-wider mb-0.5 font-semibold"
-            style={{ color: hue }}
-          >
+          <div className="text-[10px] uppercase tracking-wider mb-0.5 font-semibold text-muted-foreground">
             {el._category}
           </div>
           <div className="text-sm font-semibold ink leading-tight">
@@ -480,7 +472,7 @@ function AuctionSheetPage() {
 
 
         {/* Body / paint summary */}
-        <div className="grid sm:grid-cols-3 gap-2">
+        <div className="grid sm:grid-cols-2 gap-2">
           <Stat
             label="ЛКП кузова"
             value={`${report.inspectionStep.bodyPaintworkThicknessFrom ?? "—"}–${report.inspectionStep.bodyPaintworkThicknessTo ?? "—"}`}
@@ -490,10 +482,6 @@ function AuctionSheetPage() {
             label="ЛКП силовых"
             value={`${report.inspectionStep.bodyReinforcementPaintworkThicknessFrom ?? "—"}–${report.inspectionStep.bodyReinforcementPaintworkThicknessTo ?? "—"}`}
             unit="мкм"
-          />
-          <Stat
-            label="Владельцев"
-            value={report.carStep.ownersCount?.toString() ?? "—"}
           />
         </div>
 
@@ -540,11 +528,12 @@ function AuctionSheetPage() {
 
         {/* Inspection elements */}
         <section className="panel p-5 md:p-6">
-          <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
+          <div className="mb-4 space-y-3">
             <h2 className="text-lg md:text-xl font-bold ink">
               Осмотр элементов кузова
             </h2>
-            <div className="flex flex-wrap gap-1.5">
+            {/* Desktop: inline filter buttons */}
+            <div className="hidden md:flex flex-wrap gap-1.5">
               {FILTERS.map((f) => {
                 const isActive = filter === f.key;
                 const count = counts[f.key];
@@ -568,6 +557,51 @@ function AuctionSheetPage() {
                 );
               })}
             </div>
+            {/* Mobile: accordion */}
+            <details className="md:hidden group panel p-0 overflow-hidden">
+              <summary className="flex items-center justify-between gap-2 px-3 py-2.5 text-sm cursor-pointer list-none">
+                <span className="flex items-center gap-2">
+                  <span className="text-muted-foreground text-xs uppercase tracking-wider">Фильтр</span>
+                  <span className="ink font-semibold">
+                    {FILTERS.find((f) => f.key === filter)?.label}
+                  </span>
+                  <span className="mono text-xs text-muted-foreground">
+                    {counts[filter]}
+                  </span>
+                </span>
+                <svg
+                  width="14" height="14" viewBox="0 0 14 14"
+                  fill="none" stroke="currentColor" strokeWidth="1.6"
+                  className="transition-transform group-open:rotate-180 text-muted-foreground"
+                >
+                  <path d="M3 5l4 4 4-4" />
+                </svg>
+              </summary>
+              <div className="border-t border-border flex flex-col">
+                {FILTERS.map((f) => {
+                  const isActive = filter === f.key;
+                  const count = counts[f.key];
+                  return (
+                    <button
+                      key={f.key}
+                      type="button"
+                      onClick={(e) => {
+                        setFilter(f.key);
+                        (e.currentTarget.closest("details") as HTMLDetailsElement | null)?.removeAttribute("open");
+                      }}
+                      className="flex items-center justify-between px-3 py-2.5 text-sm border-t border-dashed border-border first:border-t-0"
+                      style={{
+                        background: isActive ? "var(--accent)" : "transparent",
+                        color: isActive ? "var(--accent-foreground)" : "var(--foreground)",
+                      }}
+                    >
+                      <span>{f.label}</span>
+                      <span className="mono text-xs opacity-70">{count}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </details>
           </div>
 
           {visibleElements.length === 0 ? (
@@ -606,7 +640,7 @@ function AuctionSheetPage() {
         {stepFiles.car && stepFiles.car.length > 0 && (
           <div className="panel p-5 md:p-6">
             <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-3">
-              Объявление и фото авто
+              Дополнительные материалы
             </h3>
             <FilesGrid items={stepFiles.car} onOpen={setActiveIdx} />
           </div>
@@ -816,51 +850,56 @@ function FileTile({ file, onClick }: { file: FileRef; onClick: () => void }) {
     <button
       type="button"
       onClick={onClick}
-      className="relative aspect-square overflow-hidden rounded-md border border-border bg-muted/40 hover:border-accent transition-colors"
+      className="group flex flex-col text-left rounded-md border border-border bg-card hover:border-accent transition-colors overflow-hidden"
       title={file.filename}
     >
-      {isImage ? (
-        <img src={url} alt={file.filename} loading="lazy" className="w-full h-full object-cover" />
-      ) : isVideo && !isHls ? (
-        <>
-          <video src={url} muted playsInline preload="metadata" className="w-full h-full object-cover" />
-          <span className="absolute inset-0 flex items-center justify-center bg-black/20">
-            <span className="w-7 h-7 rounded-full bg-black/60 backdrop-blur-sm flex items-center justify-center">
-              <svg width="10" height="10" viewBox="0 0 10 10" fill="white"><path d="M2 1l7 4-7 4z" /></svg>
+      <div className="relative aspect-square bg-muted/40 overflow-hidden">
+        {isImage ? (
+          <img src={url} alt={file.filename} loading="lazy" className="w-full h-full object-cover" />
+        ) : isVideo && !isHls ? (
+          <>
+            <video src={url} muted playsInline preload="metadata" className="w-full h-full object-cover" />
+            <span className="absolute inset-0 flex items-center justify-center bg-black/20">
+              <span className="w-7 h-7 rounded-full bg-black/60 backdrop-blur-sm flex items-center justify-center">
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="white"><path d="M2 1l7 4-7 4z" /></svg>
+              </span>
+            </span>
+          </>
+        ) : (
+          <span className="absolute inset-0 flex flex-col items-center justify-center gap-1 text-muted-foreground">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
+              {isPdf ? (
+                <>
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <path d="M14 2v6h6" />
+                </>
+              ) : isVideo ? (
+                <>
+                  <rect x="3" y="6" width="14" height="12" rx="1.5" />
+                  <path d="M17 10l4-2v8l-4-2z" />
+                </>
+              ) : isAudio ? (
+                <>
+                  <path d="M9 18V5l12-2v13" />
+                  <circle cx="6" cy="18" r="3" />
+                  <circle cx="18" cy="16" r="3" />
+                </>
+              ) : (
+                <>
+                  <rect x="4" y="4" width="16" height="16" rx="2" />
+                  <path d="M4 14l4-4 4 4 4-4 4 4" />
+                </>
+              )}
+            </svg>
+            <span className="mono text-[9px] uppercase tracking-wider">
+              {isPdf ? "PDF" : isVideo ? (isHls ? "HLS" : "Видео") : isAudio ? "Аудио" : ext || "файл"}
             </span>
           </span>
-        </>
-      ) : (
-        <span className="absolute inset-0 flex flex-col items-center justify-center gap-1 text-muted-foreground">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
-            {isPdf ? (
-              <>
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                <path d="M14 2v6h6" />
-              </>
-            ) : isVideo ? (
-              <>
-                <rect x="3" y="6" width="14" height="12" rx="1.5" />
-                <path d="M17 10l4-2v8l-4-2z" />
-              </>
-            ) : isAudio ? (
-              <>
-                <path d="M9 18V5l12-2v13" />
-                <circle cx="6" cy="18" r="3" />
-                <circle cx="18" cy="16" r="3" />
-              </>
-            ) : (
-              <>
-                <rect x="4" y="4" width="16" height="16" rx="2" />
-                <path d="M4 14l4-4 4 4 4-4 4 4" />
-              </>
-            )}
-          </svg>
-          <span className="mono text-[9px] uppercase tracking-wider">
-            {isPdf ? "PDF" : isVideo ? (isHls ? "HLS" : "Видео") : isAudio ? "Аудио" : ext || "файл"}
-          </span>
-        </span>
-      )}
+        )}
+      </div>
+      <div className="px-1.5 py-1 text-[10px] leading-tight text-muted-foreground truncate border-t border-border bg-card">
+        {file.filename}
+      </div>
     </button>
   );
 }
