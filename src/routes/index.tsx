@@ -278,10 +278,22 @@ function Photo({ file }: { file: FileRef | null | undefined }) {
   );
 }
 
-function CheckRow({ label, ok }: { label: string; ok: boolean | null }) {
+function CheckRow({
+  label,
+  ok,
+  okLabel = "Соответствует",
+  failLabel = "Не соответствует",
+  skipLabel = "Не указано",
+}: {
+  label: string;
+  ok: boolean | null;
+  okLabel?: string;
+  failLabel?: string;
+  skipLabel?: string;
+}) {
   const color =
     ok == null ? "var(--grade-skip)" : ok ? "var(--grade-good)" : "var(--grade-bad)";
-  const text = ok == null ? "Не указано" : ok ? "Соответствует" : "Не соответствует";
+  const text = ok == null ? skipLabel : ok ? okLabel : failLabel;
   return (
     <div className="flex items-center justify-between gap-3 py-2 border-b border-dashed border-border last:border-0">
       <span className="text-sm">{label}</span>
