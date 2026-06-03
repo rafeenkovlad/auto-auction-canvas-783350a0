@@ -528,11 +528,12 @@ function AuctionSheetPage() {
 
         {/* Inspection elements */}
         <section className="panel p-5 md:p-6">
-          <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
+          <div className="mb-4 space-y-3">
             <h2 className="text-lg md:text-xl font-bold ink">
               Осмотр элементов кузова
             </h2>
-            <div className="flex flex-wrap gap-1.5">
+            {/* Desktop: inline filter buttons */}
+            <div className="hidden md:flex flex-wrap gap-1.5">
               {FILTERS.map((f) => {
                 const isActive = filter === f.key;
                 const count = counts[f.key];
@@ -556,6 +557,51 @@ function AuctionSheetPage() {
                 );
               })}
             </div>
+            {/* Mobile: accordion */}
+            <details className="md:hidden group panel p-0 overflow-hidden">
+              <summary className="flex items-center justify-between gap-2 px-3 py-2.5 text-sm cursor-pointer list-none">
+                <span className="flex items-center gap-2">
+                  <span className="text-muted-foreground text-xs uppercase tracking-wider">Фильтр</span>
+                  <span className="ink font-semibold">
+                    {FILTERS.find((f) => f.key === filter)?.label}
+                  </span>
+                  <span className="mono text-xs text-muted-foreground">
+                    {counts[filter]}
+                  </span>
+                </span>
+                <svg
+                  width="14" height="14" viewBox="0 0 14 14"
+                  fill="none" stroke="currentColor" strokeWidth="1.6"
+                  className="transition-transform group-open:rotate-180 text-muted-foreground"
+                >
+                  <path d="M3 5l4 4 4-4" />
+                </svg>
+              </summary>
+              <div className="border-t border-border flex flex-col">
+                {FILTERS.map((f) => {
+                  const isActive = filter === f.key;
+                  const count = counts[f.key];
+                  return (
+                    <button
+                      key={f.key}
+                      type="button"
+                      onClick={(e) => {
+                        setFilter(f.key);
+                        (e.currentTarget.closest("details") as HTMLDetailsElement | null)?.removeAttribute("open");
+                      }}
+                      className="flex items-center justify-between px-3 py-2.5 text-sm border-t border-dashed border-border first:border-t-0"
+                      style={{
+                        background: isActive ? "var(--accent)" : "transparent",
+                        color: isActive ? "var(--accent-foreground)" : "var(--foreground)",
+                      }}
+                    >
+                      <span>{f.label}</span>
+                      <span className="mono text-xs opacity-70">{count}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </details>
           </div>
 
           {visibleElements.length === 0 ? (
