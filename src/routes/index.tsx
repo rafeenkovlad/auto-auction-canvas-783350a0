@@ -472,7 +472,7 @@ function AuctionSheetPage() {
 
 
         {/* Body / paint summary */}
-        <div className="grid sm:grid-cols-3 gap-2">
+        <div className="grid sm:grid-cols-2 gap-2">
           <Stat
             label="ЛКП кузова"
             value={`${report.inspectionStep.bodyPaintworkThicknessFrom ?? "—"}–${report.inspectionStep.bodyPaintworkThicknessTo ?? "—"}`}
@@ -482,10 +482,6 @@ function AuctionSheetPage() {
             label="ЛКП силовых"
             value={`${report.inspectionStep.bodyReinforcementPaintworkThicknessFrom ?? "—"}–${report.inspectionStep.bodyReinforcementPaintworkThicknessTo ?? "—"}`}
             unit="мкм"
-          />
-          <Stat
-            label="Владельцев"
-            value={report.carStep.ownersCount?.toString() ?? "—"}
           />
         </div>
 
