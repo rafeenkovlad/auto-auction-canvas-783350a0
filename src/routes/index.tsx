@@ -66,6 +66,16 @@ const SECTION_KEYS = [
   "computerDiagnosticsElements",
 ] as const;
 
+const STEP_LABELS: Record<string, string> = {
+  car: "Авто",
+  characteristics: "Характеристики",
+  documents: "Сверка ПТС/СТС",
+  legal: "Юридическая проверка",
+  inspection: "Осмотр",
+  testDrive: "Тест-драйв",
+  result: "Заключение",
+};
+
 const ELEMENT_LABEL: Record<string, string> = {
   general_condition: "Общее состояние",
   hood: "Капот",
