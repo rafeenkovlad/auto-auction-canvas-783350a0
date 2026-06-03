@@ -741,7 +741,7 @@ function AuctionSheetPage() {
               <div className="space-y-2">
                 {rows.map((r) => (
                   <div key={r.label} className="py-2 border-b border-dashed border-border last:border-0">
-                    <CheckRow label={r.label} ok={r.ok} />
+                    <CheckRow label={r.label} ok={r.ok} okLabel="В порядке" failLabel="Неисправно" skipLabel="—" />
                     {r.tags && r.tags.length > 0 && (
                       <div className="mt-1.5 flex flex-wrap gap-1">
                         {r.tags.map((t) => (
