@@ -920,7 +920,7 @@ function FileTile({ file, caption, onClick }: { file: FileRef; caption?: string;
         )}
       </div>
       <div className="px-1.5 py-1 text-[10px] leading-tight text-muted-foreground truncate border-t border-border bg-card">
-        {file.filename}
+        {caption ?? file.filename}
       </div>
     </button>
   );
@@ -930,16 +930,17 @@ function FilesGrid({
   items,
   onOpen,
 }: {
-  items: Array<{ file: FileRef; idx: number }>;
+  items: Array<{ file: FileRef; idx: number; caption?: string }>;
   onOpen: (idx: number) => void;
 }) {
   if (!items.length) return null;
   return (
     <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
-      {items.map(({ file, idx }) => (
+      {items.map(({ file, idx, caption }) => (
         <FileTile
           key={`${file.id}-${idx}`}
           file={file}
+          caption={caption}
           onClick={() => onOpen(idx)}
         />
       ))}
