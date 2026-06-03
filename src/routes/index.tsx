@@ -850,51 +850,56 @@ function FileTile({ file, onClick }: { file: FileRef; onClick: () => void }) {
     <button
       type="button"
       onClick={onClick}
-      className="relative aspect-square overflow-hidden rounded-md border border-border bg-muted/40 hover:border-accent transition-colors"
+      className="group flex flex-col text-left rounded-md border border-border bg-card hover:border-accent transition-colors overflow-hidden"
       title={file.filename}
     >
-      {isImage ? (
-        <img src={url} alt={file.filename} loading="lazy" className="w-full h-full object-cover" />
-      ) : isVideo && !isHls ? (
-        <>
-          <video src={url} muted playsInline preload="metadata" className="w-full h-full object-cover" />
-          <span className="absolute inset-0 flex items-center justify-center bg-black/20">
-            <span className="w-7 h-7 rounded-full bg-black/60 backdrop-blur-sm flex items-center justify-center">
-              <svg width="10" height="10" viewBox="0 0 10 10" fill="white"><path d="M2 1l7 4-7 4z" /></svg>
+      <div className="relative aspect-square bg-muted/40 overflow-hidden">
+        {isImage ? (
+          <img src={url} alt={file.filename} loading="lazy" className="w-full h-full object-cover" />
+        ) : isVideo && !isHls ? (
+          <>
+            <video src={url} muted playsInline preload="metadata" className="w-full h-full object-cover" />
+            <span className="absolute inset-0 flex items-center justify-center bg-black/20">
+              <span className="w-7 h-7 rounded-full bg-black/60 backdrop-blur-sm flex items-center justify-center">
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="white"><path d="M2 1l7 4-7 4z" /></svg>
+              </span>
+            </span>
+          </>
+        ) : (
+          <span className="absolute inset-0 flex flex-col items-center justify-center gap-1 text-muted-foreground">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
+              {isPdf ? (
+                <>
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <path d="M14 2v6h6" />
+                </>
+              ) : isVideo ? (
+                <>
+                  <rect x="3" y="6" width="14" height="12" rx="1.5" />
+                  <path d="M17 10l4-2v8l-4-2z" />
+                </>
+              ) : isAudio ? (
+                <>
+                  <path d="M9 18V5l12-2v13" />
+                  <circle cx="6" cy="18" r="3" />
+                  <circle cx="18" cy="16" r="3" />
+                </>
+              ) : (
+                <>
+                  <rect x="4" y="4" width="16" height="16" rx="2" />
+                  <path d="M4 14l4-4 4 4 4-4 4 4" />
+                </>
+              )}
+            </svg>
+            <span className="mono text-[9px] uppercase tracking-wider">
+              {isPdf ? "PDF" : isVideo ? (isHls ? "HLS" : "Видео") : isAudio ? "Аудио" : ext || "файл"}
             </span>
           </span>
-        </>
-      ) : (
-        <span className="absolute inset-0 flex flex-col items-center justify-center gap-1 text-muted-foreground">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
-            {isPdf ? (
-              <>
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                <path d="M14 2v6h6" />
-              </>
-            ) : isVideo ? (
-              <>
-                <rect x="3" y="6" width="14" height="12" rx="1.5" />
-                <path d="M17 10l4-2v8l-4-2z" />
-              </>
-            ) : isAudio ? (
-              <>
-                <path d="M9 18V5l12-2v13" />
-                <circle cx="6" cy="18" r="3" />
-                <circle cx="18" cy="16" r="3" />
-              </>
-            ) : (
-              <>
-                <rect x="4" y="4" width="16" height="16" rx="2" />
-                <path d="M4 14l4-4 4 4 4-4 4 4" />
-              </>
-            )}
-          </svg>
-          <span className="mono text-[9px] uppercase tracking-wider">
-            {isPdf ? "PDF" : isVideo ? (isHls ? "HLS" : "Видео") : isAudio ? "Аудио" : ext || "файл"}
-          </span>
-        </span>
-      )}
+        )}
+      </div>
+      <div className="px-1.5 py-1 text-[10px] leading-tight text-muted-foreground truncate border-t border-border bg-card">
+        {file.filename}
+      </div>
     </button>
   );
 }
