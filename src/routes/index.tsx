@@ -66,6 +66,16 @@ const SECTION_KEYS = [
   "computerDiagnosticsElements",
 ] as const;
 
+const STEP_LABELS: Record<string, string> = {
+  car: "Авто",
+  characteristics: "Характеристики",
+  documents: "Сверка ПТС/СТС",
+  legal: "Юридическая проверка",
+  inspection: "Осмотр",
+  testDrive: "Тест-драйв",
+  result: "Заключение",
+};
+
 const ELEMENT_LABEL: Record<string, string> = {
   general_condition: "Общее состояние",
   hood: "Капот",
@@ -278,10 +288,22 @@ function Photo({ file }: { file: FileRef | null | undefined }) {
   );
 }
 
-function CheckRow({ label, ok }: { label: string; ok: boolean | null }) {
+function CheckRow({
+  label,
+  ok,
+  okLabel = "Соответствует",
+  failLabel = "Не соответствует",
+  skipLabel = "Не указано",
+}: {
+  label: string;
+  ok: boolean | null;
+  okLabel?: string;
+  failLabel?: string;
+  skipLabel?: string;
+}) {
   const color =
     ok == null ? "var(--grade-skip)" : ok ? "var(--grade-good)" : "var(--grade-bad)";
-  const text = ok == null ? "Не указано" : ok ? "Соответствует" : "Не соответствует";
+  const text = ok == null ? skipLabel : ok ? okLabel : failLabel;
   return (
     <div className="flex items-center justify-between gap-3 py-2 border-b border-dashed border-border last:border-0">
       <span className="text-sm">{label}</span>
@@ -360,9 +382,10 @@ function AuctionSheetPage() {
     ];
 
     const all: EnrichedElement[] = [...body];
-    const filesMap: Record<string, Array<{ file: FileRef; idx: number }>> = {};
+    const filesMap: Record<string, Array<{ file: FileRef; idx: number; caption: string }>> = {};
     for (const src of fileSources) {
-      const items: Array<{ file: FileRef; idx: number }> = [];
+      const caption = STEP_LABELS[src.key] ?? src.key;
+      const items: Array<{ file: FileRef; idx: number; caption: string }> = [];
       for (const f of src.files) {
         if (!f || !f.url) continue;
         const idx = all.length;
@@ -376,13 +399,12 @@ function AuctionSheetPage() {
           audioNotes: [],
           file: f,
           _status: "ok",
-          _category: src.key,
-          _displayName: f.filename || src.key,
+          _category: caption,
+          _displayName: caption,
           _sectionKey: src.key,
-
         };
         all.push(pseudo);
-        items.push({ file: f, idx });
+        items.push({ file: f, idx, caption });
       }
       filesMap[src.key] = items;
     }
@@ -690,24 +712,36 @@ function AuctionSheetPage() {
 
 
         {/* Test drive */}
-        {report.testDriveStep.testDriveIsIncluded && (() => {
+        {(() => {
           const td = report.testDriveStep;
+          const done = !!td.testDriveIsIncluded;
           const rows: Array<{ label: string; ok: boolean | null; tags: typeof td.testDriveEngineTags }> = [
-            { label: "Двигатель", ok: td.testDriveEngineIsWorkingProperly, tags: td.testDriveEngineTags },
-            { label: "Коробка передач", ok: td.testDriveTransmissionIsWorkingProperly, tags: td.testDriveTransmissionTags },
-            { label: "Рулевое управление", ok: td.testDriveSteeringWheelIsWorkingProperly, tags: td.testDriveSteeringWheelTags },
-            { label: "Подвеска в движении", ok: td.testDriveSuspensionInDriveIsWorkingProperly, tags: td.testDriveSuspensionInDriveTags },
-            { label: "Тормоза в движении", ok: td.testDriveBrakesInDriveIsWorkingProperly, tags: td.testDriveBrakesInDriveTags },
+            { label: "Двигатель", ok: done ? td.testDriveEngineIsWorkingProperly : null, tags: done ? td.testDriveEngineTags : [] },
+            { label: "Коробка передач", ok: done ? td.testDriveTransmissionIsWorkingProperly : null, tags: done ? td.testDriveTransmissionTags : [] },
+            { label: "Рулевое управление", ok: done ? td.testDriveSteeringWheelIsWorkingProperly : null, tags: done ? td.testDriveSteeringWheelTags : [] },
+            { label: "Подвеска в движении", ok: done ? td.testDriveSuspensionInDriveIsWorkingProperly : null, tags: done ? td.testDriveSuspensionInDriveTags : [] },
+            { label: "Тормоза в движении", ok: done ? td.testDriveBrakesInDriveIsWorkingProperly : null, tags: done ? td.testDriveBrakesInDriveTags : [] },
           ];
           return (
             <div className="panel p-5 md:p-6">
-              <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-3">
-                Тест-драйв
-              </h3>
+              <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
+                <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+                  Тест-драйв
+                </h3>
+                <span
+                  className="inline-block px-2 py-0.5 rounded text-[11px] font-semibold uppercase tracking-wider border"
+                  style={{
+                    borderColor: done ? "var(--grade-good)" : "var(--grade-skip)",
+                    color: done ? "var(--grade-good)" : "var(--grade-skip)",
+                  }}
+                >
+                  {done ? "Проведён" : "Не проводился"}
+                </span>
+              </div>
               <div className="space-y-2">
                 {rows.map((r) => (
                   <div key={r.label} className="py-2 border-b border-dashed border-border last:border-0">
-                    <CheckRow label={r.label} ok={r.ok} />
+                    <CheckRow label={r.label} ok={r.ok} okLabel="В порядке" failLabel="Неисправно" skipLabel="—" />
                     {r.tags && r.tags.length > 0 && (
                       <div className="mt-1.5 flex flex-wrap gap-1">
                         {r.tags.map((t) => (
@@ -836,7 +870,7 @@ function Stat({ label, value, unit }: { label: string; value: string; unit?: str
   );
 }
 
-function FileTile({ file, onClick }: { file: FileRef; onClick: () => void }) {
+function FileTile({ file, caption, onClick }: { file: FileRef; caption?: string; onClick: () => void }) {
   const t = (file.type || "").toLowerCase();
   const url = file.url;
   const ext = url.split("?")[0].split(".").pop()?.toLowerCase() ?? "";
@@ -851,7 +885,7 @@ function FileTile({ file, onClick }: { file: FileRef; onClick: () => void }) {
       type="button"
       onClick={onClick}
       className="group flex flex-col text-left rounded-md border border-border bg-card hover:border-accent transition-colors overflow-hidden"
-      title={file.filename}
+      title={caption ?? file.filename}
     >
       <div className="relative aspect-square bg-muted/40 overflow-hidden">
         {isImage ? (
@@ -898,7 +932,7 @@ function FileTile({ file, onClick }: { file: FileRef; onClick: () => void }) {
         )}
       </div>
       <div className="px-1.5 py-1 text-[10px] leading-tight text-muted-foreground truncate border-t border-border bg-card">
-        {file.filename}
+        {caption ?? file.filename}
       </div>
     </button>
   );
@@ -908,16 +942,17 @@ function FilesGrid({
   items,
   onOpen,
 }: {
-  items: Array<{ file: FileRef; idx: number }>;
+  items: Array<{ file: FileRef; idx: number; caption?: string }>;
   onOpen: (idx: number) => void;
 }) {
   if (!items.length) return null;
   return (
     <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
-      {items.map(({ file, idx }) => (
+      {items.map(({ file, idx, caption }) => (
         <FileTile
           key={`${file.id}-${idx}`}
           file={file}
+          caption={caption}
           onClick={() => onOpen(idx)}
         />
       ))}
