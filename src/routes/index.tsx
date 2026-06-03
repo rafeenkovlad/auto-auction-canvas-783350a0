@@ -177,10 +177,6 @@ function ElementCard({
     ...el.noSeriousDamageTags.map((t) => ({ id: t.id, name: t.name, severe: false })),
   ];
 
-  const hue = sectionColor(el._sectionKey);
-  const tint = `color-mix(in oklab, ${hue} 14%, var(--card))`;
-  const borderTint = `color-mix(in oklab, ${hue} 45%, var(--border))`;
-
   return (
     <button
       ref={cardRef}
@@ -188,16 +184,12 @@ function ElementCard({
       onClick={onClick}
       className="panel text-left p-3 md:p-4 transition-all hover:-translate-y-px hover:shadow-sm w-full mb-3 break-inside-avoid inline-block align-top"
       style={{
-        background: tint,
-        borderColor: active ? "var(--accent)" : borderTint,
+        borderColor: active ? "var(--accent)" : "var(--border)",
       }}
     >
       <div className="flex items-start justify-between gap-2 mb-2">
         <div className="min-w-0">
-          <div
-            className="text-[10px] uppercase tracking-wider mb-0.5 font-semibold"
-            style={{ color: hue }}
-          >
+          <div className="text-[10px] uppercase tracking-wider mb-0.5 font-semibold text-muted-foreground">
             {el._category}
           </div>
           <div className="text-sm font-semibold ink leading-tight">
