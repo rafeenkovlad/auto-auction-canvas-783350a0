@@ -712,20 +712,32 @@ function AuctionSheetPage() {
 
 
         {/* Test drive */}
-        {report.testDriveStep.testDriveIsIncluded && (() => {
+        {(() => {
           const td = report.testDriveStep;
+          const done = !!td.testDriveIsIncluded;
           const rows: Array<{ label: string; ok: boolean | null; tags: typeof td.testDriveEngineTags }> = [
-            { label: "Двигатель", ok: td.testDriveEngineIsWorkingProperly, tags: td.testDriveEngineTags },
-            { label: "Коробка передач", ok: td.testDriveTransmissionIsWorkingProperly, tags: td.testDriveTransmissionTags },
-            { label: "Рулевое управление", ok: td.testDriveSteeringWheelIsWorkingProperly, tags: td.testDriveSteeringWheelTags },
-            { label: "Подвеска в движении", ok: td.testDriveSuspensionInDriveIsWorkingProperly, tags: td.testDriveSuspensionInDriveTags },
-            { label: "Тормоза в движении", ok: td.testDriveBrakesInDriveIsWorkingProperly, tags: td.testDriveBrakesInDriveTags },
+            { label: "Двигатель", ok: done ? td.testDriveEngineIsWorkingProperly : null, tags: done ? td.testDriveEngineTags : [] },
+            { label: "Коробка передач", ok: done ? td.testDriveTransmissionIsWorkingProperly : null, tags: done ? td.testDriveTransmissionTags : [] },
+            { label: "Рулевое управление", ok: done ? td.testDriveSteeringWheelIsWorkingProperly : null, tags: done ? td.testDriveSteeringWheelTags : [] },
+            { label: "Подвеска в движении", ok: done ? td.testDriveSuspensionInDriveIsWorkingProperly : null, tags: done ? td.testDriveSuspensionInDriveTags : [] },
+            { label: "Тормоза в движении", ok: done ? td.testDriveBrakesInDriveIsWorkingProperly : null, tags: done ? td.testDriveBrakesInDriveTags : [] },
           ];
           return (
             <div className="panel p-5 md:p-6">
-              <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-3">
-                Тест-драйв
-              </h3>
+              <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
+                <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+                  Тест-драйв
+                </h3>
+                <span
+                  className="inline-block px-2 py-0.5 rounded text-[11px] font-semibold uppercase tracking-wider border"
+                  style={{
+                    borderColor: done ? "var(--grade-good)" : "var(--grade-skip)",
+                    color: done ? "var(--grade-good)" : "var(--grade-skip)",
+                  }}
+                >
+                  {done ? "Проведён" : "Не проводился"}
+                </span>
+              </div>
               <div className="space-y-2">
                 {rows.map((r) => (
                   <div key={r.label} className="py-2 border-b border-dashed border-border last:border-0">
