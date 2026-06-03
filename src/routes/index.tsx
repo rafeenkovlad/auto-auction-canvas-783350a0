@@ -873,7 +873,7 @@ function FileTile({ file, caption, onClick }: { file: FileRef; caption?: string;
       type="button"
       onClick={onClick}
       className="group flex flex-col text-left rounded-md border border-border bg-card hover:border-accent transition-colors overflow-hidden"
-      title={file.filename}
+      title={caption ?? file.filename}
     >
       <div className="relative aspect-square bg-muted/40 overflow-hidden">
         {isImage ? (
