@@ -640,7 +640,7 @@ function AuctionSheetPage() {
         {stepFiles.car && stepFiles.car.length > 0 && (
           <div className="panel p-5 md:p-6">
             <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-3">
-              Объявление и фото авто
+              Дополнительные материалы
             </h3>
             <FilesGrid items={stepFiles.car} onOpen={setActiveIdx} />
           </div>
