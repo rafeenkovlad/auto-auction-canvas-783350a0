@@ -163,6 +163,16 @@ function sectionColor(key: string) {
 
 
 /* ===== Card ===== */
+function isImageFile(file: FileRef | null | undefined) {
+  if (!file?.url) return false;
+  const t = (file.type || "").toLowerCase();
+  const ext = file.url.split("?")[0].split(".").pop()?.toLowerCase() ?? "";
+  return (
+    t.includes("image") ||
+    ["jpg", "jpeg", "png", "webp", "gif", "avif"].includes(ext)
+  );
+}
+
 function ElementCard({
   el,
   active,
@@ -177,6 +187,7 @@ function ElementCard({
   const damageCount =
     el.seriousDamageTags.length + el.noSeriousDamageTags.length;
   const hasMedia = el.file?.url != null;
+  const thumb = isImageFile(el.file) ? el.file!.url : null;
   const paint =
     el.paintworkThicknessFrom != null && el.paintworkThicknessTo != null
       ? `${el.paintworkThicknessFrom}–${el.paintworkThicknessTo}`
@@ -197,80 +208,94 @@ function ElementCard({
         borderColor: active ? "var(--accent)" : "var(--border)",
       }}
     >
-      <div className="flex items-start justify-between gap-2 mb-2">
-        <div className="min-w-0">
-          <div className="text-[10px] uppercase tracking-wider mb-0.5 font-semibold text-muted-foreground">
-            {el._category}
+      <div className="flex gap-3">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-start justify-between gap-2 mb-2">
+            <div className="min-w-0">
+              <div className="text-[10px] uppercase tracking-wider mb-0.5 font-semibold text-muted-foreground">
+                {el._category}
+              </div>
+              <div className="text-sm font-semibold ink leading-tight">
+                {el._displayName}
+              </div>
+            </div>
           </div>
-          <div className="text-sm font-semibold ink leading-tight">
-            {el._displayName}
+
+          <div className="flex items-center gap-3 text-xs text-muted-foreground">
+            {paint && (
+              <span className="mono text-[12px]">{paint} мкм</span>
+            )}
+            {hasMedia && (
+              <span className="inline-flex items-center gap-1" title="Есть медиа">
+                <svg
+                  width="12"
+                  height="12"
+                  viewBox="0 0 14 14"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                >
+                  <rect x="2" y="3" width="10" height="8" rx="1" />
+                  <circle cx="5" cy="6" r="1" />
+                  <path d="M10 9L8 7L5 10" />
+                </svg>
+              </span>
+            )}
+            {damageCount > 0 && (
+              <span className="inline-flex items-center gap-1">
+                <svg
+                  width="12"
+                  height="12"
+                  viewBox="0 0 14 14"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                >
+                  <circle cx="7" cy="7" r="5" />
+                  <path d="M7 4v3M7 9.5v.5" />
+                </svg>
+                {damageCount}
+              </span>
+            )}
           </div>
+
+          {tags.length > 0 && (
+            <div className="mt-2 flex flex-wrap gap-1">
+              {tags.map((t) => (
+                <span
+                  key={t.id}
+                  className="inline-block px-1.5 py-0.5 rounded text-[11px] leading-tight border"
+                  style={{
+                    borderColor: t.severe
+                      ? "var(--grade-bad)"
+                      : "var(--grade-warn)",
+                    color: t.severe ? "var(--grade-bad)" : "var(--grade-warn)",
+                    background: "transparent",
+                  }}
+                >
+                  {t.name}
+                </span>
+              ))}
+            </div>
+          )}
+          {el.note && (
+            <p className="mt-2 pt-2 border-t border-dashed border-border text-xs leading-snug text-muted-foreground whitespace-pre-line">
+              {el.note}
+            </p>
+          )}
         </div>
-      </div>
 
-
-      <div className="flex items-center gap-3 text-xs text-muted-foreground">
-        {paint && (
-          <span className="mono text-[12px]">{paint} мкм</span>
-        )}
-        {hasMedia && (
-          <span className="inline-flex items-center gap-1" title="Есть медиа">
-            <svg
-              width="12"
-              height="12"
-              viewBox="0 0 14 14"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.6"
-            >
-              <rect x="2" y="3" width="10" height="8" rx="1" />
-              <circle cx="5" cy="6" r="1" />
-              <path d="M10 9L8 7L5 10" />
-            </svg>
-          </span>
-        )}
-        {damageCount > 0 && (
-          <span className="inline-flex items-center gap-1">
-            <svg
-              width="12"
-              height="12"
-              viewBox="0 0 14 14"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.6"
-            >
-              <circle cx="7" cy="7" r="5" />
-              <path d="M7 4v3M7 9.5v.5" />
-            </svg>
-            {damageCount}
-          </span>
+        {thumb && (
+          <div className="flex-shrink-0 self-start w-14 h-14 md:w-16 md:h-16 rounded-md overflow-hidden border border-border">
+            <img
+              src={thumb}
+              alt=""
+              loading="lazy"
+              className="w-full h-full object-cover"
+            />
+          </div>
         )}
       </div>
-
-      {tags.length > 0 && (
-        <div className="mt-2 flex flex-wrap gap-1">
-          {tags.map((t) => (
-            <span
-              key={t.id}
-              className="inline-block px-1.5 py-0.5 rounded text-[11px] leading-tight border"
-              style={{
-                borderColor: t.severe
-                  ? "var(--grade-bad)"
-                  : "var(--grade-warn)",
-                color: t.severe ? "var(--grade-bad)" : "var(--grade-warn)",
-                background: "transparent",
-              }}
-            >
-              {t.name}
-            </span>
-          ))}
-        </div>
-      )}
-      {el.note && (
-        <p className="mt-2 pt-2 border-t border-dashed border-border text-xs leading-snug text-muted-foreground whitespace-pre-line">
-          {el.note}
-        </p>
-      )}
     </button>
   );
 }
