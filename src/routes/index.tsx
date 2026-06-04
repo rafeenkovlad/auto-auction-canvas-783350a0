@@ -895,6 +895,47 @@ function Stat({ label, value, unit }: { label: string; value: string; unit?: str
   );
 }
 
+function VideoThumb({ url, isHls }: { url: string; isHls: boolean }) {
+  const ref = useRef<HTMLVideoElement>(null);
+  useEffect(() => {
+    const video = ref.current;
+    if (!video) return;
+    let hls: any;
+    if (isHls) {
+      if (video.canPlayType("application/vnd.apple.mpegurl")) {
+        video.src = url;
+      } else {
+        let cancelled = false;
+        import("hls.js").then(({ default: Hls }) => {
+          if (cancelled) return;
+          if (Hls.isSupported()) {
+            hls = new Hls({ maxBufferLength: 1 });
+            hls.loadSource(url);
+            hls.attachMedia(video);
+          } else {
+            video.src = url;
+          }
+        });
+        return () => {
+          cancelled = true;
+          if (hls) hls.destroy();
+        };
+      }
+    } else {
+      video.src = url.includes("#") ? url : `${url}#t=0.1`;
+    }
+  }, [url, isHls]);
+  return (
+    <video
+      ref={ref}
+      muted
+      playsInline
+      preload="metadata"
+      className="w-full h-full object-cover"
+    />
+  );
+}
+
 function FileTile({ file, caption, onClick }: { file: FileRef; caption?: string; onClick: () => void }) {
   const t = (file.type || "").toLowerCase();
   const url = file.url;
