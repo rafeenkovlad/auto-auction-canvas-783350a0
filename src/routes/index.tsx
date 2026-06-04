@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import {
@@ -895,6 +895,47 @@ function Stat({ label, value, unit }: { label: string; value: string; unit?: str
   );
 }
 
+function VideoThumb({ url, isHls }: { url: string; isHls: boolean }) {
+  const ref = useRef<HTMLVideoElement>(null);
+  useEffect(() => {
+    const video = ref.current;
+    if (!video) return;
+    let hls: any;
+    if (isHls) {
+      if (video.canPlayType("application/vnd.apple.mpegurl")) {
+        video.src = url;
+      } else {
+        let cancelled = false;
+        import("hls.js").then(({ default: Hls }) => {
+          if (cancelled) return;
+          if (Hls.isSupported()) {
+            hls = new Hls({ maxBufferLength: 1 });
+            hls.loadSource(url);
+            hls.attachMedia(video);
+          } else {
+            video.src = url;
+          }
+        });
+        return () => {
+          cancelled = true;
+          if (hls) hls.destroy();
+        };
+      }
+    } else {
+      video.src = url.includes("#") ? url : `${url}#t=0.1`;
+    }
+  }, [url, isHls]);
+  return (
+    <video
+      ref={ref}
+      muted
+      playsInline
+      preload="metadata"
+      className="w-full h-full object-cover"
+    />
+  );
+}
+
 function FileTile({ file, caption, onClick }: { file: FileRef; caption?: string; onClick: () => void }) {
   const t = (file.type || "").toLowerCase();
   const url = file.url;
@@ -917,8 +958,8 @@ function FileTile({ file, caption, onClick }: { file: FileRef; caption?: string;
           <img src={url} alt={file.filename} loading="lazy" className="w-full h-full object-cover" />
         ) : isVideo ? (
           <>
-            <video src={url} muted playsInline preload="metadata" className="w-full h-full object-cover" />
-            <span className="absolute inset-0 flex items-center justify-center bg-black/20">
+            <VideoThumb url={url} isHls={isHls} />
+            <span className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/20">
               <span className="w-7 h-7 rounded-full bg-black/60 backdrop-blur-sm flex items-center justify-center">
                 <svg width="10" height="10" viewBox="0 0 10 10" fill="white"><path d="M2 1l7 4-7 4z" /></svg>
               </span>
