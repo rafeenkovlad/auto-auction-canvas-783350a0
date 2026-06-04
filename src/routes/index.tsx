@@ -915,7 +915,7 @@ function FileTile({ file, caption, onClick }: { file: FileRef; caption?: string;
       <div className="relative aspect-square bg-muted/40 overflow-hidden">
         {isImage ? (
           <img src={url} alt={file.filename} loading="lazy" className="w-full h-full object-cover" />
-        ) : isVideo && !isHls ? (
+        ) : isVideo ? (
           <>
             <video src={url} muted playsInline preload="metadata" className="w-full h-full object-cover" />
             <span className="absolute inset-0 flex items-center justify-center bg-black/20">
