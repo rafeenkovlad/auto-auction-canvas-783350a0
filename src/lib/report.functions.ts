@@ -1,14 +1,16 @@
 import { createServerFn } from "@tanstack/react-start";
-
-const DEFAULT_TOKEN =
-  "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpYXQiOjE3ODAyNTUwNzQuMDUxMjEyLCJleHAiOjE3ODI4NDcwNzQuMDUxMjEyLCJzdWIiOiJSRVAtQTg3MjQxNiIsInR5cGUiOiJzaGFyZSJ9.iYI08Ek3D4xdyUMqzxWW3o_UyWF0prtG_XNTHYRHDpUgvnPCYm-z7tHqXcg1BEVfpWCYFVU2F2q0n9mjU8Hb3vQ1ltPHnsTVRjK0MRMTlgVb7P_HwKrywXgEushD40QjoRXLJPMojckbjOCUOynZhYBETC4pVvxi4sCXpe7yy8Wkah64j30DvAiHvN4pbWzgJC7x0ifydk6-_wTbVt9eqECzdV_t_hjuD0-_BUd5L1H6BkidO5hvfdAVvH-jCmN59pqo8Sai0nW49CQtmg9g91H9HiyImgtN_MqMvvfSH0pyIe7D1fgE_V13u9KZBkqaTV6zdLIKlsyObaj9CgEsGw";
+import { getServerConfig } from "./config.server";
 
 export const getReport = createServerFn({ method: "GET" })
-  .inputValidator((data: { token?: string } | undefined) => data ?? {})
+  .inputValidator((data: { token?: string } | undefined) => {
+    const token = data?.token?.trim();
+    if (!token) throw new Error("Не указан токен отчёта");
+    return { token };
+  })
   .handler(async ({ data }) => {
-    const token = data.token || DEFAULT_TOKEN;
+    const { sharedApiBaseUrl } = getServerConfig();
     const res = await fetch(
-      `https://carreports.ru/api/v1/shared/report?token=${encodeURIComponent(token)}`,
+      `${sharedApiBaseUrl}/api/v1/shared/report?token=${encodeURIComponent(data.token)}`,
     );
     if (!res.ok) throw new Error(`Report fetch failed: ${res.status}`);
     const json = (await res.json()) as { result: CarReport; errors?: unknown[] };

@@ -19,8 +19,8 @@ import process from "node:process";
 export function getServerConfig() {
   return {
     nodeEnv: process.env.NODE_ENV,
-    // Add server-only values here, e.g.:
-    //   databaseUrl: process.env.DATABASE_URL,
-    //   stripeSecretKey: process.env.STRIPE_SECRET_KEY,
+    // Base URL of the shared report API. Override per environment with
+    // SHARED_API_URL (e.g. https://vindiezel.ru). No trailing slash.
+    sharedApiBaseUrl: (process.env.SHARED_API_URL ?? "https://carreports.ru").replace(/\/+$/, ""),
   };
 }
