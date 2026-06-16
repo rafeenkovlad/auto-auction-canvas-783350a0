@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { getServerConfig } from "./config.server";
 
 export const getReport = createServerFn({ method: "GET" })
-  .inputValidator((data: { token?: string } | undefined) => {
+  .validator((data: { token?: string } | undefined) => {
     const token = data?.token?.trim();
     if (!token) throw new Error("Не указан токен отчёта");
     return { token };
