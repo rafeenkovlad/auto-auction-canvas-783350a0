@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { Car, Armchair, Frame, CircleDot, Square, Lightbulb } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import type { InspectionElement } from "@/lib/report.functions";
 import { CarBodySchema } from "@/components/CarBodySchema";
 import { FrameSchema } from "@/components/FrameSchema";
@@ -8,14 +10,15 @@ import { LightingSchema } from "@/components/LightingSchema";
 
 type TabKey = "body" | "interior" | "frame" | "wheels" | "glass" | "lighting";
 
-const TABS: { key: TabKey; label: string }[] = [
-  { key: "body", label: "Кузов" },
-  { key: "interior", label: "Салон" },
-  { key: "frame", label: "Силовые" },
-  { key: "wheels", label: "Колёса" },
-  { key: "glass", label: "Стёкла" },
-  { key: "lighting", label: "Освещение" },
+const TABS: { key: TabKey; label: string; icon: LucideIcon }[] = [
+  { key: "body", label: "Кузов", icon: Car },
+  { key: "interior", label: "Салон", icon: Armchair },
+  { key: "frame", label: "Силовые", icon: Frame },
+  { key: "wheels", label: "Колёса", icon: CircleDot },
+  { key: "glass", label: "Стёкла", icon: Square },
+  { key: "lighting", label: "Освещение", icon: Lightbulb },
 ];
+
 
 function statusOf(el: InspectionElement) {
   if (el.seriousDamageTags.length > 0) return "serious" as const;
@@ -110,45 +113,72 @@ export function SchemaTabs({
 
   return (
     <div className="panel p-5 md:p-6 flex flex-col gap-4">
-      <div className="flex items-center justify-between gap-3 flex-wrap">
+      <div className="flex items-center justify-between gap-3">
         <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
           Схема осмотра
         </h3>
-        <div className="flex flex-wrap gap-x-3 gap-y-1">
-          {TABS.map((t) => {
-            const active = tab === t.key;
-            const ws = worstStatus(elementsByTab[t.key]);
-            const dotColor =
-              ws === "serious"
-                ? "var(--grade-bad)"
-                : ws === "minor"
-                  ? "var(--grade-warn)"
-                  : ws === "ok"
-                    ? "var(--grade-good)"
-                    : "var(--border)";
-            return (
-              <button
-                key={t.key}
-                type="button"
-                onClick={() => setTab(t.key)}
-                className="inline-flex items-center gap-1.5 px-1.5 py-1 text-xs font-medium bg-transparent border-0 transition-colors"
-                style={{
-                  color: active ? "var(--foreground)" : "var(--muted-foreground)",
-                  borderBottom: `2px solid ${active ? "var(--foreground)" : "transparent"}`,
-                  borderRadius: 0,
-                }}
-              >
-                <span
-                  className="w-1.5 h-1.5 rounded-full"
-                  style={{ background: dotColor }}
-                  aria-hidden
-                />
-                {t.label}
-              </button>
-            );
-          })}
+        <div className="hidden sm:flex items-center gap-3 text-[10px] uppercase tracking-wider text-muted-foreground">
+          <span className="inline-flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full" style={{ background: "var(--grade-good)" }} />
+            норма
+          </span>
+          <span className="inline-flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full" style={{ background: "var(--grade-warn)" }} />
+            внимание
+          </span>
+          <span className="inline-flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full" style={{ background: "var(--grade-bad)" }} />
+            замечания
+          </span>
         </div>
       </div>
+
+      <div
+        className="grid grid-cols-3 sm:grid-cols-6 gap-1 p-1 rounded-xl"
+        style={{ background: "color-mix(in oklab, var(--muted) 60%, transparent)" }}
+        role="tablist"
+      >
+        {TABS.map((t) => {
+          const active = tab === t.key;
+          const ws = worstStatus(elementsByTab[t.key]);
+          const dotColor =
+            ws === "serious"
+              ? "var(--grade-bad)"
+              : ws === "minor"
+                ? "var(--grade-warn)"
+                : ws === "ok"
+                  ? "var(--grade-good)"
+                  : "transparent";
+          const Icon = t.icon;
+          return (
+            <button
+              key={t.key}
+              type="button"
+              role="tab"
+              aria-selected={active}
+              onClick={() => setTab(t.key)}
+              className="relative flex flex-col items-center justify-center gap-1 px-2 py-2.5 rounded-lg text-[11px] font-medium transition-all"
+              style={{
+                background: active ? "var(--card)" : "transparent",
+                color: active ? "var(--foreground)" : "var(--muted-foreground)",
+                boxShadow: active
+                  ? "0 1px 2px rgba(0,0,0,0.06), 0 0 0 1px var(--border)"
+                  : undefined,
+              }}
+            >
+              <span
+                className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full"
+                style={{ background: dotColor }}
+                aria-hidden
+              />
+              <Icon size={16} strokeWidth={1.75} aria-hidden />
+              <span>{t.label}</span>
+            </button>
+          );
+        })}
+      </div>
+
+
 
 
       {tab === "body" && (
