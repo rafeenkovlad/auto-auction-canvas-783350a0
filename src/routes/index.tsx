@@ -383,7 +383,7 @@ function AuctionSheetPage() {
     // Hero image: photo from carReference (по модификации).
     // Build srcSet so the browser picks the best match for screen width + DPR.
     const SIZE_WIDTHS: Record<string, number> = { s: 240, m: 300, l: 400, xl: 600 };
-    const photos = report.carReference?.photos ?? [];
+    const photos = (report.carReference ?? report.characteristicsStep?.carReference)?.photos ?? [];
     const srcSetEntries: string[] = [];
     for (const p of photos) {
       const base = SIZE_WIDTHS[p.size] ?? 300;
@@ -419,7 +419,7 @@ function AuctionSheetPage() {
 
   const characteristics = useMemo(() => {
     const c = report.characteristicsStep;
-    const ref = report.carReference;
+    const ref = report.carReference ?? report.characteristicsStep?.carReference;
     const restyling = ref?.restyling;
     const yearStart = restyling?.yearStart ? new Date(restyling.yearStart).getFullYear() : null;
     const yearEnd = restyling?.yearEnd ? new Date(restyling.yearEnd).getFullYear() : null;
