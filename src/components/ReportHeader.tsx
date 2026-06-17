@@ -1,4 +1,4 @@
-import type { CarReport } from "@/lib/report.functions";
+import type { CarReport } from "@/lib/report.api";
 import { MetaCell } from "@/components/ReportPrimitives";
 import { fmtDate, fmtMileage } from "@/lib/report.utils";
 

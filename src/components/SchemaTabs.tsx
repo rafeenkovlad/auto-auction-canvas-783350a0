@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { getElementStatus, statusFill, statusStroke, type Status } from "@/lib/report.utils";
 import { Car, Armchair, Shield, Disc3, AppWindow, Lightbulb } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import type { InspectionElement } from "@/lib/report.functions";
+import type { InspectionElement } from "@/lib/report.api";
 import { CarBodySchema } from "@/components/CarBodySchema";
 import { FrameSchema } from "@/components/FrameSchema";
 import { WheelsSchema } from "@/components/WheelsSchema";

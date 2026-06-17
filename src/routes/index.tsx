@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { queryOptions, useQuery } from "@tanstack/react-query";
-import { getReport, type InspectionElement } from "@/lib/report.functions";
+import { getReport, type InspectionElement } from "@/lib/report.api";
 import { ElementViewer } from "@/components/ElementViewer";
 import { SchemaTabs } from "@/components/SchemaTabs";
 import { MediaGallery } from "@/components/MediaGallery";
