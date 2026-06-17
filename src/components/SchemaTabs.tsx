@@ -13,11 +13,12 @@ type TabKey = "body" | "interior" | "frame" | "wheels" | "glass" | "lighting";
 const TABS: { key: TabKey; label: string; icon: LucideIcon }[] = [
   { key: "body", label: "Кузов", icon: Car },
   { key: "interior", label: "Салон", icon: Armchair },
-  { key: "frame", label: "Силовые", icon: Frame },
-  { key: "wheels", label: "Колёса", icon: CircleDot },
-  { key: "glass", label: "Стёкла", icon: Square },
+  { key: "frame", label: "Силовые", icon: Shield },
+  { key: "wheels", label: "Колёса", icon: Disc3 },
+  { key: "glass", label: "Стёкла", icon: AppWindow },
   { key: "lighting", label: "Освещение", icon: Lightbulb },
 ];
+
 
 
 function statusOf(el: InspectionElement) {
