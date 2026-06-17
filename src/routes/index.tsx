@@ -419,15 +419,32 @@ function AuctionSheetPage() {
 
   const characteristics = useMemo(() => {
     const c = report.characteristicsStep;
-    if (!c) return [];
-    const rows: Array<[string, string | null | undefined]> = [
+    const ref = report.carReference;
+    const restyling = ref?.restyling;
+    const yearStart = restyling?.yearStart ? new Date(restyling.yearStart).getFullYear() : null;
+    const yearEnd = restyling?.yearEnd ? new Date(restyling.yearEnd).getFullYear() : null;
+    const yearsStr = yearStart
+      ? `${yearStart}–${yearEnd ?? "н.в."}`
+      : null;
+    const brandStr = ref?.brand
+      ? [ref.brand.nameRus, ref.brand.name].filter(Boolean).join(" / ")
+      : null;
+    const modelStr = ref?.model
+      ? [ref.model.nameRus, ref.model.name].filter(Boolean).join(" / ")
+      : null;
+    const rows: Array<[string, string | number | null | undefined]> = [
       ["VIN", report.vin],
-      ["Кузов", c.equipment ?? null],
-      ["Двигатель", c.engineType],
-      ["Объём", c.engineVolume],
-      ["КПП", c.transmission],
-      ["Привод", c.driveType],
-      ["Цвет", c.color],
+      ["Марка", brandStr],
+      ["Модель", modelStr],
+      ["Поколение", ref?.generation?.name ?? null],
+      ["Рестайлинг", restyling?.name ? `${restyling.name}${yearsStr ? ` (${yearsStr})` : ""}` : yearsStr],
+      ["Кузов (frame)", ref?.frame?.name ?? null],
+      ["Комплектация", c?.equipment ?? null],
+      ["Двигатель", c?.engineType],
+      ["Объём", c?.engineVolume],
+      ["КПП", c?.transmission],
+      ["Привод", c?.driveType],
+      ["Цвет", c?.color],
     ];
     return rows.filter(([, v]) => v != null && v !== "");
   }, [report]);
