@@ -24,6 +24,10 @@ const ZONE_LABEL: Record<string, string> = {
   rthresh: "Правый порог",
   windshield: "Лобовое стекло",
   rear_window: "Заднее стекло",
+  lfwin: "Переднее левое стекло",
+  rfwin: "Переднее правое стекло",
+  lrwin: "Заднее левое стекло",
+  rrwin: "Заднее правое стекло",
 };
 
 const ELEMENT_ZONE: Record<string, string> = {
