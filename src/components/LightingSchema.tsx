@@ -192,29 +192,6 @@ export function LightingSchema({
         </div>
       )}
 
-      {others.length > 0 && (
-        <div className="flex flex-col gap-1.5">
-          <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            Прочие элементы
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-            {others.map((el) => {
-              const s = statusOf(el);
-              return (
-                <button
-                  key={el.id}
-                  type="button"
-                  onClick={() => onElementClick?.(el)}
-                  className="text-left px-3 py-2 rounded-lg border text-xs font-medium transition-colors hover:border-accent"
-                  style={{ background: fillFor(s), borderColor: strokeFor(s, false) }}
-                >
-                  {el.elementType.replace(/_/g, " ")}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
