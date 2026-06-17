@@ -1,6 +1,8 @@
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 import type { InspectionElement } from "@/lib/report.api";
 import carTopImg from "@/assets/car-top.png";
+import { SchemaShell } from "@/components/SchemaShell";
+
 
 
 type Status = "ok" | "minor" | "serious" | "none";
