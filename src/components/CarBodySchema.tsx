@@ -86,12 +86,15 @@ const VIEWS: { key: View; label: string }[] = [
 export function CarBodySchema({
   elements,
   onElementClick,
+  embedded = false,
 }: {
   elements: InspectionElement[];
   onElementClick?: (el: InspectionElement) => void;
+  embedded?: boolean;
 }) {
   const [view, setView] = useState<View>("top");
   const [hover, setHover] = useState<string | null>(null);
+
 
   const { zoneMap, zoneElement } = useMemo(() => {
     const m = new Map<string, Status>();
@@ -144,11 +147,14 @@ export function CarBodySchema({
   );
 
   return (
-    <div className="panel p-5 md:p-6">
+    <div className={embedded ? "" : "panel p-5 md:p-6"}>
       <div className="flex items-center justify-between gap-3 flex-wrap mb-4">
-        <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-          Схема кузова
-        </h3>
+        {!embedded && (
+          <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+            Схема кузова
+          </h3>
+        )}
+
         <div className="flex items-center gap-1.5 flex-wrap">
           <span className="text-[11px] text-muted-foreground mr-1">Вид:</span>
           {VIEWS.map((v) => (
