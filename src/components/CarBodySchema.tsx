@@ -232,6 +232,15 @@ export function CarBodySchema({
                   const z = ELEMENT_ZONE[el.elementType];
                   const st = statusOf(el);
                   const allTags = [...el.seriousDamageTags, ...el.noSeriousDamageTags];
+                  const pf = el.paintworkThicknessFrom;
+                  const pt = el.paintworkThicknessTo;
+                  const paint =
+                    pf != null || pt != null
+                      ? pf != null && pt != null && pf !== pt
+                        ? `${pf}–${pt} мкм`
+                        : `${pf ?? pt} мкм`
+                      : null;
+
                   return (
                     <button
                       key={el.id}
@@ -252,6 +261,12 @@ export function CarBodySchema({
                         <span className="font-medium ink truncate">
                           {ZONE_LABEL[z] ?? el.elementType.replace(/_/g, " ")}
                         </span>
+                        {paint && (
+                          <span className="ml-auto mono text-[10px] px-1.5 py-0.5 rounded border border-border text-muted-foreground flex-shrink-0">
+                            ЛКП {paint}
+                          </span>
+                        )}
+
                       </div>
                       {el.note && (
                         <div className="text-[11px] text-muted-foreground ml-4 mt-1 whitespace-pre-wrap break-words">
