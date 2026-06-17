@@ -93,9 +93,19 @@ function severityVisual(s: Severity) {
   };
 }
 
-export function InspectionHistoryTimeline() {
+export function InspectionHistoryTimeline({
+  entries,
+  initialLimit = 4,
+}: {
+  /** Pass real history entries. When omitted, demo mock data is shown. */
+  entries?: HistoryEntry[];
+  initialLimit?: number;
+} = {}) {
   const [expanded, setExpanded] = useState(false);
-  const visible = expanded ? MOCK_HISTORY : MOCK_HISTORY.slice(0, 4);
+  const isDemo = !entries;
+  const source = entries ?? MOCK_HISTORY;
+  if (source.length === 0) return null;
+  const visible = expanded ? source : source.slice(0, initialLimit);
 
   return (
     <section className="panel p-5 md:p-6">
@@ -103,10 +113,13 @@ export function InspectionHistoryTimeline() {
         <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
           История замечаний
         </h3>
-        <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
-          Демо · по предыдущим отчётам
-        </span>
+        {isDemo && (
+          <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
+            Демо · по предыдущим отчётам
+          </span>
+        )}
       </div>
+
 
       <ol className="relative flex flex-col gap-5">
         {/* vertical rail */}
