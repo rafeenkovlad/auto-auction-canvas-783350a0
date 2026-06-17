@@ -470,10 +470,10 @@ function AuctionSheetPage() {
     >
       <div className="mx-auto max-w-7xl space-y-4">
         {/* Top bar */}
-        <header className="panel px-4 md:px-5 py-3 flex items-center gap-4 md:gap-6 flex-wrap">
-          <div className="flex items-center gap-2.5 pr-4 md:pr-5 border-r border-border">
+        <header className="panel px-4 md:px-5 py-3 flex flex-col md:flex-row md:items-center gap-4 md:gap-6">
+          <div className="flex items-center gap-2.5 min-w-0">
             <div
-              className="w-9 h-9 rounded-lg flex items-center justify-center"
+              className="w-9 h-9 shrink-0 rounded-lg flex items-center justify-center"
               style={{ background: "var(--ink)" }}
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.8" className="w-5 h-5">
@@ -482,11 +482,11 @@ function AuctionSheetPage() {
                 <circle cx="16.5" cy="16" r="1.5" fill="white" />
               </svg>
             </div>
-            <div className="leading-tight">
+            <div className="min-w-0 flex-1 leading-tight">
               <div className="text-[10px] font-bold tracking-[0.18em] text-muted-foreground">
                 AUTO AUCTION
               </div>
-              <div className="text-sm font-black ink tracking-wider">CANVAS</div>
+              <div className="text-sm font-black ink tracking-wider truncate">CANVAS</div>
             </div>
           </div>
 
@@ -494,29 +494,31 @@ function AuctionSheetPage() {
             <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
               Отчёт о проверке автомобиля
             </div>
-            <div className="mono text-xs text-muted-foreground mt-0.5">
+            <div className="mono text-xs text-muted-foreground mt-0.5 truncate">
               ID отчёта: <span className="ink font-semibold">{report.reportNumber}</span>
             </div>
           </div>
 
-          <MetaCell
-            label="Дата осмотра"
-            value={fmtDate(report.carStep.dateInspection ?? report.reportDate)}
-          />
-          {report.carStep.cityInspection && (
-            <MetaCell label="Город" value={report.carStep.cityInspection} />
-          )}
-          <MetaCell label="Пробег" value={fmtMileage(report.carStep.mileage)} />
-          {report.carStep.gosNumber && (
-            <div className="flex flex-col items-center justify-center px-3 py-1 border-2 border-foreground bg-white rounded">
-              <span className="mono text-[8px] uppercase tracking-widest text-muted-foreground">
-                Гос. номер
-              </span>
-              <span className="mono text-sm font-bold ink tracking-wider">
-                {report.carStep.gosNumber}
-              </span>
-            </div>
-          )}
+          <div className="flex flex-wrap items-center gap-3 md:gap-6">
+            <MetaCell
+              label="Дата осмотра"
+              value={fmtDate(report.carStep.dateInspection ?? report.reportDate)}
+            />
+            {report.carStep.cityInspection && (
+              <MetaCell label="Город" value={report.carStep.cityInspection} />
+            )}
+            <MetaCell label="Пробег" value={fmtMileage(report.carStep.mileage)} />
+            {report.carStep.gosNumber && (
+              <div className="flex flex-col items-center justify-center px-3 py-1 border-2 border-foreground bg-white rounded">
+                <span className="mono text-[8px] uppercase tracking-widest text-muted-foreground">
+                  Гос. номер
+                </span>
+                <span className="mono text-sm font-bold ink tracking-wider">
+                  {report.carStep.gosNumber}
+                </span>
+              </div>
+            )}
+          </div>
         </header>
 
         {/* Hero */}
