@@ -261,6 +261,12 @@ export function CarBodySchema({
                         <span className="font-medium ink truncate">
                           {ZONE_LABEL[z] ?? el.elementType.replace(/_/g, " ")}
                         </span>
+                        {paint && (
+                          <span className="ml-auto mono text-[10px] px-1.5 py-0.5 rounded border border-border text-muted-foreground flex-shrink-0">
+                            ЛКП {paint}
+                          </span>
+                        )}
+
                       </div>
                       {el.note && (
                         <div className="text-[11px] text-muted-foreground ml-4 mt-1 whitespace-pre-wrap break-words">
