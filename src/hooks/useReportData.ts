@@ -3,7 +3,7 @@ import type {
   CarReport,
   FileRef,
   InspectionElement,
-} from "@/lib/report.functions";
+} from "@/lib/report.api";
 import type { GalleryItem } from "@/components/MediaGallery";
 import {
   SECTION_KEYS,

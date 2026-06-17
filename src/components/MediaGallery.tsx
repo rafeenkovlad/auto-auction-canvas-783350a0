@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import type { FileRef } from "@/lib/report.functions";
+import type { FileRef } from "@/lib/report.api";
 
 export type GalleryItem = {
   file: FileRef;

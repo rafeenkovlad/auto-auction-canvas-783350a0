@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import type { InspectionElement } from "@/lib/report.functions";
+import type { InspectionElement } from "@/lib/report.api";
 import frameImg from "@/assets/frame-schema.png";
 
 type Status = "ok" | "minor" | "serious" | "none";

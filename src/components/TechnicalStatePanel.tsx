@@ -1,4 +1,4 @@
-import type { CarReport } from "@/lib/report.functions";
+import type { CarReport } from "@/lib/report.api";
 import { SectionCard } from "@/components/SectionCard";
 import { Stat } from "@/components/ReportPrimitives";
 import type { EnrichedElement } from "@/lib/report.utils";

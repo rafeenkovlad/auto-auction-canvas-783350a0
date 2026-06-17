@@ -1,4 +1,4 @@
-import type { InspectionElement } from "@/lib/report.functions";
+import type { InspectionElement } from "@/lib/report.api";
 import { ZoneSchema, type Zone } from "@/components/ZoneSchema";
 
 // Top-down car silhouette (front pointing up).

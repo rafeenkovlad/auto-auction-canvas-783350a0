@@ -1,4 +1,4 @@
-import type { CarReport } from "@/lib/report.functions";
+import type { CarReport } from "@/lib/report.api";
 import { CheckRow } from "@/components/ReportPrimitives";
 
 export function TestDriveCard({ report }: { report: CarReport }) {

@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import type { InspectionElement } from "@/lib/report.functions";
+import type { InspectionElement } from "@/lib/report.api";
 
 export type Status = "ok" | "minor" | "serious" | "none";
 

@@ -1,4 +1,4 @@
-import type { CarReport } from "@/lib/report.functions";
+import type { CarReport } from "@/lib/report.api";
 
 export function ExpertConclusion({
   result,

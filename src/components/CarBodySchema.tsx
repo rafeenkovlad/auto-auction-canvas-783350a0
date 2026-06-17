@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import type { InspectionElement } from "@/lib/report.functions";
+import type { InspectionElement } from "@/lib/report.api";
 import carTopImg from "@/assets/car-top.png";
 
 

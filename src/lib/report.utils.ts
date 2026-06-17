@@ -1,4 +1,4 @@
-import type { FileRef, InspectionElement } from "@/lib/report.functions";
+import type { FileRef, InspectionElement } from "@/lib/report.api";
 
 export type Status = "ok" | "minor" | "serious";
 
