@@ -8,7 +8,6 @@ import {
   type FileRef,
 } from "@/lib/report.functions";
 import { ElementViewer } from "@/components/ElementViewer";
-import { CarBodySchema } from "@/components/CarBodySchema";
 import { SchemaTabs } from "@/components/SchemaTabs";
 import { MediaGallery, type GalleryItem } from "@/components/MediaGallery";
 
