@@ -2,13 +2,19 @@ import { useState } from "react";
 import type { InspectionElement } from "@/lib/report.functions";
 import { CarBodySchema } from "@/components/CarBodySchema";
 import { FrameSchema } from "@/components/FrameSchema";
+import { WheelsSchema } from "@/components/WheelsSchema";
+import { GlassSchema } from "@/components/GlassSchema";
+import { LightingSchema } from "@/components/LightingSchema";
 
-type TabKey = "body" | "interior" | "frame";
+type TabKey = "body" | "interior" | "frame" | "wheels" | "glass" | "lighting";
 
 const TABS: { key: TabKey; label: string }[] = [
   { key: "body", label: "Кузов" },
   { key: "interior", label: "Салон" },
   { key: "frame", label: "Силовые" },
+  { key: "wheels", label: "Колёса" },
+  { key: "glass", label: "Стёкла" },
+  { key: "lighting", label: "Освещение" },
 ];
 
 function statusOf(el: InspectionElement) {
@@ -67,11 +73,17 @@ export function SchemaTabs({
   bodyElements,
   interiorElements,
   frameElements,
+  wheelsElements,
+  glassElements,
+  lightingElements,
   onElementClick,
 }: {
   bodyElements: InspectionElement[];
   interiorElements: InspectionElement[];
   frameElements: InspectionElement[];
+  wheelsElements: InspectionElement[];
+  glassElements: InspectionElement[];
+  lightingElements: InspectionElement[];
   onElementClick?: (el: InspectionElement) => void;
 }) {
   const [tab, setTab] = useState<TabKey>("body");
@@ -116,6 +128,15 @@ export function SchemaTabs({
       )}
       {tab === "frame" && (
         <FrameSchema elements={frameElements} onElementClick={onElementClick} />
+      )}
+      {tab === "wheels" && (
+        <WheelsSchema elements={wheelsElements} onElementClick={onElementClick} />
+      )}
+      {tab === "glass" && (
+        <GlassSchema elements={glassElements} onElementClick={onElementClick} />
+      )}
+      {tab === "lighting" && (
+        <LightingSchema elements={lightingElements} onElementClick={onElementClick} />
       )}
     </div>
   );

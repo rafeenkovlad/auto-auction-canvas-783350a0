@@ -564,6 +564,9 @@ function AuctionSheetPage() {
             bodyElements={bodyElements}
             interiorElements={report.inspectionStep.interiorElements ?? []}
             frameElements={report.inspectionStep.bodyReinforcementElements ?? []}
+            wheelsElements={report.inspectionStep.wheelsAndBrakesElements ?? []}
+            glassElements={report.inspectionStep.glassElements ?? []}
+            lightingElements={report.inspectionStep.lightningElements ?? []}
             onElementClick={openElement}
           />
 
