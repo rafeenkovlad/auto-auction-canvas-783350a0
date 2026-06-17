@@ -476,8 +476,8 @@ function AuctionSheetPage() {
                 className="w-full h-full object-cover"
               />
             ) : (
-              <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">
-                Нет фото
+              <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs text-center px-3">
+                Модификация не определена
               </div>
             )}
           </div>
