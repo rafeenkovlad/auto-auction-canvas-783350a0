@@ -29,9 +29,6 @@ export const Route = createFileRoute("/")({
   validateSearch: (s: Record<string, unknown>) => ({
     token: typeof s.token === "string" ? s.token : undefined,
   }),
-  loaderDeps: ({ search }) => ({ token: search.token }),
-  loader: ({ context, deps }) =>
-    context.queryClient.ensureQueryData(reportQuery(deps.token)),
   head: () => ({
     meta: [
       { title: "Отчёт о проверке автомобиля — Auto Auction Canvas" },
