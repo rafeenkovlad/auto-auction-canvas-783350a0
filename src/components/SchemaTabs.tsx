@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Car, Armchair, Frame, CircleDot, Square, Lightbulb } from "lucide-react";
+import { Car, Armchair, Shield, Disc3, AppWindow, Lightbulb } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { InspectionElement } from "@/lib/report.functions";
 import { CarBodySchema } from "@/components/CarBodySchema";
