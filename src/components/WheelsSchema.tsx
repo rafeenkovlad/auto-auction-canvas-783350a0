@@ -1,65 +1,138 @@
+import { useMemo } from "react";
 import type { InspectionElement } from "@/lib/report.api";
-import { ZoneCanvas, type Zone } from "@/components/ZoneSchema";
+import { type Zone, fillFor, strokeFor } from "@/components/ZoneSchema";
+import { getElementStatus } from "@/lib/report.utils";
 import { SchemaShell, type SchemaCanvasApi } from "@/components/SchemaShell";
+import carSide from "@/assets/car-side.png.asset.json";
 
-const BASE = (
-  <g>
-    <rect
-      x="120"
-      y="40"
-      width="200"
-      height="440"
-      rx="60"
-      fill="oklch(0.97 0.005 250)"
-      stroke="oklch(0.78 0.008 250)"
-      strokeWidth="1.5"
-    />
-    <path
-      d="M150 130 Q220 100 290 130 L280 220 L160 220 Z"
-      fill="oklch(0.93 0.01 250)"
-      stroke="oklch(0.8 0.008 250)"
-      strokeWidth="1"
-    />
-    <path
-      d="M160 300 L280 300 L290 400 Q220 425 150 400 Z"
-      fill="oklch(0.93 0.01 250)"
-      stroke="oklch(0.8 0.008 250)"
-      strokeWidth="1"
-    />
-  </g>
-);
+const IMG_W = 1536;
+const IMG_H = 1024;
 
-const ZONES: Zone[] = [
+const LEFT_SIDE_ZONES: Zone[] = [
   {
     types: ["front_left_wheel", "wheel_front_left", "front_left_tire", "left_front_wheel"],
     label: "Переднее левое колесо",
-    shape: { kind: "rect", x: 78, y: 130, w: 44, h: 90, rx: 10 },
-  },
-  {
-    types: ["front_right_wheel", "wheel_front_right", "front_right_tire", "right_front_wheel"],
-    label: "Переднее правое колесо",
-    shape: { kind: "rect", x: 318, y: 130, w: 44, h: 90, rx: 10 },
+    shape: { kind: "ellipse", cx: 360, cy: 680, rx: 130, ry: 135 },
   },
   {
     types: ["rear_left_wheel", "wheel_rear_left", "rear_left_tire", "left_rear_wheel"],
     label: "Заднее левое колесо",
-    shape: { kind: "rect", x: 78, y: 310, w: 44, h: 90, rx: 10 },
+    shape: { kind: "ellipse", cx: 1150, cy: 680, rx: 130, ry: 135 },
+  },
+];
+
+const RIGHT_SIDE_ZONES: Zone[] = [
+  {
+    types: ["front_right_wheel", "wheel_front_right", "front_right_tire", "right_front_wheel"],
+    label: "Переднее правое колесо",
+    shape: { kind: "ellipse", cx: 360, cy: 680, rx: 130, ry: 135 },
   },
   {
     types: ["rear_right_wheel", "wheel_rear_right", "rear_right_tire", "right_rear_wheel"],
     label: "Заднее правое колесо",
-    shape: { kind: "rect", x: 318, y: 310, w: 44, h: 90, rx: 10 },
-  },
-  {
-    types: ["spare_wheel", "spare_tire"],
-    label: "Запасное колесо",
-    shape: { kind: "ellipse", cx: 220, cy: 460, rx: 28, ry: 14 },
+    shape: { kind: "ellipse", cx: 1150, cy: 680, rx: 130, ry: 135 },
   },
 ];
 
+const SPARE_LABEL = "Запасное колесо";
+const SPARE_TYPES = ["spare_wheel", "spare_tire"];
+
+const ALL_ZONES = [...LEFT_SIDE_ZONES, ...RIGHT_SIDE_ZONES];
+
 function labelFor(el: InspectionElement): string {
-  for (const z of ZONES) if (z.types.includes(el.elementType)) return z.label;
+  if (SPARE_TYPES.includes(el.elementType)) return SPARE_LABEL;
+  for (const z of ALL_ZONES) if (z.types.includes(el.elementType)) return z.label;
   return el.elementType.replace(/_/g, " ");
+}
+
+function ImagePanel({
+  imageUrl,
+  zones,
+  byType,
+  hoverKey,
+  setHoverKey,
+  onElementClick,
+  mirrored = false,
+}: {
+  imageUrl: string;
+  zones: Zone[];
+  byType: Map<string, InspectionElement>;
+  hoverKey: string | null;
+  setHoverKey: (k: string | null) => void;
+  onElementClick?: (el: InspectionElement) => void;
+  mirrored?: boolean;
+}) {
+  return (
+    <div className="flex-1 min-w-0" style={mirrored ? { transform: "scaleX(-1)" } : undefined}>
+      <svg
+        viewBox={`0 0 ${IMG_W} ${IMG_H}`}
+        className="w-full h-auto block"
+        preserveAspectRatio="xMidYMid meet"
+      >
+        <image href={imageUrl} x={0} y={0} width={IMG_W} height={IMG_H} />
+        {zones.map((z, i) => {
+          const el = z.types.map((t) => byType.get(t)).find(Boolean);
+          const key = el?.elementType ?? `__zone_${i}`;
+          const s = el ? getElementStatus(el) : "none";
+          const isHover = hoverKey === key;
+          const hasDamage = el && s !== "ok";
+          const showOverlay = isHover || hasDamage;
+          const fill = showOverlay
+            ? isHover
+              ? "color-mix(in oklab, var(--accent) 18%, transparent)"
+              : fillFor(s)
+            : "transparent";
+          const stroke = showOverlay ? strokeFor(s, isHover) : "transparent";
+          const sw = isHover ? 5 : 3;
+          const handlers = el
+            ? {
+                onMouseEnter: () => setHoverKey(key),
+                onMouseLeave: () => setHoverKey(null),
+                onClick: () => onElementClick?.(el),
+                style: { cursor: "pointer", transition: "all 140ms ease" },
+              }
+            : { style: { pointerEvents: "none" as const } };
+          const common = {
+            fill,
+            stroke,
+            strokeWidth: sw,
+            strokeLinejoin: "round" as const,
+            vectorEffect: "non-scaling-stroke" as const,
+            ...handlers,
+          };
+          if (z.shape.kind === "rect") {
+            return (
+              <rect
+                key={key}
+                x={z.shape.x}
+                y={z.shape.y}
+                width={z.shape.w}
+                height={z.shape.h}
+                rx={z.shape.rx ?? 8}
+                {...common}
+              />
+            );
+          }
+          if (z.shape.kind === "polygon") {
+            return <polygon key={key} points={z.shape.points} {...common} />;
+          }
+          if (z.shape.kind === "ellipse") {
+            return (
+              <ellipse
+                key={key}
+                cx={z.shape.cx}
+                cy={z.shape.cy}
+                rx={z.shape.rx}
+                ry={z.shape.ry}
+                {...common}
+              />
+            );
+          }
+          return null;
+        })}
+      </svg>
+    </div>
+  );
 }
 
 export function WheelsSchema({
@@ -69,25 +142,41 @@ export function WheelsSchema({
   elements: InspectionElement[];
   onElementClick?: (el: InspectionElement) => void;
 }) {
+  const byType = useMemo(() => {
+    const m = new Map<string, InspectionElement>();
+    for (const el of elements) m.set(el.elementType, el);
+    return m;
+  }, [elements]);
+
   return (
     <SchemaShell
       elements={elements}
+      canvasPanel={false}
       canvas={({ hoverKey, setHoverKey }: SchemaCanvasApi) => (
-        <ZoneCanvas
-          viewBox="0 0 440 500"
-          baseSvg={BASE}
-          zones={ZONES}
-          elements={elements}
-          hoverKey={hoverKey}
-          setHoverKey={setHoverKey}
-          onElementClick={onElementClick}
-          maxWidth={420}
-        />
+        <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 items-start">
+          <ImagePanel
+            imageUrl={carSide.url}
+            zones={LEFT_SIDE_ZONES}
+            byType={byType}
+            hoverKey={hoverKey}
+            setHoverKey={setHoverKey}
+            onElementClick={onElementClick}
+          />
+          <ImagePanel
+            imageUrl={carSide.url}
+            zones={RIGHT_SIDE_ZONES}
+            byType={byType}
+            hoverKey={hoverKey}
+            setHoverKey={setHoverKey}
+            onElementClick={onElementClick}
+            mirrored
+          />
+        </div>
       )}
       zoneKeyForElement={(el) => el.elementType}
       zoneLabelForElement={labelFor}
       zoneLabelForKey={(k) => {
-        const el = elements.find((e) => e.elementType === k);
+        const el = byType.get(k);
         return el ? labelFor(el) : k;
       }}
       onElementClick={onElementClick}
