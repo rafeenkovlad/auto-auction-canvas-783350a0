@@ -296,12 +296,6 @@ function TopView({ zoneProps }: { zoneProps: ZoneProps }) {
         );
       })}
 
-      {/* Индикатор «перёд» */}
-      <g opacity="0.45" pointerEvents="none">
-        <path d="M512,30 L536,68 L488,68 Z" fill={OUTLINE} />
-        <text x="512" y="92" textAnchor="middle" fontSize="26"
-          fontFamily="ui-sans-serif, system-ui" fill={INK} letterSpacing="2">FRONT</text>
-      </g>
     </svg>
   );
 }
