@@ -88,6 +88,26 @@ export function SchemaTabs({
 }) {
   const [tab, setTab] = useState<TabKey>("body");
 
+  const elementsByTab: Record<TabKey, InspectionElement[]> = {
+    body: bodyElements,
+    interior: interiorElements,
+    frame: frameElements,
+    wheels: wheelsElements,
+    glass: glassElements,
+    lighting: lightingElements,
+  };
+
+  function worstStatus(els: InspectionElement[]): "ok" | "minor" | "serious" | "empty" {
+    if (!els || els.length === 0) return "empty";
+    let res: "ok" | "minor" | "serious" = "ok";
+    for (const el of els) {
+      const s = statusOf(el);
+      if (s === "serious") return "serious";
+      if (s === "minor") res = "minor";
+    }
+    return res;
+  }
+
   return (
     <div className="panel p-5 md:p-6 flex flex-col gap-4">
       <div className="flex items-center justify-between gap-3 flex-wrap">
@@ -97,6 +117,10 @@ export function SchemaTabs({
         <div className="flex flex-wrap gap-1.5">
           {TABS.map((t) => {
             const active = tab === t.key;
+            const ws = worstStatus(elementsByTab[t.key]);
+            const hasStatus = ws !== "empty";
+            const bg = hasStatus ? fillFor(ws as "ok" | "minor" | "serious") : "var(--card)";
+            const bd = hasStatus ? strokeFor(ws as "ok" | "minor" | "serious") : "var(--border)";
             return (
               <button
                 key={t.key}
@@ -104,9 +128,10 @@ export function SchemaTabs({
                 onClick={() => setTab(t.key)}
                 className="px-3 py-1.5 rounded-md text-xs font-medium border transition-colors"
                 style={{
-                  background: active ? "var(--accent)" : "var(--card)",
-                  color: active ? "var(--accent-foreground)" : "var(--foreground)",
-                  borderColor: active ? "var(--accent)" : "var(--border)",
+                  background: bg,
+                  color: "var(--foreground)",
+                  borderColor: bd,
+                  boxShadow: active ? "0 0 0 2px var(--accent)" : undefined,
                 }}
               >
                 {t.label}
