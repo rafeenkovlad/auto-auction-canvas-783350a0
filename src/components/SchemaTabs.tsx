@@ -78,25 +78,37 @@ export function SchemaTabs({
 }) {
   const [tab, setTab] = useState<TabKey>("body");
 
-  const elementsByTab: Record<TabKey, InspectionElement[]> = {
-    body: bodyElements,
-    interior: interiorElements,
-    frame: frameElements,
-    wheels: wheelsElements,
-    glass: glassElements,
-    lighting: lightingElements,
-  };
+  const elementsByTab = useMemo<Record<TabKey, InspectionElement[]>>(
+    () => ({
+      body: bodyElements,
+      interior: interiorElements,
+      frame: frameElements,
+      wheels: wheelsElements,
+      glass: glassElements,
+      lighting: lightingElements,
+    }),
+    [bodyElements, interiorElements, frameElements, wheelsElements, glassElements, lightingElements],
+  );
 
-  function worstStatus(els: InspectionElement[]): "ok" | "minor" | "serious" | "empty" {
-    if (!els || els.length === 0) return "empty";
-    let res: "ok" | "minor" | "serious" = "ok";
-    for (const el of els) {
-      const s = statusOf(el);
-      if (s === "serious") return "serious";
-      if (s === "minor") res = "minor";
-    }
+  const statusByTab = useMemo(() => {
+    const res = {} as Record<TabKey, Status | "empty">;
+    (Object.keys(elementsByTab) as TabKey[]).forEach((k) => {
+      const els = elementsByTab[k];
+      if (!els || els.length === 0) {
+        res[k] = "empty";
+        return;
+      }
+      let s: Status = "ok";
+      for (const el of els) {
+        const cur = getElementStatus(el);
+        if (cur === "serious") { s = "serious"; break; }
+        if (cur === "minor") s = "minor";
+      }
+      res[k] = s;
+    });
     return res;
-  }
+  }, [elementsByTab]);
+
 
   return (
     <div className="panel p-5 md:p-6 flex flex-col gap-4">
