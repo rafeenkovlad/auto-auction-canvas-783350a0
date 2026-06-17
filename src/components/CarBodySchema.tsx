@@ -313,9 +313,9 @@ function TopView({ zoneProps }: { zoneProps: ZoneProps }) {
       ...z,
       fill: "transparent",
       fillOpacity: 0,
-      stroke: isHover ? "var(--accent)" : "oklch(0.28 0.012 250 / 0.78)",
-      strokeWidth: isHover ? 2.2 : 1.3,
-      strokeDasharray: isHover ? undefined : ("4 3" as const),
+      stroke: isHover ? "var(--accent)" : "transparent",
+      strokeWidth: isHover ? 2.2 : 0,
+      strokeDasharray: undefined,
       vectorEffect: "non-scaling-stroke" as const,
     };
   };
