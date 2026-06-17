@@ -301,7 +301,7 @@ function AuctionSheetPage() {
 
   const [activeIdx, setActiveIdx] = useState<number | null>(null);
 
-  const { sections, bodyElements, allElements, gallery, heroImage, heroSrcSet } = useMemo(() => {
+  const { sections, bodyElements, allElements, gallery, additional, heroImage, heroSrcSet } = useMemo(() => {
     const secs: Array<{ key: string; elements: EnrichedElement[] }> = [];
     const body: EnrichedElement[] = [];
     for (const key of SECTION_KEYS) {
@@ -349,8 +349,10 @@ function AuctionSheetPage() {
       { key: "testDrive", files: report.testDriveStep.files ?? [] },
       { key: "result", files: report.resultStep.files ?? [] },
     ];
+    const additionalItems: GalleryItem[] = [];
     for (const src of fileSources) {
       const caption = STEP_LABELS[src.key] ?? src.key;
+      const isInspection = src.key === "inspection";
       for (const f of src.files) {
         if (!f || !f.url) continue;
         const idx = all.length;
@@ -369,16 +371,22 @@ function AuctionSheetPage() {
           _sectionKey: src.key,
         };
         all.push(pseudo);
-        galleryItems.push({
+        const item: GalleryItem = {
           file: f,
           idx,
           caption,
           sectionKey: src.key,
           isVideo: isVideoFile(f),
           isDamage: false,
-        });
+        };
+        if (isInspection) {
+          galleryItems.push(item);
+        } else {
+          additionalItems.push(item);
+        }
       }
     }
+
 
     // Hero image: photo from carReference (по модификации).
     // Build srcSet so the browser picks the best match for screen width + DPR.
@@ -407,10 +415,12 @@ function AuctionSheetPage() {
       bodyElements: body,
       allElements: all,
       gallery: galleryItems,
+      additional: additionalItems,
       heroImage: hero,
       heroSrcSet,
     };
   }, [report]);
+
 
   const openElement = (el: InspectionElement) => {
     const idx = allElements.findIndex((e) => e.id === el.id);
@@ -595,6 +605,28 @@ function AuctionSheetPage() {
           onOpen={setActiveIdx}
           renderTile={(item) => <GalleryTileBody item={item} />}
         />
+
+        {/* Additional materials (files from other steps) */}
+        {additional.length > 0 && (
+          <section className="panel p-5 md:p-6">
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-4">
+              Дополнительные материалы
+            </h3>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+              {additional.map((item) => (
+                <button
+                  key={`${item.file.id}-${item.idx}`}
+                  type="button"
+                  onClick={() => setActiveIdx(item.idx)}
+                  className="text-left rounded-lg border border-border bg-card hover:border-accent hover:shadow-sm transition-all overflow-hidden flex flex-col"
+                >
+                  <GalleryTileBody item={item} />
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
+
 
         {/* Documents + Test drive */}
         <section className="grid md:grid-cols-2 gap-4">
