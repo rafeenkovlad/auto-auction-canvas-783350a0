@@ -1,21 +1,22 @@
-import { createServerFn } from "@tanstack/react-start";
-import { getServerConfig } from "./config.server";
+// Client-side fetch to avoid Cloudflare Worker outbound fetch failures
+// ("Network connection lost") when calling carreports.ru from SSR.
+// carreports.ru returns `Access-Control-Allow-Origin: *`, so direct
+// browser fetch works fine.
 
-export const getReport = createServerFn({ method: "GET" })
-  .inputValidator((data: { token?: string } | undefined) => {
-    const token = data?.token?.trim();
-    if (!token) throw new Error("Не указан токен отчёта");
-    return { token };
-  })
-  .handler(async ({ data }) => {
-    const { sharedApiBaseUrl } = getServerConfig();
-    const res = await fetch(
-      `${sharedApiBaseUrl}/api/v1/shared/report?token=${encodeURIComponent(data.token)}`,
-    );
-    if (!res.ok) throw new Error(`Report fetch failed: ${res.status}`);
-    const json = (await res.json()) as { result: CarReport; errors?: unknown[] };
-    return json.result;
-  });
+const SHARED_API_BASE_URL = "https://carreports.ru";
+
+export async function getReport(args?: {
+  data?: { token?: string };
+}): Promise<CarReport> {
+  const token = args?.data?.token?.trim();
+  if (!token) throw new Error("Не указан токен отчёта");
+  const res = await fetch(
+    `${SHARED_API_BASE_URL}/api/v1/shared/report?token=${encodeURIComponent(token)}`,
+  );
+  if (!res.ok) throw new Error(`Report fetch failed: ${res.status}`);
+  const json = (await res.json()) as { result: CarReport; errors?: unknown[] };
+  return json.result;
+}
 
 // ---------- types ----------
 export interface FileRef {
