@@ -647,6 +647,9 @@ function AuctionSheetPage() {
           </div>
         </section>
 
+        {/* Inspection history timeline (placeholder, previous reports) */}
+        <InspectionHistoryTimeline />
+
         {/* Media gallery */}
         <MediaGallery
           items={gallery}
