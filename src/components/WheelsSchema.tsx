@@ -1,7 +1,7 @@
 import type { InspectionElement } from "@/lib/report.api";
-import { ZoneSchema, type Zone } from "@/components/ZoneSchema";
+import { ZoneCanvas, type Zone } from "@/components/ZoneSchema";
+import { SchemaShell, type SchemaCanvasApi } from "@/components/SchemaShell";
 
-// Top-down car silhouette (front pointing up).
 const BASE = (
   <g>
     <rect
@@ -14,7 +14,6 @@ const BASE = (
       stroke="oklch(0.78 0.008 250)"
       strokeWidth="1.5"
     />
-    {/* roof / windshield hint */}
     <path
       d="M150 130 Q220 100 290 130 L280 220 L160 220 Z"
       fill="oklch(0.93 0.01 250)"
@@ -58,6 +57,11 @@ const ZONES: Zone[] = [
   },
 ];
 
+function labelFor(el: InspectionElement): string {
+  for (const z of ZONES) if (z.types.includes(el.elementType)) return z.label;
+  return el.elementType.replace(/_/g, " ");
+}
+
 export function WheelsSchema({
   elements,
   onElementClick,
@@ -66,11 +70,26 @@ export function WheelsSchema({
   onElementClick?: (el: InspectionElement) => void;
 }) {
   return (
-    <ZoneSchema
-      viewBox="0 0 440 500"
-      baseSvg={BASE}
-      zones={ZONES}
+    <SchemaShell
       elements={elements}
+      canvas={({ hoverKey, setHoverKey }: SchemaCanvasApi) => (
+        <ZoneCanvas
+          viewBox="0 0 440 500"
+          baseSvg={BASE}
+          zones={ZONES}
+          elements={elements}
+          hoverKey={hoverKey}
+          setHoverKey={setHoverKey}
+          onElementClick={onElementClick}
+          maxWidth={420}
+        />
+      )}
+      zoneKeyForElement={(el) => el.elementType}
+      zoneLabelForElement={labelFor}
+      zoneLabelForKey={(k) => {
+        const el = elements.find((e) => e.elementType === k);
+        return el ? labelFor(el) : k;
+      }}
       onElementClick={onElementClick}
       emptyText="Нет данных по колёсам и тормозам"
     />
