@@ -245,13 +245,11 @@ function pluralize(n: number, one: string, few: string, many: string) {
 function SectionCard({
   sectionKey,
   elements,
-  onOpenFirst,
 }: {
   sectionKey: string;
   elements: EnrichedElement[];
-  onOpenFirst: () => void;
 }) {
-  const { status, summary } = sectionSummary(elements);
+  const { status } = sectionSummary(elements);
   const labelText =
     status === "ok"
       ? "Хорошо"
@@ -261,12 +259,16 @@ function SectionCard({
           ? "Замечания"
           : "Нет данных";
   const meta = status ? statusMeta(status) : null;
+
+  // Collect tags with severity
+  const tags: Array<{ name: string; severe: boolean }> = [];
+  for (const el of elements) {
+    for (const t of el.seriousDamageTags) tags.push({ name: t.name, severe: true });
+    for (const t of el.noSeriousDamageTags) tags.push({ name: t.name, severe: false });
+  }
+
   return (
-    <button
-      type="button"
-      onClick={onOpenFirst}
-      className="panel text-left p-4 transition-all hover:-translate-y-px hover:border-accent flex flex-col gap-3"
-    >
+    <div className="panel p-4 flex flex-col gap-3">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
           <span
@@ -288,10 +290,40 @@ function SectionCard({
           </span>
         )}
       </div>
-      <p className="text-xs text-muted-foreground leading-snug">{summary}</p>
-    </button>
+      {tags.length > 0 ? (
+        <div className="flex flex-wrap gap-1.5">
+          {tags.map((t, i) => (
+            <span
+              key={i}
+              className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-[11px] font-medium border"
+              style={{
+                background: t.severe
+                  ? "color-mix(in oklab, var(--grade-bad) 12%, white)"
+                  : "color-mix(in oklab, var(--grade-warn) 18%, white)",
+                borderColor: t.severe ? "var(--grade-bad)" : "var(--grade-warn)",
+                color: "var(--foreground)",
+              }}
+            >
+              <span
+                className="w-2 h-2 rounded-full"
+                style={{
+                  background: t.severe ? "var(--grade-bad)" : "var(--grade-warn)",
+                }}
+                aria-label={t.severe ? "Серьёзное" : "Незначительное"}
+              />
+              {t.name}
+            </span>
+          ))}
+        </div>
+      ) : (
+        <p className="text-xs text-muted-foreground leading-snug">
+          Замечаний не выявлено. Все элементы в норме.
+        </p>
+      )}
+    </div>
   );
 }
+
 
 /* ===== Page ===== */
 function AuctionSheetPage() {
@@ -592,11 +624,8 @@ function AuctionSheetPage() {
                     key={s.key}
                     sectionKey={s.key}
                     elements={s.elements}
-                    onOpenFirst={() => {
-                      const first = s.elements[0];
-                      if (first) openElement(first);
-                    }}
                   />
+
                 ))}
             </div>
             {(report.inspectionStep.bodyPaintworkThicknessFrom != null ||
