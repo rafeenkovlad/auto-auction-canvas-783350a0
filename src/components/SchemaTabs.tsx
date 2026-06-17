@@ -126,7 +126,7 @@ export function SchemaTabs({
       >
         {TABS.map((t) => {
           const active = tab === t.key;
-          const ws = worstStatus(elementsByTab[t.key]);
+          const ws = statusByTab[t.key];
           const dotColor =
             ws === "serious"
               ? "var(--grade-bad)"
