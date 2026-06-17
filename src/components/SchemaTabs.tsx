@@ -136,12 +136,9 @@ export function SchemaTabs({
         <CarBodySchema elements={bodyElements} onElementClick={onElementClick} embedded />
       )}
       {tab === "interior" && (
-        <PlaceholderBoard
-          elements={interiorElements}
-          emptyText="Нет данных по салону"
-          onElementClick={onElementClick}
-        />
+        <InteriorSchema elements={interiorElements} onElementClick={onElementClick} />
       )}
+
       {tab === "frame" && (
         <FrameSchema elements={frameElements} onElementClick={onElementClick} />
       )}
