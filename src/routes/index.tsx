@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
+import { queryOptions, useQuery } from "@tanstack/react-query";
 import { getReport, type InspectionElement } from "@/lib/report.functions";
 import { ElementViewer } from "@/components/ElementViewer";
 import { SchemaTabs } from "@/components/SchemaTabs";
@@ -52,7 +52,34 @@ export const Route = createFileRoute("/")({
 
 function AuctionSheetPage() {
   const { token } = Route.useSearch();
-  const { data: report } = useSuspenseQuery(reportQuery(token));
+  const reportResult = useQuery({
+    ...reportQuery(token),
+    enabled: Boolean(token),
+  });
+
+  if (!token) {
+    return <ReportStateCard title="Не указан токен отчёта" />;
+  }
+
+  if (reportResult.isPending) {
+    return <ReportStateCard title="Загружаем отчёт" />;
+  }
+
+  if (reportResult.isError) {
+    return (
+      <ReportStateCard
+        title="Не удалось загрузить отчёт"
+        message={reportResult.error.message}
+      />
+    );
+  }
+
+  const report = reportResult.data;
+
+  return <ReportContent report={report} />;
+}
+
+function ReportContent({ report }: { report: Awaited<ReturnType<typeof getReport>> }) {
   const carName = report.reportName.replace(/^.*·\s*/, "");
 
   const [activeIdx, setActiveIdx] = useState<number | null>(null);
@@ -138,6 +165,17 @@ function AuctionSheetPage() {
         onChange={(i) => setActiveIdx(i)}
         statusMeta={statusMeta}
       />
+    </main>
+  );
+}
+
+function ReportStateCard({ title, message }: { title: string; message?: string }) {
+  return (
+    <main className="min-h-screen flex items-center justify-center p-8">
+      <div className="panel p-8 max-w-lg text-center">
+        <h1 className="text-2xl font-bold ink mb-2">{title}</h1>
+        {message && <p className="text-muted-foreground text-sm">{message}</p>}
+      </div>
     </main>
   );
 }
