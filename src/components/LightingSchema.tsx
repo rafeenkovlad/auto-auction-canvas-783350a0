@@ -1,10 +1,11 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import type { InspectionElement } from "@/lib/report.api";
-import { type Zone, statusOf, fillFor, strokeFor } from "@/components/ZoneSchema";
+import { type Zone, fillFor, strokeFor } from "@/components/ZoneSchema";
+import { getElementStatus } from "@/lib/report.utils";
+import { SchemaShell, type SchemaCanvasApi } from "@/components/SchemaShell";
 import carFront from "@/assets/car-front.png.asset.json";
 import carRear from "@/assets/car-rear.png.asset.json";
 
-// Hotspots are positioned over the photo using its native pixel dimensions.
 const IMG_W = 1536;
 const IMG_H = 1024;
 
@@ -44,101 +45,97 @@ const REAR_ZONES: Zone[] = [
   },
 ];
 
-
-
 const ALL_ZONES = [...FRONT_ZONES, ...REAR_ZONES];
 
+function labelFor(el: InspectionElement): string {
+  for (const z of ALL_ZONES) if (z.types.includes(el.elementType)) return z.label;
+  return el.elementType.replace(/_/g, " ");
+}
+
 function ImagePanel({
-  title,
   imageUrl,
   zones,
   byType,
-  hovered,
-  setHovered,
+  hoverKey,
+  setHoverKey,
   onElementClick,
 }: {
-  title: string;
   imageUrl: string;
   zones: Zone[];
   byType: Map<string, InspectionElement>;
-  hovered: string | null;
-  setHovered: (k: string | null) => void;
+  hoverKey: string | null;
+  setHoverKey: (k: string | null) => void;
   onElementClick?: (el: InspectionElement) => void;
 }) {
   return (
-    <div className="flex flex-col gap-2 flex-1 min-w-0">
-      <div className="relative w-full">
-        <svg
-          viewBox={`0 0 ${IMG_W} ${IMG_H}`}
-          className="w-full h-auto block"
-          preserveAspectRatio="xMidYMid meet"
-          aria-label={title}
-        >
-          <image href={imageUrl} x={0} y={0} width={IMG_W} height={IMG_H} />
-          {zones.map((z, i) => {
-            const el = z.types.map((t) => byType.get(t)).find(Boolean);
-            const key = `${title}-${i}`;
-            const s = el ? statusOf(el) : "none";
-            const isHover = hovered === key;
-            const hasDamage = el && s !== "ok" && s !== "none";
-            // Visible when hovered or damaged; otherwise fully invisible hotspot.
-            const showOverlay = isHover || hasDamage;
-            const fill = showOverlay
-              ? isHover
-                ? "color-mix(in oklab, var(--accent) 18%, transparent)"
-                : fillFor(s)
-              : "transparent";
-            const stroke = showOverlay ? strokeFor(s, isHover) : "transparent";
-            const sw = isHover ? 5 : 3;
-            const handlers = el
-              ? {
-                  onMouseEnter: () => setHovered(key),
-                  onMouseLeave: () => setHovered(null),
-                  onClick: () => onElementClick?.(el),
-                  style: { cursor: "pointer", transition: "all 140ms ease" },
-                }
-              : { style: { pointerEvents: "none" as const } };
-            const common = {
-              fill,
-              stroke,
-              strokeWidth: sw,
-              strokeLinejoin: "round" as const,
-              vectorEffect: "non-scaling-stroke" as const,
-              ...handlers,
-            };
-            if (z.shape.kind === "rect") {
-              return (
-                <rect
-                  key={key}
-                  x={z.shape.x}
-                  y={z.shape.y}
-                  width={z.shape.w}
-                  height={z.shape.h}
-                  rx={z.shape.rx ?? 8}
-                  {...common}
-                />
-              );
-            }
-            if (z.shape.kind === "polygon") {
-              return <polygon key={key} points={z.shape.points} {...common} />;
-            }
-            if (z.shape.kind === "ellipse") {
-              return (
-                <ellipse
-                  key={key}
-                  cx={z.shape.cx}
-                  cy={z.shape.cy}
-                  rx={z.shape.rx}
-                  ry={z.shape.ry}
-                  {...common}
-                />
-              );
-            }
-            return null;
-          })}
-
-        </svg>
-      </div>
+    <div className="flex-1 min-w-0">
+      <svg
+        viewBox={`0 0 ${IMG_W} ${IMG_H}`}
+        className="w-full h-auto block"
+        preserveAspectRatio="xMidYMid meet"
+      >
+        <image href={imageUrl} x={0} y={0} width={IMG_W} height={IMG_H} />
+        {zones.map((z, i) => {
+          const el = z.types.map((t) => byType.get(t)).find(Boolean);
+          const key = el?.elementType ?? `__zone_${i}`;
+          const s = el ? getElementStatus(el) : "none";
+          const isHover = hoverKey === key;
+          const hasDamage = el && s !== "ok";
+          const showOverlay = isHover || hasDamage;
+          const fill = showOverlay
+            ? isHover
+              ? "color-mix(in oklab, var(--accent) 18%, transparent)"
+              : fillFor(s)
+            : "transparent";
+          const stroke = showOverlay ? strokeFor(s, isHover) : "transparent";
+          const sw = isHover ? 5 : 3;
+          const handlers = el
+            ? {
+                onMouseEnter: () => setHoverKey(key),
+                onMouseLeave: () => setHoverKey(null),
+                onClick: () => onElementClick?.(el),
+                style: { cursor: "pointer", transition: "all 140ms ease" },
+              }
+            : { style: { pointerEvents: "none" as const } };
+          const common = {
+            fill,
+            stroke,
+            strokeWidth: sw,
+            strokeLinejoin: "round" as const,
+            vectorEffect: "non-scaling-stroke" as const,
+            ...handlers,
+          };
+          if (z.shape.kind === "rect") {
+            return (
+              <rect
+                key={key}
+                x={z.shape.x}
+                y={z.shape.y}
+                width={z.shape.w}
+                height={z.shape.h}
+                rx={z.shape.rx ?? 8}
+                {...common}
+              />
+            );
+          }
+          if (z.shape.kind === "polygon") {
+            return <polygon key={key} points={z.shape.points} {...common} />;
+          }
+          if (z.shape.kind === "ellipse") {
+            return (
+              <ellipse
+                key={key}
+                cx={z.shape.cx}
+                cy={z.shape.cy}
+                rx={z.shape.rx}
+                ry={z.shape.ry}
+                {...common}
+              />
+            );
+          }
+          return null;
+        })}
+      </svg>
     </div>
   );
 }
@@ -150,78 +147,44 @@ export function LightingSchema({
   elements: InspectionElement[];
   onElementClick?: (el: InspectionElement) => void;
 }) {
-  const [hovered, setHovered] = useState<string | null>(null);
-
   const byType = useMemo(() => {
     const m = new Map<string, InspectionElement>();
     for (const el of elements) m.set(el.elementType, el);
     return m;
   }, [elements]);
 
-  if (!elements || elements.length === 0) {
-    return (
-      <div className="flex items-center justify-center text-sm text-muted-foreground py-16">
-        Нет данных по освещению
-      </div>
-    );
-  }
-
-  const matchedTypes = new Set<string>();
-  for (const z of ALL_ZONES) {
-    for (const t of z.types) if (byType.has(t)) { matchedTypes.add(t); break; }
-  }
-  const others = elements.filter((e) => !matchedTypes.has(e.elementType));
-  const damaged = elements.filter((e) => statusOf(e) !== "ok");
-
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 items-start">
-        <ImagePanel
-          title="Перед"
-          imageUrl={carFront.url}
-          zones={FRONT_ZONES}
-          byType={byType}
-          hovered={hovered}
-          setHovered={setHovered}
-          onElementClick={onElementClick}
-        />
-        <ImagePanel
-          title="Зад"
-          imageUrl={carRear.url}
-          zones={REAR_ZONES}
-          byType={byType}
-          hovered={hovered}
-          setHovered={setHovered}
-          onElementClick={onElementClick}
-        />
-      </div>
-
-      {damaged.length > 0 && (
-        <div className="flex flex-col gap-1.5">
-          <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            Замечания
-          </div>
-          <ul className="flex flex-col gap-1">
-            {damaged.map((el) => {
-              const s = statusOf(el);
-              return (
-                <li
-                  key={el.id}
-                  className="flex items-center gap-2 text-xs cursor-pointer hover:text-accent"
-                  onClick={() => onElementClick?.(el)}
-                >
-                  <span
-                    className="inline-block w-2 h-2 rounded-full flex-shrink-0"
-                    style={{ background: strokeFor(s, false) }}
-                  />
-                  <span className="truncate">{el.elementType.replace(/_/g, " ")}</span>
-                </li>
-              );
-            })}
-          </ul>
+    <SchemaShell
+      elements={elements}
+      canvasPanel={false}
+      canvas={({ hoverKey, setHoverKey }: SchemaCanvasApi) => (
+        <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 items-start">
+          <ImagePanel
+            imageUrl={carFront.url}
+            zones={FRONT_ZONES}
+            byType={byType}
+            hoverKey={hoverKey}
+            setHoverKey={setHoverKey}
+            onElementClick={onElementClick}
+          />
+          <ImagePanel
+            imageUrl={carRear.url}
+            zones={REAR_ZONES}
+            byType={byType}
+            hoverKey={hoverKey}
+            setHoverKey={setHoverKey}
+            onElementClick={onElementClick}
+          />
         </div>
       )}
-
-    </div>
+      zoneKeyForElement={(el) => el.elementType}
+      zoneLabelForElement={labelFor}
+      zoneLabelForKey={(k) => {
+        const el = byType.get(k);
+        return el ? labelFor(el) : k;
+      }}
+      onElementClick={onElementClick}
+      emptyText="Нет данных по освещению"
+    />
   );
 }
