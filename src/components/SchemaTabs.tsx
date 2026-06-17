@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { getElementStatus, statusFill, statusStroke, type Status } from "@/lib/report.utils";
+import { getElementStatus, type Status } from "@/lib/report.utils";
 import { Car, Armchair, Shield, Disc3, AppWindow, Lightbulb } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { InspectionElement } from "@/lib/report.api";
@@ -8,6 +8,8 @@ import { FrameSchema } from "@/components/FrameSchema";
 import { WheelsSchema } from "@/components/WheelsSchema";
 import { GlassSchema } from "@/components/GlassSchema";
 import { LightingSchema } from "@/components/LightingSchema";
+import { InteriorSchema } from "@/components/InteriorSchema";
+
 
 type TabKey = "body" | "interior" | "frame" | "wheels" | "glass" | "lighting";
 
@@ -21,43 +23,6 @@ const TABS: { key: TabKey; label: string; icon: LucideIcon }[] = [
 ];
 
 
-
-
-function PlaceholderBoard({
-  elements,
-  emptyText,
-  onElementClick,
-}: {
-  elements: InspectionElement[];
-  emptyText: string;
-  onElementClick?: (el: InspectionElement) => void;
-}) {
-  if (!elements || elements.length === 0) {
-    return (
-      <div className="flex items-center justify-center text-sm text-muted-foreground py-16">
-        {emptyText}
-      </div>
-    );
-  }
-  return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-      {elements.map((el) => {
-        const s = getElementStatus(el);
-        return (
-          <button
-            key={el.id}
-            type="button"
-            onClick={() => onElementClick?.(el)}
-            className="text-left px-3 py-2.5 rounded-lg border text-xs font-medium transition-colors hover:border-accent"
-            style={{ background: statusFill(s), borderColor: statusStroke(s) }}
-          >
-            {el.elementType.replace(/_/g, " ")}
-          </button>
-        );
-      })}
-    </div>
-  );
-}
 
 export function SchemaTabs({
   bodyElements,
@@ -171,12 +136,9 @@ export function SchemaTabs({
         <CarBodySchema elements={bodyElements} onElementClick={onElementClick} embedded />
       )}
       {tab === "interior" && (
-        <PlaceholderBoard
-          elements={interiorElements}
-          emptyText="Нет данных по салону"
-          onElementClick={onElementClick}
-        />
+        <InteriorSchema elements={interiorElements} onElementClick={onElementClick} />
       )}
+
       {tab === "frame" && (
         <FrameSchema elements={frameElements} onElementClick={onElementClick} />
       )}

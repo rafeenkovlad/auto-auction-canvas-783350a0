@@ -1,6 +1,9 @@
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 import type { InspectionElement } from "@/lib/report.api";
 import carTopImg from "@/assets/car-top.png";
+import { SchemaShell, type SchemaCanvasApi } from "@/components/SchemaShell";
+
+
 
 
 type Status = "ok" | "minor" | "serious" | "none";
@@ -85,10 +88,6 @@ export function CarBodySchema({
   onElementClick?: (el: InspectionElement) => void;
   embedded?: boolean;
 }) {
-  
-  const [hover, setHover] = useState<string | null>(null);
-
-
   const { zoneMap, zoneElement } = useMemo(() => {
     const m = new Map<string, Status>();
     const eMap = new Map<string, InspectionElement>();
@@ -112,32 +111,24 @@ export function CarBodySchema({
     if (el && onElementClick) onElementClick(el);
   };
 
-  const zoneProps = (id: string) => {
-    const st = statusOfZone(id);
-    const isHover = hover === id;
-    const hasEl = zoneElement.has(id);
-    return {
-      fill: fillFor(st),
-      stroke: strokeFor(st, isHover),
-      strokeWidth: isHover ? 2 : 1.2,
-      strokeLinejoin: "round" as const,
-      style: { cursor: hasEl ? "pointer" : "default", transition: "all 140ms ease" },
-      onMouseEnter: () => setHover(id),
-      onMouseLeave: () => setHover(null),
-      onClick: () => handleZone(id),
+  const renderCanvas = ({ hoverKey, setHoverKey }: SchemaCanvasApi) => {
+    const zoneProps = (id: string) => {
+      const st = statusOfZone(id);
+      const isHover = hoverKey === id;
+      const hasEl = zoneElement.has(id);
+      return {
+        fill: fillFor(st),
+        stroke: strokeFor(st, isHover),
+        strokeWidth: isHover ? 2 : 1.2,
+        strokeLinejoin: "round" as const,
+        style: { cursor: hasEl ? "pointer" : "default", transition: "all 140ms ease" },
+        onMouseEnter: () => setHoverKey(id),
+        onMouseLeave: () => setHoverKey(null),
+        onClick: () => handleZone(id),
+      };
     };
+    return <TopView zoneProps={zoneProps} />;
   };
-
-  const damaged = useMemo(
-    () =>
-      elements
-        .filter((e) => {
-          const z = ELEMENT_ZONE[e.elementType];
-          return z && (statusOf(e) === "minor" || statusOf(e) === "serious");
-        })
-        .sort((a, b) => rank(statusOf(b)) - rank(statusOf(a))),
-    [elements],
-  );
 
   return (
     <div className={embedded ? "" : "panel p-5 md:p-6"}>
@@ -148,136 +139,22 @@ export function CarBodySchema({
           </h3>
         </div>
       )}
-
-      <div className="grid md:grid-cols-[1fr_minmax(180px,240px)] gap-4">
-        <div
-          className="relative rounded-lg p-3 body-schema-canvas"
-          style={{
-            background:
-              "linear-gradient(180deg, oklch(0.985 0.003 250) 0%, oklch(0.97 0.004 250) 100%)",
-            border: "1px solid var(--border)",
-          }}
-        >
-          <TopView zoneProps={zoneProps} />
-          {hover && (
-            <div
-              className="pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-2 px-2.5 py-1 rounded-md text-xs font-medium shadow-sm"
-              style={{
-                background: "var(--card)",
-                border: "1px solid var(--border)",
-              }}
-            >
-              {ZONE_LABEL[hover] ?? hover}
-            </div>
-          )}
-        </div>
-
-        <div className="flex flex-col gap-3">
-          <div className="flex flex-col gap-1.5">
-            {(
-              [
-                ["ok", "Без замечаний", "var(--grade-good)"],
-                ["minor", "Внимание", "var(--grade-warn)"],
-                ["serious", "Повреждения", "var(--grade-bad)"],
-                
-              ] as const
-            ).map(([k, label, color]) => (
-              <div key={k} className="flex items-center gap-2 text-xs">
-                <span
-                  className="w-3 h-3 rounded-full flex-shrink-0"
-                  style={{ background: color }}
-                />
-                <span className="text-muted-foreground">{label}</span>
-              </div>
-            ))}
-          </div>
-
-          {damaged.length > 0 && (
-            <div className="border-t border-border pt-3 mt-1">
-              <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-2">
-                Замечания
-              </div>
-              <div className="flex flex-col gap-2 max-h-[280px] overflow-auto">
-                {damaged.map((el) => {
-                  const z = ELEMENT_ZONE[el.elementType];
-                  const st = statusOf(el);
-                  const allTags = [...el.seriousDamageTags, ...el.noSeriousDamageTags];
-                  const pf = el.paintworkThicknessFrom;
-                  const pt = el.paintworkThicknessTo;
-                  const paint =
-                    pf != null || pt != null
-                      ? pf != null && pt != null && pf !== pt
-                        ? `${pf}–${pt} мкм`
-                        : `${pf ?? pt} мкм`
-                      : null;
-
-                  return (
-                    <button
-                      key={el.id}
-                      type="button"
-                      onMouseEnter={() => setHover(z)}
-                      onMouseLeave={() => setHover(null)}
-                      onClick={() => onElementClick?.(el)}
-                      className="text-left text-xs hover:bg-muted/60 rounded p-1.5 -mx-1.5 transition-colors"
-                    >
-                      <div className="flex items-center gap-2">
-                        <span
-                          className="w-2 h-2 rounded-full flex-shrink-0"
-                          style={{
-                            background:
-                              st === "serious" ? "var(--grade-bad)" : "var(--grade-warn)",
-                          }}
-                        />
-                        <span className="font-medium ink truncate">
-                          {ZONE_LABEL[z] ?? el.elementType.replace(/_/g, " ")}
-                        </span>
-                        {paint && (
-                          <span className="ml-auto mono text-[10px] px-1.5 py-0.5 rounded border border-border text-muted-foreground flex-shrink-0">
-                            ЛКП {paint}
-                          </span>
-                        )}
-
-                      </div>
-                      {el.note && (
-                        <div className="text-[11px] text-muted-foreground ml-4 mt-1 whitespace-pre-wrap break-words">
-                          {el.note}
-                        </div>
-                      )}
-                      {allTags.length > 0 && (
-                        <div className="ml-4 mt-1 flex flex-wrap gap-1">
-                          {allTags.map((t) => (
-                            <span
-                              key={t.id}
-                              className="text-[10px] px-1.5 py-0.5 rounded-full border"
-                              style={{
-                                background: t.type === "serious"
-                                  ? "color-mix(in oklch, var(--grade-bad) 12%, transparent)"
-                                  : "color-mix(in oklch, var(--grade-warn) 14%, transparent)",
-                                borderColor: t.type === "serious"
-                                  ? "color-mix(in oklch, var(--grade-bad) 35%, transparent)"
-                                  : "color-mix(in oklch, var(--grade-warn) 40%, transparent)",
-                                color: "var(--foreground)",
-                              }}
-                            >
-                              {t.name}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-      <p className="mt-3 text-[11px] text-muted-foreground text-center">
-        Наведите или нажмите на элемент, чтобы увидеть детали и связанные фото
-      </p>
+      <SchemaShell
+        elements={elements}
+        canvas={renderCanvas}
+        zoneKeyForElement={(el) => ELEMENT_ZONE[el.elementType] ?? null}
+        zoneLabelForElement={(el) => {
+          const z = ELEMENT_ZONE[el.elementType];
+          return ZONE_LABEL[z] ?? el.elementType.replace(/_/g, " ");
+        }}
+        zoneLabelForKey={(k) => ZONE_LABEL[k] ?? k}
+        onElementClick={onElementClick}
+        emptyText="Нет данных по кузову"
+      />
     </div>
   );
 }
+
 
 type ZoneProps = (id: string) => {
   fill: string;
