@@ -319,26 +319,27 @@ function TopView({ zoneProps }: { zoneProps: ZoneProps }) {
   };
 
   // Центры зон в координатах исходника 1024×1536
+  // Координаты выверены по силуэту авто (bbox ~ x:232–790, y:142–1306)
   const CENTERS: Record<string, [number, number]> = {
-    fbumper: [512, 230],
-    flfender: [310, 440],
-    frfender: [714, 440],
-    hood: [512, 433],
-    windshield: [512, 640],
-    fldoor: [403, 803],
-    frdoor: [621, 803],
-    rldoor: [403, 954],
-    rrdoor: [621, 954],
-    lfwin: [434, 800],
-    rfwin: [590, 800],
-    lrwin: [434, 953],
-    rrwin: [590, 953],
-    roof: [512, 870],
-    rear_window: [512, 1080],
-    rlfender: [310, 1135],
-    rrfender: [714, 1135],
-    trunk: [512, 1186],
-    rbumper: [512, 1245],
+    fbumper:     [512, 175],
+    hood:        [512, 370],
+    flfender:    [288, 360],
+    frfender:    [736, 360],
+    windshield:  [512, 605],
+    lfwin:       [410, 760],
+    rfwin:       [612, 760],
+    lrwin:       [410, 925],
+    rrwin:       [612, 925],
+    fldoor:      [305, 755],
+    frdoor:      [718, 755],
+    rldoor:      [305, 925],
+    rrdoor:      [718, 925],
+    roof:        [512, 840],
+    rear_window: [512, 1065],
+    rlfender:    [288, 1140],
+    rrfender:    [736, 1140],
+    trunk:       [512, 1190],
+    rbumper:     [512, 1275],
   };
 
   // Цвет маркера по статусу зоны
