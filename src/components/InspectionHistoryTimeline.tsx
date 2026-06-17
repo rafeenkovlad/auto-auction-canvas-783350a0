@@ -174,7 +174,7 @@ export function InspectionHistoryTimeline({
         })}
       </ol>
 
-      {MOCK_HISTORY.length > 4 && (
+      {source.length > initialLimit && (
         <div className="flex justify-center mt-5">
           <button
             type="button"
