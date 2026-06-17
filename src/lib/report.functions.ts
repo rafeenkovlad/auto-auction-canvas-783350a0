@@ -83,6 +83,7 @@ export interface CarReport {
     modelGenerationRestylingFrameId?: number | null;
     modelCarId?: number | null;
     carImageUrl?: string | null;
+    carReference?: CarReference | null;
     engineVolume?: string | null;
     engineType?: string | null;
     transmission?: string | null;
