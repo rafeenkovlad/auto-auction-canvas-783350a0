@@ -65,14 +65,12 @@ function ImagePanel({
 }) {
   return (
     <div className="flex flex-col gap-2 flex-1 min-w-0">
-      <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-        {title}
-      </div>
       <div className="relative w-full">
         <svg
           viewBox={`0 0 ${IMG_W} ${IMG_H}`}
           className="w-full h-auto block"
           preserveAspectRatio="xMidYMid meet"
+          aria-label={title}
         >
           <image href={imageUrl} x={0} y={0} width={IMG_W} height={IMG_H} />
           {zones.map((z, i) => {
