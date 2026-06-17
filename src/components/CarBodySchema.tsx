@@ -365,25 +365,25 @@ function TopView({ zoneProps }: { zoneProps: ZoneProps }) {
       />
 
       {/* Кликабельные зоны (прозрачные) */}
-      <path d="M400,140 Q512,118 624,140 L716,308 L308,308 Z" {...overlay("fbumper")} />
-      <path d="M288,310 L348,310 L348,560 L296,560 L280,440 Z" {...overlay("flfender")} />
-      <path d="M736,310 L676,310 L676,560 L728,560 L744,440 Z" {...overlay("frfender")} />
-      <path d="M350,310 L674,310 L674,556 L350,556 Z" {...overlay("hood")} />
-      <path d="M352,562 L672,562 L660,720 L364,720 Z" {...overlay("windshield")} />
-      <path d="M298,724 L508,724 L508,882 L298,882 Z" {...overlay("fldoor")} />
-      <path d="M516,724 L726,724 L726,882 L516,882 Z" {...overlay("frdoor")} />
-      <path d="M298,888 L508,888 L508,1020 L298,1020 Z" {...overlay("rldoor")} />
-      <path d="M516,888 L726,888 L726,1020 L516,1020 Z" {...overlay("rrdoor")} />
-      <path d="M364,724 L504,724 L504,878 L364,878 Z" {...overlay("lfwin")} />
-      <path d="M520,724 L660,724 L660,878 L520,878 Z" {...overlay("rfwin")} />
-      <path d="M364,888 L504,888 L504,1018 L364,1018 Z" {...overlay("lrwin")} />
-      <path d="M520,888 L660,888 L660,1018 L520,1018 Z" {...overlay("rrwin")} />
-      <path d="M364,722 L660,722 L660,1018 L364,1018 Z" {...overlay("roof")} />
-      <path d="M384,1020 L640,1020 L610,1140 L414,1140 Z" {...overlay("rear_window")} />
-      <path d="M288,1024 L350,1024 L350,1218 L312,1244 L280,1140 Z" {...overlay("rlfender")} />
-      <path d="M736,1024 L674,1024 L674,1218 L712,1244 L744,1140 Z" {...overlay("rrfender")} />
-      <path d="M352,1148 L672,1148 L672,1224 L352,1224 Z" {...overlay("trunk")} />
-      <path d="M312,1224 L712,1224 Q512,1290 312,1224 Z" {...overlay("rbumper")} />
+      <path d="M400,142 Q512,130 624,142 L724,210 L290,210 Z" {...overlay("fbumper")} />
+      <path d="M254,210 L348,210 L348,540 L268,540 L256,440 Z" {...overlay("flfender")} />
+      <path d="M770,210 L676,210 L676,540 L756,540 L768,440 Z" {...overlay("frfender")} />
+      <path d="M350,212 L674,212 L674,538 L350,538 Z" {...overlay("hood")} />
+      <path d="M350,540 L674,540 L660,668 L364,668 Z" {...overlay("windshield")} />
+      <path d="M265,670 L358,670 L358,840 L265,840 Z" {...overlay("fldoor")} />
+      <path d="M666,670 L758,670 L758,840 L666,840 Z" {...overlay("frdoor")} />
+      <path d="M265,842 L358,842 L358,1010 L265,1010 Z" {...overlay("rldoor")} />
+      <path d="M666,842 L758,842 L758,1010 L666,1010 Z" {...overlay("rrdoor")} />
+      <path d="M360,670 L508,670 L508,838 L360,838 Z" {...overlay("lfwin")} />
+      <path d="M516,670 L664,670 L664,838 L516,838 Z" {...overlay("rfwin")} />
+      <path d="M360,842 L508,842 L508,1010 L360,1010 Z" {...overlay("lrwin")} />
+      <path d="M516,842 L664,842 L664,1010 L516,1010 Z" {...overlay("rrwin")} />
+      <path d="M360,670 L664,670 L664,1010 L360,1010 Z" {...overlay("roof")} />
+      <path d="M364,1012 L660,1012 L630,1130 L394,1130 Z" {...overlay("rear_window")} />
+      <path d="M256,1012 L358,1012 L358,1230 L300,1244 L260,1130 Z" {...overlay("rlfender")} />
+      <path d="M768,1012 L666,1012 L666,1230 L724,1244 L764,1130 Z" {...overlay("rrfender")} />
+      <path d="M360,1132 L664,1132 L664,1240 L360,1240 Z" {...overlay("trunk")} />
+      <path d="M300,1242 L724,1242 Q512,1310 300,1242 Z" {...overlay("rbumper")} />
 
       {/* Маркеры заметок — небольшие кружки по центру каждой зоны со статусом */}
       {Object.entries(CENTERS).map(([id, [cx, cy]]) => {
