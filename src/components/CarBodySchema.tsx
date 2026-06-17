@@ -313,8 +313,8 @@ function TopView({ zoneProps }: { zoneProps: ZoneProps }) {
       ...z,
       fill: "transparent",
       fillOpacity: 0,
-      stroke: isHover ? "var(--accent)" : "transparent",
-      strokeWidth: isHover ? 2.2 : 0,
+      stroke: "transparent",
+      strokeWidth: 0,
       strokeDasharray: undefined,
       vectorEffect: "non-scaling-stroke" as const,
     };
