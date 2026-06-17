@@ -225,7 +225,7 @@ export function CarBodySchema({
                 {damaged.map((el) => {
                   const z = ELEMENT_ZONE[el.elementType];
                   const st = statusOf(el);
-                  const tag = el.seriousDamageTags[0]?.name ?? el.noSeriousDamageTags[0]?.name;
+                  const allTags = [...el.seriousDamageTags, ...el.noSeriousDamageTags];
                   return (
                     <button
                       key={el.id}
@@ -247,9 +247,30 @@ export function CarBodySchema({
                           {ZONE_LABEL[z] ?? el.elementType.replace(/_/g, " ")}
                         </span>
                       </div>
-                      {tag && (
-                        <div className="text-[11px] text-muted-foreground ml-4 mt-0.5 truncate">
-                          {tag}
+                      {el.note && (
+                        <div className="text-[11px] text-muted-foreground ml-4 mt-1 whitespace-pre-wrap break-words">
+                          {el.note}
+                        </div>
+                      )}
+                      {allTags.length > 0 && (
+                        <div className="ml-4 mt-1 flex flex-wrap gap-1">
+                          {allTags.map((t) => (
+                            <span
+                              key={t.id}
+                              className="text-[10px] px-1.5 py-0.5 rounded-full border"
+                              style={{
+                                background: t.type === "serious"
+                                  ? "color-mix(in oklch, var(--grade-bad) 12%, transparent)"
+                                  : "color-mix(in oklch, var(--grade-warn) 14%, transparent)",
+                                borderColor: t.type === "serious"
+                                  ? "color-mix(in oklch, var(--grade-bad) 35%, transparent)"
+                                  : "color-mix(in oklch, var(--grade-warn) 40%, transparent)",
+                                color: "var(--foreground)",
+                              }}
+                            >
+                              {t.name}
+                            </span>
+                          ))}
                         </div>
                       )}
                     </button>
