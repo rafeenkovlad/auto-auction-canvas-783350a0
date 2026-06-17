@@ -561,7 +561,13 @@ function AuctionSheetPage() {
 
         {/* Body schema + technical state */}
         <section className="grid lg:grid-cols-2 gap-4">
-          <CarBodySchema elements={bodyElements} onElementClick={openElement} />
+          <SchemaTabs
+            bodyElements={bodyElements}
+            interiorElements={report.inspectionStep.interiorElements ?? []}
+            frameElements={report.inspectionStep.bodyReinforcementElements ?? []}
+            onElementClick={openElement}
+          />
+
 
           <div className="panel p-5 md:p-6">
             <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-4">
