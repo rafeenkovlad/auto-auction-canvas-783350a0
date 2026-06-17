@@ -327,7 +327,7 @@ function TopView({ zoneProps }: { zoneProps: ZoneProps }) {
     hood:        [512, 388],
     flfender:    [300, 400],
     frfender:    [724, 400],
-    windshield:  [512, 632],
+    
     fldoor:      [300, 678],
     frdoor:      [724, 678],
     rldoor:      [300, 890],
