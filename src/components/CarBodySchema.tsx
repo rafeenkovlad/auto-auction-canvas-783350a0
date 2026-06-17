@@ -148,32 +148,13 @@ export function CarBodySchema({
 
   return (
     <div className={embedded ? "" : "panel p-5 md:p-6"}>
-      <div className="flex items-center justify-between gap-3 flex-wrap mb-4">
-        {!embedded && (
+      {!embedded && (
+        <div className="mb-4">
           <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
             Схема кузова
           </h3>
-        )}
-
-        <div className="flex items-center gap-1.5 flex-wrap">
-          <span className="text-[11px] text-muted-foreground mr-1">Вид:</span>
-          {VIEWS.map((v) => (
-            <button
-              key={v.key}
-              type="button"
-              onClick={() => setView(v.key)}
-              className="px-2.5 py-1 rounded-md text-xs font-medium border transition-colors"
-              style={{
-                background: view === v.key ? "var(--accent)" : "var(--card)",
-                color: view === v.key ? "var(--accent-foreground)" : "var(--foreground)",
-                borderColor: view === v.key ? "var(--accent)" : "var(--border)",
-              }}
-            >
-              {v.label}
-            </button>
-          ))}
         </div>
-      </div>
+      )}
 
       <div className="grid md:grid-cols-[1fr_minmax(180px,240px)] gap-4">
         <div
@@ -184,11 +165,7 @@ export function CarBodySchema({
             border: "1px solid var(--border)",
           }}
         >
-          {view === "top" && <TopView zoneProps={zoneProps} />}
-          {view === "front" && <FrontView zoneProps={zoneProps} />}
-          {view === "rear" && <RearView zoneProps={zoneProps} />}
-          {view === "left" && <SideView zoneProps={zoneProps} side="left" />}
-          {view === "right" && <SideView zoneProps={zoneProps} side="right" />}
+          <TopView zoneProps={zoneProps} />
           {hover && (
             <div
               className="pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-2 px-2.5 py-1 rounded-md text-xs font-medium shadow-sm"
