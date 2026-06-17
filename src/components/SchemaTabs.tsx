@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { InspectionElement } from "@/lib/report.functions";
 import { CarBodySchema } from "@/components/CarBodySchema";
+import { FrameSchema } from "@/components/FrameSchema";
 
 type TabKey = "body" | "interior" | "frame";
 
@@ -114,11 +115,7 @@ export function SchemaTabs({
         />
       )}
       {tab === "frame" && (
-        <PlaceholderBoard
-          elements={frameElements}
-          emptyText="Нет данных по силовым элементам"
-          onElementClick={onElementClick}
-        />
+        <FrameSchema elements={frameElements} onElementClick={onElementClick} />
       )}
     </div>
   );
