@@ -44,6 +44,20 @@ export interface InspectionElement {
   paintworkThicknessFrom?: number | null;
   paintworkThicknessTo?: number | null;
 }
+export interface CarReferencePhoto {
+  id: number;
+  size: string;
+  urlX1: string;
+  urlX2: string;
+}
+export interface CarReference {
+  brand?: { id: number; name: string; nameRus?: string; slug?: string } | null;
+  model?: { id: number; name: string; nameRus?: string; slug?: string } | null;
+  generation?: { id: number; name: number | string } | null;
+  restyling?: { id: number; name: string; yearStart?: string | null; yearEnd?: string | null } | null;
+  frame?: { id: number; name: string } | null;
+  photos?: CarReferencePhoto[];
+}
 export interface CarReport {
   id: number;
   reportNumber: string;
@@ -51,6 +65,7 @@ export interface CarReport {
   reportDate: string;
   vin: string;
   createdAt: string;
+  carReference?: CarReference | null;
   carStep: {
     vin: string;
     unreadableVin?: boolean;
