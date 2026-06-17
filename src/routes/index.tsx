@@ -349,8 +349,10 @@ function AuctionSheetPage() {
       { key: "testDrive", files: report.testDriveStep.files ?? [] },
       { key: "result", files: report.resultStep.files ?? [] },
     ];
+    const additionalItems: GalleryItem[] = [];
     for (const src of fileSources) {
       const caption = STEP_LABELS[src.key] ?? src.key;
+      const isInspection = src.key === "inspection";
       for (const f of src.files) {
         if (!f || !f.url) continue;
         const idx = all.length;
@@ -369,16 +371,22 @@ function AuctionSheetPage() {
           _sectionKey: src.key,
         };
         all.push(pseudo);
-        galleryItems.push({
+        const item: GalleryItem = {
           file: f,
           idx,
           caption,
           sectionKey: src.key,
           isVideo: isVideoFile(f),
           isDamage: false,
-        });
+        };
+        if (isInspection) {
+          galleryItems.push(item);
+        } else {
+          additionalItems.push(item);
+        }
       }
     }
+
 
     // Hero image: photo from carReference (по модификации).
     // Build srcSet so the browser picks the best match for screen width + DPR.
