@@ -65,14 +65,12 @@ function ImagePanel({
 }) {
   return (
     <div className="flex flex-col gap-2 flex-1 min-w-0">
-      <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-        {title}
-      </div>
       <div className="relative w-full">
         <svg
           viewBox={`0 0 ${IMG_W} ${IMG_H}`}
           className="w-full h-auto block"
           preserveAspectRatio="xMidYMid meet"
+          aria-label={title}
         >
           <image href={imageUrl} x={0} y={0} width={IMG_W} height={IMG_H} />
           {zones.map((z, i) => {
@@ -194,29 +192,6 @@ export function LightingSchema({
         </div>
       )}
 
-      {others.length > 0 && (
-        <div className="flex flex-col gap-1.5">
-          <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            Прочие элементы
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-            {others.map((el) => {
-              const s = statusOf(el);
-              return (
-                <button
-                  key={el.id}
-                  type="button"
-                  onClick={() => onElementClick?.(el)}
-                  className="text-left px-3 py-2 rounded-lg border text-xs font-medium transition-colors hover:border-accent"
-                  style={{ background: fillFor(s), borderColor: strokeFor(s, false) }}
-                >
-                  {el.elementType.replace(/_/g, " ")}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
