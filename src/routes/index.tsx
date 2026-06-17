@@ -301,7 +301,7 @@ function AuctionSheetPage() {
 
   const [activeIdx, setActiveIdx] = useState<number | null>(null);
 
-  const { sections, bodyElements, allElements, gallery, heroImage } = useMemo(() => {
+  const { sections, bodyElements, allElements, gallery, heroImage, heroSrcSet } = useMemo(() => {
     const secs: Array<{ key: string; elements: EnrichedElement[] }> = [];
     const body: EnrichedElement[] = [];
     for (const key of SECTION_KEYS) {
@@ -491,6 +491,8 @@ function AuctionSheetPage() {
             {heroImage ? (
               <img
                 src={heroImage}
+                srcSet={heroSrcSet ?? undefined}
+                sizes="(min-width: 768px) 260px, 100vw"
                 alt={carName}
                 loading="lazy"
                 className="w-full h-full object-cover"
