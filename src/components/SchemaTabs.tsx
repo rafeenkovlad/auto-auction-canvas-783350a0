@@ -117,21 +117,8 @@ export function SchemaTabs({
         <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
           Схема осмотра
         </h3>
-        <div className="hidden sm:flex items-center gap-3 text-[10px] uppercase tracking-wider text-muted-foreground">
-          <span className="inline-flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full" style={{ background: "var(--grade-good)" }} />
-            норма
-          </span>
-          <span className="inline-flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full" style={{ background: "var(--grade-warn)" }} />
-            внимание
-          </span>
-          <span className="inline-flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full" style={{ background: "var(--grade-bad)" }} />
-            замечания
-          </span>
-        </div>
       </div>
+
 
       <div
         className="grid grid-cols-3 sm:grid-cols-6 gap-1 p-1 rounded-xl"
