@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { getElementStatus, statusFill, statusStroke, type Status } from "@/lib/report.utils";
+import { getElementStatus, type Status } from "@/lib/report.utils";
 import { Car, Armchair, Shield, Disc3, AppWindow, Lightbulb } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { InspectionElement } from "@/lib/report.api";
@@ -8,6 +8,8 @@ import { FrameSchema } from "@/components/FrameSchema";
 import { WheelsSchema } from "@/components/WheelsSchema";
 import { GlassSchema } from "@/components/GlassSchema";
 import { LightingSchema } from "@/components/LightingSchema";
+import { InteriorSchema } from "@/components/InteriorSchema";
+
 
 type TabKey = "body" | "interior" | "frame" | "wheels" | "glass" | "lighting";
 
