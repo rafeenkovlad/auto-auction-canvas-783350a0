@@ -301,7 +301,7 @@ function AuctionSheetPage() {
 
   const [activeIdx, setActiveIdx] = useState<number | null>(null);
 
-  const { sections, bodyElements, allElements, gallery, heroImage, heroSrcSet } = useMemo(() => {
+  const { sections, bodyElements, allElements, gallery, additional, heroImage, heroSrcSet } = useMemo(() => {
     const secs: Array<{ key: string; elements: EnrichedElement[] }> = [];
     const body: EnrichedElement[] = [];
     for (const key of SECTION_KEYS) {
