@@ -179,8 +179,8 @@ export function LightingSchema({
       zoneKeyForElement={(el) => el.elementType}
       zoneLabelForElement={labelFor}
       zoneLabelForKey={(k) => {
-        const el = byType.get(k);
-        return el ? labelFor(el) : k;
+        const z = ALL_ZONES.find((zn) => zn.types.includes(k));
+        return z?.label ?? k;
       }}
       onElementClick={onElementClick}
       emptyText="Нет данных по освещению"
