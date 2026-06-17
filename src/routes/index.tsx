@@ -380,8 +380,17 @@ function AuctionSheetPage() {
       }
     }
 
-    // Hero image: car image from characteristics step (по модификации)
-    const hero = report.characteristicsStep?.carImageUrl ?? null;
+    // Hero image: photo from carReference (по модификации); prefer size "m" @ x2
+    const photos = report.carReference?.photos ?? [];
+    const pickPhoto =
+      photos.find((p) => p.size === "m") ??
+      photos.find((p) => p.size === "s") ??
+      photos[0];
+    const hero =
+      pickPhoto?.urlX2 ??
+      pickPhoto?.urlX1 ??
+      report.characteristicsStep?.carImageUrl ??
+      null;
 
     return {
       sections: secs,
