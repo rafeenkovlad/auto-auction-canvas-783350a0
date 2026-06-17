@@ -380,8 +380,18 @@ function AuctionSheetPage() {
       }
     }
 
-    // Hero image: photo from carReference (по модификации); prefer size "m" @ x2
+    // Hero image: photo from carReference (по модификации).
+    // Build srcSet so the browser picks the best match for screen width + DPR.
+    const SIZE_WIDTHS: Record<string, number> = { s: 240, m: 300, l: 400, xl: 600 };
     const photos = report.carReference?.photos ?? [];
+    const srcSetEntries: string[] = [];
+    for (const p of photos) {
+      const base = SIZE_WIDTHS[p.size] ?? 300;
+      if (p.urlX1) srcSetEntries.push(`${p.urlX1} ${base}w`);
+      if (p.urlX2) srcSetEntries.push(`${p.urlX2} ${base * 2}w`);
+    }
+    const heroSrcSet = srcSetEntries.join(", ") || null;
+    // Fallback src: prefer "m" then "s" then first; x2 by default
     const pickPhoto =
       photos.find((p) => p.size === "m") ??
       photos.find((p) => p.size === "s") ??
@@ -398,6 +408,7 @@ function AuctionSheetPage() {
       allElements: all,
       gallery: galleryItems,
       heroImage: hero,
+      heroSrcSet,
     };
   }, [report]);
 
