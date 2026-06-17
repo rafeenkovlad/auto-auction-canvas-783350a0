@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { Car, Armchair, Frame, CircleDot, Square, Lightbulb } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import type { InspectionElement } from "@/lib/report.functions";
 import { CarBodySchema } from "@/components/CarBodySchema";
 import { FrameSchema } from "@/components/FrameSchema";
@@ -8,14 +10,15 @@ import { LightingSchema } from "@/components/LightingSchema";
 
 type TabKey = "body" | "interior" | "frame" | "wheels" | "glass" | "lighting";
 
-const TABS: { key: TabKey; label: string }[] = [
-  { key: "body", label: "Кузов" },
-  { key: "interior", label: "Салон" },
-  { key: "frame", label: "Силовые" },
-  { key: "wheels", label: "Колёса" },
-  { key: "glass", label: "Стёкла" },
-  { key: "lighting", label: "Освещение" },
+const TABS: { key: TabKey; label: string; icon: LucideIcon }[] = [
+  { key: "body", label: "Кузов", icon: Car },
+  { key: "interior", label: "Салон", icon: Armchair },
+  { key: "frame", label: "Силовые", icon: Frame },
+  { key: "wheels", label: "Колёса", icon: CircleDot },
+  { key: "glass", label: "Стёкла", icon: Square },
+  { key: "lighting", label: "Освещение", icon: Lightbulb },
 ];
+
 
 function statusOf(el: InspectionElement) {
   if (el.seriousDamageTags.length > 0) return "serious" as const;
