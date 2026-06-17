@@ -75,6 +75,11 @@ function AuctionSheetPage() {
   }
 
   const report = reportResult.data;
+
+  return <ReportContent report={report} />;
+}
+
+function ReportContent({ report }: { report: Awaited<ReturnType<typeof getReport>> }) {
   const carName = report.reportName.replace(/^.*·\s*/, "");
 
   const [activeIdx, setActiveIdx] = useState<number | null>(null);
