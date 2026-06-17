@@ -67,6 +67,7 @@ export interface CarReport {
   characteristicsStep?: {
     modelGenerationRestylingFrameId?: number | null;
     modelCarId?: number | null;
+    carImageUrl?: string | null;
     engineVolume?: string | null;
     engineType?: string | null;
     transmission?: string | null;
