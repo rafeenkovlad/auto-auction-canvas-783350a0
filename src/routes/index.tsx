@@ -380,13 +380,8 @@ function AuctionSheetPage() {
       }
     }
 
-    // Hero image: first image from car step or any image with car element
-    const hero =
-      [report.carStep.listingFile, ...(report.carStep.files ?? [])].find((f) =>
-        isImageFile(f),
-      )?.url ??
-      body.find((e) => isImageFile(e.file))?.file?.url ??
-      null;
+    // Hero image: car image from characteristics step (по модификации)
+    const hero = report.characteristicsStep?.carImageUrl ?? null;
 
     return {
       sections: secs,
