@@ -4,7 +4,7 @@ import carTopImg from "@/assets/car-top.png";
 
 
 type Status = "ok" | "minor" | "serious" | "none";
-type View = "top" | "front" | "rear" | "left" | "right";
+
 
 const ZONE_LABEL: Record<string, string> = {
   hood: "Капот",
@@ -75,13 +75,6 @@ function strokeFor(s: Status, hovered: boolean) {
   return "oklch(0.62 0.008 250)";
 }
 
-const VIEWS: { key: View; label: string }[] = [
-  { key: "top", label: "Сверху" },
-  { key: "left", label: "Слева" },
-  { key: "right", label: "Справа" },
-  { key: "front", label: "Спереди" },
-  { key: "rear", label: "Сзади" },
-];
 
 export function CarBodySchema({
   elements,
@@ -92,7 +85,7 @@ export function CarBodySchema({
   onElementClick?: (el: InspectionElement) => void;
   embedded?: boolean;
 }) {
-  const [view, setView] = useState<View>("top");
+  
   const [hover, setHover] = useState<string | null>(null);
 
 
