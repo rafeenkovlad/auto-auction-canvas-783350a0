@@ -10,6 +10,7 @@ import {
 import { ElementViewer } from "@/components/ElementViewer";
 import { SchemaTabs } from "@/components/SchemaTabs";
 import { MediaGallery, type GalleryItem } from "@/components/MediaGallery";
+import { InspectionHistoryTimeline } from "@/components/InspectionHistoryTimeline";
 
 const reportQuery = (token?: string) =>
   queryOptions({
@@ -645,6 +646,9 @@ function AuctionSheetPage() {
             )}
           </div>
         </section>
+
+        {/* Inspection history timeline (placeholder, previous reports) */}
+        <InspectionHistoryTimeline />
 
         {/* Media gallery */}
         <MediaGallery
