@@ -24,6 +24,10 @@ const ZONE_LABEL: Record<string, string> = {
   rthresh: "Правый порог",
   windshield: "Лобовое стекло",
   rear_window: "Заднее стекло",
+  lfwin: "Переднее левое стекло",
+  rfwin: "Переднее правое стекло",
+  lrwin: "Заднее левое стекло",
+  rrwin: "Заднее правое стекло",
 };
 
 const ELEMENT_ZONE: Record<string, string> = {
@@ -339,7 +343,10 @@ function TopView({ zoneProps }: { zoneProps: ZoneProps }) {
       {/* Капот */}
       <path d="M350,310 L674,310 L674,556 L350,556 Z" {...overlay("hood")} />
 
-      {/* Передняя левая дверь (включая зону порога — DTO без порогов) */}
+      {/* Лобовое стекло */}
+      <path d="M352,562 L672,562 L660,720 L364,720 Z" {...overlay("windshield")} />
+
+      {/* Передняя левая дверь */}
       <path d="M298,724 L508,724 L508,882 L298,882 Z" {...overlay("fldoor")} />
       {/* Передняя правая дверь */}
       <path d="M516,724 L726,724 L726,882 L516,882 Z" {...overlay("frdoor")} />
@@ -348,8 +355,18 @@ function TopView({ zoneProps }: { zoneProps: ZoneProps }) {
       {/* Задняя правая дверь */}
       <path d="M516,888 L726,888 L726,1020 L516,1020 Z" {...overlay("rrdoor")} />
 
-      {/* Крыша (включая стёкла — DTO без стёкол) */}
-      <path d="M352,562 L672,562 L672,1140 L352,1140 Z" {...overlay("roof")} />
+      {/* Боковые стёкла — передние */}
+      <path d="M364,724 L504,724 L504,878 L364,878 Z" {...overlay("lfwin")} />
+      <path d="M520,724 L660,724 L660,878 L520,878 Z" {...overlay("rfwin")} />
+      {/* Боковые стёкла — задние */}
+      <path d="M364,888 L504,888 L504,1018 L364,1018 Z" {...overlay("lrwin")} />
+      <path d="M520,888 L660,888 L660,1018 L520,1018 Z" {...overlay("rrwin")} />
+
+      {/* Крыша */}
+      <path d="M364,722 L660,722 L660,1018 L364,1018 Z" {...overlay("roof")} />
+
+      {/* Заднее стекло */}
+      <path d="M384,1020 L640,1020 L610,1140 L414,1140 Z" {...overlay("rear_window")} />
 
       {/* Заднее левое крыло (с аркой) */}
       <path d="M288,1024 L350,1024 L350,1218 L312,1244 L280,1140 Z" {...overlay("rlfender")} />
