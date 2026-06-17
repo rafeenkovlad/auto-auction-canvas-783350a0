@@ -1,34 +1,20 @@
-// The browser calls a same-origin proxy (/api/public/report) which forwards
-// to the shared report API. Going through our server avoids cross-origin /
-// sandboxed-preview "Failed to fetch" errors and lets us override the
-// upstream base URL via SHARED_API_URL.
-//
-// If the proxy itself is unreachable, fall back to a direct call to
-// carreports.ru (returns Access-Control-Allow-Origin: *).
+// Client-side fetch to avoid Cloudflare Worker outbound fetch failures
+// ("Network connection lost") when calling carreports.ru from SSR.
+// carreports.ru returns `Access-Control-Allow-Origin: *`, so direct
+// browser fetch works fine.
 
-const DIRECT_API_BASE_URL = "https://carreports.ru";
+const SHARED_API_BASE_URL = "https://carreports.ru";
 
 export async function getReport(args?: {
   data?: { token?: string };
 }): Promise<CarReport> {
   const token = args?.data?.token?.trim();
   if (!token) throw new Error("Не указан токен отчёта");
-
-  const proxyUrl = `/api/public/report?token=${encodeURIComponent(token)}`;
-  const directUrl = `${DIRECT_API_BASE_URL}/api/v1/shared/report?token=${encodeURIComponent(token)}`;
-
-  let res: Response;
-  try {
-    res = await fetch(proxyUrl);
-    if (!res.ok && res.status >= 500) {
-      res = await fetch(directUrl);
-    }
-  } catch {
-    res = await fetch(directUrl);
-  }
+  const res = await fetch(
+    `${SHARED_API_BASE_URL}/api/v1/shared/report?token=${encodeURIComponent(token)}`,
+  );
   if (!res.ok) throw new Error(`Report fetch failed: ${res.status}`);
   const json = (await res.json()) as { result: CarReport; errors?: unknown[] };
-  if (!json?.result) throw new Error("Пустой ответ сервера");
   return json.result;
 }
 

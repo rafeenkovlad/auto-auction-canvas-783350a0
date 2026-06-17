@@ -11,7 +11,6 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ReportsShareTokenRouteImport } from './routes/reports.share.$token'
-import { Route as ApiPublicReportRouteImport } from './routes/api/public/report'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -23,39 +22,30 @@ const ReportsShareTokenRoute = ReportsShareTokenRouteImport.update({
   path: '/reports/share/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPublicReportRoute = ApiPublicReportRouteImport.update({
-  id: '/api/public/report',
-  path: '/api/public/report',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/api/public/report': typeof ApiPublicReportRoute
   '/reports/share/$token': typeof ReportsShareTokenRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/api/public/report': typeof ApiPublicReportRoute
   '/reports/share/$token': typeof ReportsShareTokenRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/api/public/report': typeof ApiPublicReportRoute
   '/reports/share/$token': typeof ReportsShareTokenRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/public/report' | '/reports/share/$token'
+  fullPaths: '/' | '/reports/share/$token'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/public/report' | '/reports/share/$token'
-  id: '__root__' | '/' | '/api/public/report' | '/reports/share/$token'
+  to: '/' | '/reports/share/$token'
+  id: '__root__' | '/' | '/reports/share/$token'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  ApiPublicReportRoute: typeof ApiPublicReportRoute
   ReportsShareTokenRoute: typeof ReportsShareTokenRoute
 }
 
@@ -75,19 +65,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReportsShareTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/report': {
-      id: '/api/public/report'
-      path: '/api/public/report'
-      fullPath: '/api/public/report'
-      preLoaderRoute: typeof ApiPublicReportRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  ApiPublicReportRoute: ApiPublicReportRoute,
   ReportsShareTokenRoute: ReportsShareTokenRoute,
 }
 export const routeTree = rootRouteImport
