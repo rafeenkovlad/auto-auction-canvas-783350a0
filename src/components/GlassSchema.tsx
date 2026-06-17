@@ -1,7 +1,7 @@
 import type { InspectionElement } from "@/lib/report.api";
-import { ZoneSchema, type Zone } from "@/components/ZoneSchema";
+import { ZoneCanvas, type Zone } from "@/components/ZoneSchema";
+import { SchemaShell, type SchemaCanvasApi } from "@/components/SchemaShell";
 
-// Top-down car silhouette with windows highlighted.
 const BASE = (
   <g>
     <rect
@@ -14,7 +14,6 @@ const BASE = (
       stroke="oklch(0.78 0.008 250)"
       strokeWidth="1.5"
     />
-    {/* Mid spine */}
     <line x1="220" y1="240" x2="220" y2="280" stroke="oklch(0.85 0.005 250)" strokeWidth="1" />
   </g>
 );
@@ -23,18 +22,12 @@ const ZONES: Zone[] = [
   {
     types: ["windshield", "front_windshield"],
     label: "Лобовое стекло",
-    shape: {
-      kind: "polygon",
-      points: "150,130 290,130 280,210 160,210",
-    },
+    shape: { kind: "polygon", points: "150,130 290,130 280,210 160,210" },
   },
   {
     types: ["rear_window", "rear_windshield", "back_window"],
     label: "Заднее стекло",
-    shape: {
-      kind: "polygon",
-      points: "160,310 280,310 290,395 150,395",
-    },
+    shape: { kind: "polygon", points: "160,310 280,310 290,395 150,395" },
   },
   {
     types: ["front_left_window", "front_left_glass", "left_front_window"],
@@ -58,6 +51,11 @@ const ZONES: Zone[] = [
   },
 ];
 
+function labelFor(el: InspectionElement): string {
+  for (const z of ZONES) if (z.types.includes(el.elementType)) return z.label;
+  return el.elementType.replace(/_/g, " ");
+}
+
 export function GlassSchema({
   elements,
   onElementClick,
@@ -66,11 +64,26 @@ export function GlassSchema({
   onElementClick?: (el: InspectionElement) => void;
 }) {
   return (
-    <ZoneSchema
-      viewBox="0 0 440 500"
-      baseSvg={BASE}
-      zones={ZONES}
+    <SchemaShell
       elements={elements}
+      canvas={({ hoverKey, setHoverKey }: SchemaCanvasApi) => (
+        <ZoneCanvas
+          viewBox="0 0 440 500"
+          baseSvg={BASE}
+          zones={ZONES}
+          elements={elements}
+          hoverKey={hoverKey}
+          setHoverKey={setHoverKey}
+          onElementClick={onElementClick}
+          maxWidth={420}
+        />
+      )}
+      zoneKeyForElement={(el) => el.elementType}
+      zoneLabelForElement={labelFor}
+      zoneLabelForKey={(k) => {
+        const el = elements.find((e) => e.elementType === k);
+        return el ? labelFor(el) : k;
+      }}
       onElementClick={onElementClick}
       emptyText="Нет данных по стёклам"
     />
