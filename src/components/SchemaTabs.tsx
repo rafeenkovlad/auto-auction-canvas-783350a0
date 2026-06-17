@@ -114,32 +114,42 @@ export function SchemaTabs({
         <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
           Схема осмотра
         </h3>
-        <div className="flex flex-wrap gap-1.5">
+        <div className="flex flex-wrap gap-x-3 gap-y-1">
           {TABS.map((t) => {
             const active = tab === t.key;
             const ws = worstStatus(elementsByTab[t.key]);
-            const hasStatus = ws !== "empty";
-            const bg = hasStatus ? fillFor(ws as "ok" | "minor" | "serious") : "var(--card)";
-            const bd = hasStatus ? strokeFor(ws as "ok" | "minor" | "serious") : "var(--border)";
+            const dotColor =
+              ws === "serious"
+                ? "var(--grade-bad)"
+                : ws === "minor"
+                  ? "var(--grade-warn)"
+                  : ws === "ok"
+                    ? "var(--grade-good)"
+                    : "var(--border)";
             return (
               <button
                 key={t.key}
                 type="button"
                 onClick={() => setTab(t.key)}
-                className="px-3 py-1.5 rounded-md text-xs font-medium border transition-colors"
+                className="inline-flex items-center gap-1.5 px-1.5 py-1 text-xs font-medium bg-transparent border-0 transition-colors"
                 style={{
-                  background: bg,
-                  color: "var(--foreground)",
-                  borderColor: bd,
-                  boxShadow: active ? "0 0 0 2px var(--accent)" : undefined,
+                  color: active ? "var(--foreground)" : "var(--muted-foreground)",
+                  borderBottom: `2px solid ${active ? "var(--foreground)" : "transparent"}`,
+                  borderRadius: 0,
                 }}
               >
+                <span
+                  className="w-1.5 h-1.5 rounded-full"
+                  style={{ background: dotColor }}
+                  aria-hidden
+                />
                 {t.label}
               </button>
             );
           })}
         </div>
       </div>
+
 
       {tab === "body" && (
         <CarBodySchema elements={bodyElements} onElementClick={onElementClick} embedded />
