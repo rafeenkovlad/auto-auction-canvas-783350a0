@@ -330,7 +330,7 @@ function TopView({ zoneProps }: { zoneProps: ZoneProps }) {
     windshield:  [512, 632],
     lfwin:       [330, 682],
     rfwin:       [669, 768],
-    lrwin:       [355, 903],
+    lrwin:       [330, 893],
     rrwin:       [669, 903],
     fldoor:      [304, 700],
     frdoor:      [720, 700],
