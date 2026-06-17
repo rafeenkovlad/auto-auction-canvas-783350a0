@@ -301,7 +301,7 @@ function AuctionSheetPage() {
 
   const [activeIdx, setActiveIdx] = useState<number | null>(null);
 
-  const { sections, bodyElements, allElements, gallery, heroImage } = useMemo(() => {
+  const { sections, bodyElements, allElements, gallery, heroImage, heroSrcSet } = useMemo(() => {
     const secs: Array<{ key: string; elements: EnrichedElement[] }> = [];
     const body: EnrichedElement[] = [];
     for (const key of SECTION_KEYS) {
@@ -380,8 +380,18 @@ function AuctionSheetPage() {
       }
     }
 
-    // Hero image: photo from carReference (по модификации); prefer size "m" @ x2
+    // Hero image: photo from carReference (по модификации).
+    // Build srcSet so the browser picks the best match for screen width + DPR.
+    const SIZE_WIDTHS: Record<string, number> = { s: 240, m: 300, l: 400, xl: 600 };
     const photos = report.carReference?.photos ?? [];
+    const srcSetEntries: string[] = [];
+    for (const p of photos) {
+      const base = SIZE_WIDTHS[p.size] ?? 300;
+      if (p.urlX1) srcSetEntries.push(`${p.urlX1} ${base}w`);
+      if (p.urlX2) srcSetEntries.push(`${p.urlX2} ${base * 2}w`);
+    }
+    const heroSrcSet = srcSetEntries.join(", ") || null;
+    // Fallback src: prefer "m" then "s" then first; x2 by default
     const pickPhoto =
       photos.find((p) => p.size === "m") ??
       photos.find((p) => p.size === "s") ??
@@ -398,6 +408,7 @@ function AuctionSheetPage() {
       allElements: all,
       gallery: galleryItems,
       heroImage: hero,
+      heroSrcSet,
     };
   }, [report]);
 
@@ -480,6 +491,8 @@ function AuctionSheetPage() {
             {heroImage ? (
               <img
                 src={heroImage}
+                srcSet={heroSrcSet ?? undefined}
+                sizes="(min-width: 768px) 260px, 100vw"
                 alt={carName}
                 loading="lazy"
                 className="w-full h-full object-cover"
