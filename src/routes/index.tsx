@@ -624,11 +624,8 @@ function AuctionSheetPage() {
                     key={s.key}
                     sectionKey={s.key}
                     elements={s.elements}
-                    onOpenFirst={() => {
-                      const first = s.elements[0];
-                      if (first) openElement(first);
-                    }}
                   />
+
                 ))}
             </div>
             {(report.inspectionStep.bodyPaintworkThicknessFrom != null ||
