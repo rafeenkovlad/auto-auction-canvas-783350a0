@@ -602,7 +602,7 @@ function AuctionSheetPage() {
         {/* Body schema + technical state */}
         <section className="grid lg:grid-cols-2 gap-4">
           <SchemaTabs
-            bodyElements={bodyElements}
+            bodyElements={report.inspectionStep.bodyElements ?? []}
             interiorElements={report.inspectionStep.interiorElements ?? []}
             frameElements={report.inspectionStep.bodyReinforcementElements ?? []}
             wheelsElements={report.inspectionStep.wheelsAndBrakesElements ?? []}
