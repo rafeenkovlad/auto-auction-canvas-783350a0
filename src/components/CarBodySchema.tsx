@@ -232,6 +232,15 @@ export function CarBodySchema({
                   const z = ELEMENT_ZONE[el.elementType];
                   const st = statusOf(el);
                   const allTags = [...el.seriousDamageTags, ...el.noSeriousDamageTags];
+                  const pf = el.paintworkThicknessFrom;
+                  const pt = el.paintworkThicknessTo;
+                  const paint =
+                    pf != null || pt != null
+                      ? pf != null && pt != null && pf !== pt
+                        ? `${pf}–${pt} мкм`
+                        : `${pf ?? pt} мкм`
+                      : null;
+
                   return (
                     <button
                       key={el.id}
