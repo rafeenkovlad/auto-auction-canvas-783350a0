@@ -1,72 +1,119 @@
+import { useMemo, useState } from "react";
 import type { InspectionElement } from "@/lib/report.api";
-import { ZoneSchema, type Zone } from "@/components/ZoneSchema";
+import { type Zone, statusOf, fillFor, strokeFor } from "@/components/ZoneSchema";
+import carFront from "@/assets/car-front.png.asset.json";
+import carRear from "@/assets/car-rear.png.asset.json";
 
-// Top-down car silhouette with light positions.
-const BASE = (
-  <g>
-    <rect
-      x="120"
-      y="40"
-      width="200"
-      height="440"
-      rx="60"
-      fill="oklch(0.97 0.005 250)"
-      stroke="oklch(0.78 0.008 250)"
-      strokeWidth="1.5"
-    />
-    {/* front grille */}
-    <rect
-      x="170"
-      y="62"
-      width="100"
-      height="14"
-      rx="3"
-      fill="oklch(0.88 0.005 250)"
-    />
-    {/* rear */}
-    <rect
-      x="170"
-      y="448"
-      width="100"
-      height="14"
-      rx="3"
-      fill="oklch(0.88 0.005 250)"
-    />
-  </g>
-);
+// Hotspots are positioned over the photo using its native pixel dimensions.
+const IMG_W = 1512;
+const IMG_H = 988;
 
-const ZONES: Zone[] = [
+const FRONT_ZONES: Zone[] = [
   {
     types: ["left_headlight", "front_left_headlight", "headlight_left"],
     label: "Левая фара",
-    shape: { kind: "ellipse", cx: 156, cy: 70, rx: 22, ry: 12 },
+    shape: { kind: "rect", x: 300, y: 440, w: 230, h: 100, rx: 30 },
   },
   {
     types: ["right_headlight", "front_right_headlight", "headlight_right"],
     label: "Правая фара",
-    shape: { kind: "ellipse", cx: 284, cy: 70, rx: 22, ry: 12 },
+    shape: { kind: "rect", x: 985, y: 440, w: 230, h: 100, rx: 30 },
   },
   {
     types: ["left_fog_light", "front_left_fog_light", "fog_light_left"],
     label: "Левая ПТФ",
-    shape: { kind: "ellipse", cx: 160, cy: 100, rx: 12, ry: 7 },
+    shape: { kind: "rect", x: 325, y: 615, w: 155, h: 120, rx: 24 },
   },
   {
     types: ["right_fog_light", "front_right_fog_light", "fog_light_right"],
     label: "Правая ПТФ",
-    shape: { kind: "ellipse", cx: 280, cy: 100, rx: 12, ry: 7 },
+    shape: { kind: "rect", x: 1035, y: 615, w: 155, h: 120, rx: 24 },
   },
+];
+
+const REAR_ZONES: Zone[] = [
   {
     types: ["left_taillight", "rear_left_taillight", "taillight_left", "left_rear_light"],
     label: "Левый задний фонарь",
-    shape: { kind: "ellipse", cx: 156, cy: 455, rx: 22, ry: 12 },
+    shape: { kind: "rect", x: 300, y: 340, w: 360, h: 130, rx: 28 },
   },
   {
     types: ["right_taillight", "rear_right_taillight", "taillight_right", "right_rear_light"],
     label: "Правый задний фонарь",
-    shape: { kind: "ellipse", cx: 284, cy: 455, rx: 22, ry: 12 },
+    shape: { kind: "rect", x: 855, y: 340, w: 360, h: 130, rx: 28 },
   },
 ];
+
+const ALL_ZONES = [...FRONT_ZONES, ...REAR_ZONES];
+
+function ImagePanel({
+  title,
+  imageUrl,
+  zones,
+  byType,
+  hovered,
+  setHovered,
+  onElementClick,
+}: {
+  title: string;
+  imageUrl: string;
+  zones: Zone[];
+  byType: Map<string, InspectionElement>;
+  hovered: string | null;
+  setHovered: (k: string | null) => void;
+  onElementClick?: (el: InspectionElement) => void;
+}) {
+  return (
+    <div className="flex flex-col gap-2 flex-1 min-w-0">
+      <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+        {title}
+      </div>
+      <div className="relative w-full">
+        <svg
+          viewBox={`0 0 ${IMG_W} ${IMG_H}`}
+          className="w-full h-auto block"
+          preserveAspectRatio="xMidYMid meet"
+        >
+          <image href={imageUrl} x={0} y={0} width={IMG_W} height={IMG_H} />
+          {zones.map((z, i) => {
+            const el = z.types.map((t) => byType.get(t)).find(Boolean);
+            const key = `${title}-${i}`;
+            const s = el ? statusOf(el) : "none";
+            const isHover = hovered === key;
+            // Invisible by default; show overlay only on hover, or when there's damage.
+            const showOverlay = isHover || (el && s !== "ok" && s !== "none");
+            const fill = showOverlay ? fillFor(s) : "transparent";
+            const stroke = showOverlay ? strokeFor(s, isHover) : "transparent";
+            const sw = isHover ? 4 : 2.5;
+            const handlers = el
+              ? {
+                  onMouseEnter: () => setHovered(key),
+                  onMouseLeave: () => setHovered(null),
+                  onClick: () => onElementClick?.(el),
+                  style: { cursor: "pointer" },
+                }
+              : { style: { pointerEvents: "none" as const } };
+            if (z.shape.kind !== "rect") return null;
+            return (
+              <rect
+                key={key}
+                x={z.shape.x}
+                y={z.shape.y}
+                width={z.shape.w}
+                height={z.shape.h}
+                rx={z.shape.rx ?? 8}
+                fill={fill}
+                stroke={stroke}
+                strokeWidth={sw}
+                {...handlers}
+              />
+            );
+          })}
+        </svg>
+      </div>
+    </div>
+  );
+}
 
 export function LightingSchema({
   elements,
@@ -75,14 +122,101 @@ export function LightingSchema({
   elements: InspectionElement[];
   onElementClick?: (el: InspectionElement) => void;
 }) {
+  const [hovered, setHovered] = useState<string | null>(null);
+
+  const byType = useMemo(() => {
+    const m = new Map<string, InspectionElement>();
+    for (const el of elements) m.set(el.elementType, el);
+    return m;
+  }, [elements]);
+
+  if (!elements || elements.length === 0) {
+    return (
+      <div className="flex items-center justify-center text-sm text-muted-foreground py-16">
+        Нет данных по освещению
+      </div>
+    );
+  }
+
+  const matchedTypes = new Set<string>();
+  for (const z of ALL_ZONES) {
+    for (const t of z.types) if (byType.has(t)) { matchedTypes.add(t); break; }
+  }
+  const others = elements.filter((e) => !matchedTypes.has(e.elementType));
+  const damaged = elements.filter((e) => statusOf(e) !== "ok");
+
   return (
-    <ZoneSchema
-      viewBox="0 0 440 500"
-      baseSvg={BASE}
-      zones={ZONES}
-      elements={elements}
-      onElementClick={onElementClick}
-      emptyText="Нет данных по освещению"
-    />
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 items-start">
+        <ImagePanel
+          title="Перед"
+          imageUrl={carFront.url}
+          zones={FRONT_ZONES}
+          byType={byType}
+          hovered={hovered}
+          setHovered={setHovered}
+          onElementClick={onElementClick}
+        />
+        <ImagePanel
+          title="Зад"
+          imageUrl={carRear.url}
+          zones={REAR_ZONES}
+          byType={byType}
+          hovered={hovered}
+          setHovered={setHovered}
+          onElementClick={onElementClick}
+        />
+      </div>
+
+      {damaged.length > 0 && (
+        <div className="flex flex-col gap-1.5">
+          <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Замечания
+          </div>
+          <ul className="flex flex-col gap-1">
+            {damaged.map((el) => {
+              const s = statusOf(el);
+              return (
+                <li
+                  key={el.id}
+                  className="flex items-center gap-2 text-xs cursor-pointer hover:text-accent"
+                  onClick={() => onElementClick?.(el)}
+                >
+                  <span
+                    className="inline-block w-2 h-2 rounded-full flex-shrink-0"
+                    style={{ background: strokeFor(s, false) }}
+                  />
+                  <span className="truncate">{el.elementType.replace(/_/g, " ")}</span>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
+
+      {others.length > 0 && (
+        <div className="flex flex-col gap-1.5">
+          <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Прочие элементы
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            {others.map((el) => {
+              const s = statusOf(el);
+              return (
+                <button
+                  key={el.id}
+                  type="button"
+                  onClick={() => onElementClick?.(el)}
+                  className="text-left px-3 py-2 rounded-lg border text-xs font-medium transition-colors hover:border-accent"
+                  style={{ background: fillFor(s), borderColor: strokeFor(s, false) }}
+                >
+                  {el.elementType.replace(/_/g, " ")}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
