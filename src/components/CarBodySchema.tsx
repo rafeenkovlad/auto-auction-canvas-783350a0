@@ -293,184 +293,217 @@ const CHROME = "oklch(0.82 0.008 250)";
 const STROKE = 1.4;
 
 /* ============================================================
- * TOP VIEW — вид сверху
- * Длинный универсал: трапециевидный нос → широкие плечи → ровные борта
- * → почти вертикальный задок. Видны 4 двери, рейлинги, люк, спойлер.
+ * TOP VIEW — Audi A6 Allroad, вид сверху (полная переработка).
+ * Пропорции реального универсала (~4.95 × 1.9 м), плечевая линия,
+ * сужение к фарам, объёмные рейлинги, панорамный люк, ручки дверей,
+ * горизонты стёкол, тонкие световые блики.
  * ============================================================ */
 function TopView({ zoneProps }: { zoneProps: ZoneProps }) {
   return (
     <svg
-      viewBox="0 0 300 720"
-      className="w-full h-auto max-h-[560px] mx-auto block"
+      viewBox="0 0 320 780"
+      className="w-full h-auto max-h-[580px] mx-auto block"
       role="img"
       aria-label="Audi A6 Allroad — вид сверху"
     >
-      {/* мягкая тень-силуэт */}
-      <ellipse cx="150" cy="700" rx="120" ry="6" fill={INK} opacity="0.08" />
+      <defs>
+        <linearGradient id="bodyHL" x1="0" x2="1" y1="0" y2="0">
+          <stop offset="0" stopColor="white" stopOpacity="0" />
+          <stop offset="0.5" stopColor="white" stopOpacity="0.85" />
+          <stop offset="1" stopColor="white" stopOpacity="0" />
+        </linearGradient>
+        <linearGradient id="bodyShade" x1="0" x2="1" y1="0" y2="0">
+          <stop offset="0" stopColor={INK} stopOpacity="0.18" />
+          <stop offset="0.25" stopColor={INK} stopOpacity="0" />
+          <stop offset="0.75" stopColor={INK} stopOpacity="0" />
+          <stop offset="1" stopColor={INK} stopOpacity="0.18" />
+        </linearGradient>
+        <linearGradient id="glassGrad" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0" stopColor={GLASS} stopOpacity="0.9" />
+          <stop offset="1" stopColor="oklch(0.72 0.02 235)" stopOpacity="0.85" />
+        </linearGradient>
+        <radialGradient id="floorShadow" cx="0.5" cy="0.5" r="0.5">
+          <stop offset="0" stopColor={INK} stopOpacity="0.22" />
+          <stop offset="1" stopColor={INK} stopOpacity="0" />
+        </radialGradient>
+        <clipPath id="bodyClip">
+          <path d="M96,30 Q160,8 224,30 Q266,46 274,98 L280,200 Q284,300 282,400 L280,590 Q278,654 272,680 Q262,716 230,728 Q160,746 90,728 Q58,716 48,680 Q42,654 40,590 L38,400 Q36,300 40,200 L46,98 Q54,46 96,30 Z" />
+        </clipPath>
+      </defs>
 
-      {/* внешний контур кузова: сужение к фарам, широкие плечи, ровная корма */}
-      <path
-        d="M88,28
-           Q150,10 212,28
-           Q252,42 260,90
-           L266,180
-           Q270,260 268,360
-           L266,540
-           Q264,608 258,640
-           Q250,672 220,684
-           Q150,702 80,684
-           Q50,672 42,640
-           Q36,608 34,540
-           L32,360
-           Q30,260 34,180
-           L40,90
-           Q48,42 88,28 Z"
-        fill="white" stroke={OUTLINE} strokeWidth={STROKE} strokeLinejoin="round"
-      />
+      <ellipse cx="160" cy="755" rx="135" ry="10" fill="url(#floorShadow)" />
 
-      {/* ── ПЕРЁД ─────────────────────────────────────────── */}
-      {/* передний бампер с нижним воздухозаборником */}
+      {/* Внешний контур кузова */}
       <path
-        d="M52,58 Q150,36 248,58 L244,98 Q150,80 56,98 Z"
-        {...zoneProps("fbumper")}
-      />
-      {/* боковые воздухозаборники */}
-      <rect x="64" y="68" width="38" height="16" rx="2.5" fill={DARK} opacity="0.55" />
-      <rect x="198" y="68" width="38" height="16" rx="2.5" fill={DARK} opacity="0.55" />
-      {/* Singleframe сверху не виден, но кромка читается */}
-      <path d="M118,86 L182,86 L178,96 L122,96 Z" fill={DARK} opacity="0.35" />
-
-      {/* передние крылья */}
-      <path
-        d="M34,98 L72,98 L72,180 L38,180 Q30,140 34,98 Z"
-        {...zoneProps("flfender")}
-      />
-      <path
-        d="M266,98 L228,98 L228,180 L262,180 Q270,140 266,98 Z"
-        {...zoneProps("frfender")}
+        d="M96,30 Q160,8 224,30 Q266,46 274,98 L280,200 Q284,300 282,400 L280,590 Q278,654 272,680 Q262,716 230,728 Q160,746 90,728 Q58,716 48,680 Q42,654 40,590 L38,400 Q36,300 40,200 L46,98 Q54,46 96,30 Z"
+        fill="white" stroke={OUTLINE} strokeWidth="1.6" strokeLinejoin="round"
       />
 
-      {/* длинный капот */}
-      <path
-        d="M72,98 L228,98 L228,210 L72,210 Z"
-        {...zoneProps("hood")}
-      />
-      {/* power-domes — две продольные подштамповки */}
-      <path d="M96,108 Q100,150 96,206" fill="none" stroke={DIVIDER} strokeWidth="0.6" strokeDasharray="2 3" />
-      <path d="M204,108 Q200,150 204,206" fill="none" stroke={DIVIDER} strokeWidth="0.6" strokeDasharray="2 3" />
-      <line x1="150" y1="100" x2="150" y2="208" stroke={DIVIDER} strokeWidth="0.5" strokeDasharray="2 3" />
-
-      {/* лобовое стекло — сильный наклон */}
-      <path
-        d="M72,210 L228,210 L210,278 L90,278 Z"
-        {...zoneProps("windshield")}
-      />
-      {/* щётки */}
-      <line x1="100" y1="216" x2="118" y2="270" stroke={DARK} strokeWidth="0.8" opacity="0.7" />
-      <line x1="200" y1="216" x2="182" y2="270" stroke={DARK} strokeWidth="0.8" opacity="0.7" />
-
-      {/* зеркала */}
-      <path d="M14,254 Q4,258 6,268 Q12,274 26,272 L30,260 Z" fill={DARK} />
-      <path d="M286,254 Q296,258 294,268 Q288,274 274,272 L270,260 Z" fill={DARK} />
-
-      {/* ── КРЫША И ДВЕРИ ─────────────────────────────────── */}
-      {/* крыша */}
-      <path
-        d="M90,278 L210,278 L210,500 L90,500 Z"
-        {...zoneProps("roof")}
-      />
-      {/* люк / стеклянная панель */}
-      <rect x="108" y="296" width="84" height="120" rx="6"
-        fill={GLASS} opacity="0.55" stroke={OUTLINE} strokeWidth="0.5" />
-      {/* рейлинги allroad — толстые тёмные полосы */}
-      <rect x="86" y="278" width="6" height="222" rx="2" fill={DARK} />
-      <rect x="208" y="278" width="6" height="222" rx="2" fill={DARK} />
-      {/* антенна-плавник */}
-      <ellipse cx="150" cy="492" rx="6" ry="10" fill={DARK} opacity="0.5" />
-
-      {/* пороги с накладками */}
-      <path
-        d="M34,278 L72,278 L72,500 L40,500 Q32,400 34,278 Z"
-        {...zoneProps("lthresh")}
-      />
-      <path
-        d="M266,278 L228,278 L228,500 L260,500 Q268,400 266,278 Z"
-        {...zoneProps("rthresh")}
-      />
-      <rect x="32" y="376" width="6" height="42" rx="1" fill={CLAD} opacity="0.55" />
-      <rect x="262" y="376" width="6" height="42" rx="1" fill={CLAD} opacity="0.55" />
-
-      {/* двери — передние */}
-      <path
-        d="M72,278 L90,278 L90,388 L72,388 Z"
-        {...zoneProps("fldoor")}
-      />
-      <path
-        d="M228,278 L210,278 L210,388 L228,388 Z"
-        {...zoneProps("frdoor")}
-      />
-      {/* двери — задние */}
-      <path
-        d="M72,390 L90,390 L90,500 L72,500 Z"
-        {...zoneProps("rldoor")}
-      />
-      <path
-        d="M228,390 L210,390 L210,500 L228,500 Z"
-        {...zoneProps("rrdoor")}
-      />
-      {/* линия разделения дверей */}
-      <line x1="90" y1="389" x2="210" y2="389" stroke={DIVIDER} strokeWidth="0.6" />
-
-      {/* ── ЗАД ──────────────────────────────────────────── */}
-      {/* задние крылья (расширители) */}
-      <path
-        d="M34,500 L72,500 L72,580 Q52,578 38,572 Q30,540 34,500 Z"
-        {...zoneProps("rlfender")}
-      />
-      <path
-        d="M266,500 L228,500 L228,580 Q248,578 262,572 Q270,540 266,500 Z"
-        {...zoneProps("rrfender")}
-      />
-
-      {/* заднее стекло — короткое и почти вертикальное */}
-      <path
-        d="M90,502 L210,502 L226,556 L74,556 Z"
-        {...zoneProps("rear_window")}
-      />
-      <g stroke={DIVIDER} strokeWidth="0.35" opacity="0.6">
-        <line x1="96" y1="516" x2="204" y2="516" />
-        <line x1="90" y1="528" x2="210" y2="528" />
-        <line x1="84" y1="540" x2="216" y2="540" />
+      {/* Объём (тень боковин + центральный блик) */}
+      <g clipPath="url(#bodyClip)" pointerEvents="none">
+        <rect x="0" y="0" width="320" height="780" fill="url(#bodyShade)" />
+        <rect x="140" y="0" width="40" height="780" fill="url(#bodyHL)" opacity="0.35" />
       </g>
-      {/* спойлер */}
-      <rect x="84" y="498" width="132" height="6" rx="2" fill={DARK} opacity="0.5" />
 
-      {/* крышка багажника */}
-      <path
-        d="M72,558 L228,558 L228,634 L72,634 Z"
-        {...zoneProps("trunk")}
-      />
-      <line x1="150" y1="566" x2="150" y2="628" stroke={DIVIDER} strokeWidth="0.5" strokeDasharray="3 3" />
-      {/* кольца Audi */}
-      <g fill="none" stroke={DARK} strokeWidth="0.9" opacity="0.9">
-        <circle cx="138" cy="592" r="4.5" />
-        <circle cx="146" cy="592" r="4.5" />
-        <circle cx="154" cy="592" r="4.5" />
-        <circle cx="162" cy="592" r="4.5" />
+      {/* ── ПЕРЕДОК ───────────────────────────────────────── */}
+      <path d="M58,62 Q160,38 262,62 L258,106 Q160,86 62,106 Z" {...zoneProps("fbumper")} />
+      {/* Singleframe */}
+      <path d="M124,90 L196,90 L190,108 L130,108 Z" fill={DARK} opacity="0.55" />
+      <g stroke="oklch(0.4 0.008 250)" strokeWidth="0.5" opacity="0.7">
+        {Array.from({ length: 9 }).map((_, i) => {
+          const t = i / 8;
+          const xTop = 126 + t * 68;
+          const xBot = 132 + t * 56;
+          return <line key={i} x1={xTop} y1="92" x2={xBot} y2="106" />;
+        })}
       </g>
-      <rect x="124" y="606" width="52" height="6" rx="1" fill={DARK} opacity="0.5" />
+      {/* Воздухозаборники */}
+      <path d="M70,72 L108,72 L106,90 L72,90 Z" fill={DARK} opacity="0.6" />
+      <path d="M250,72 L212,72 L214,90 L248,90 Z" fill={DARK} opacity="0.6" />
 
-      {/* задний бампер с двойным выхлопом и диффузором */}
-      <path
-        d="M56,636 L244,636 L248,668 Q150,688 52,668 Z"
-        {...zoneProps("rbumper")}
-      />
-      <rect x="86" y="654" width="32" height="12" rx="2" fill={DARK} opacity="0.65" />
-      <rect x="182" y="654" width="32" height="12" rx="2" fill={DARK} opacity="0.65" />
+      {/* Фары */}
+      <path d="M62,68 Q88,60 122,68 L120,82 Q86,76 64,82 Z"
+        fill={LAMP} stroke={OUTLINE} strokeWidth="0.6" strokeLinejoin="round" />
+      <path d="M258,68 Q232,60 198,68 L200,82 Q234,76 256,82 Z"
+        fill={LAMP} stroke={OUTLINE} strokeWidth="0.6" strokeLinejoin="round" />
+      <line x1="70" y1="74" x2="118" y2="74" stroke={INK} strokeWidth="0.5" opacity="0.7" />
+      <line x1="202" y1="74" x2="250" y2="74" stroke={INK} strokeWidth="0.5" opacity="0.7" />
 
-      {/* стрелка «перёд» */}
-      <g opacity="0.5">
-        <path d="M150,14 L157,28 L143,28 Z" fill={OUTLINE} />
+      {/* Передние крылья */}
+      <path d="M40,108 L80,108 L80,200 L44,200 Q36,154 40,108 Z" {...zoneProps("flfender")} />
+      <path d="M280,108 L240,108 L240,200 L276,200 Q284,154 280,108 Z" {...zoneProps("frfender")} />
+
+      {/* ── КАПОТ ────────────────────────────────────────── */}
+      <path d="M80,108 L240,108 L240,234 L80,234 Z" {...zoneProps("hood")} />
+      <path d="M80,108 L80,234 M240,108 L240,234" stroke={OUTLINE} strokeWidth="0.7" opacity="0.6" />
+      <path d="M104,120 Q108,170 102,228" fill="none" stroke={DIVIDER} strokeWidth="0.9" strokeLinecap="round" />
+      <path d="M216,120 Q212,170 218,228" fill="none" stroke={DIVIDER} strokeWidth="0.9" strokeLinecap="round" />
+      <line x1="160" y1="112" x2="160" y2="232" stroke={DIVIDER} strokeWidth="0.5" strokeDasharray="2 4" />
+      <path d="M90,112 Q160,108 230,112" fill="none" stroke={DIVIDER} strokeWidth="0.5" opacity="0.7" />
+      <g fill="none" stroke={CHROME} strokeWidth="0.9" opacity="0.85" pointerEvents="none">
+        <circle cx="150" cy="146" r="3.5" />
+        <circle cx="156" cy="146" r="3.5" />
+        <circle cx="162" cy="146" r="3.5" />
+        <circle cx="168" cy="146" r="3.5" />
+      </g>
+
+      {/* Жабо + лобовое */}
+      <rect x="80" y="234" width="160" height="6" fill={DARK} opacity="0.45" />
+      <path d="M80,240 L240,240 L218,308 L102,308 Z" {...zoneProps("windshield")} />
+      <path d="M82,242 L238,242 L216,306 L104,306 Z" fill="url(#glassGrad)" opacity="0.55" pointerEvents="none" />
+      <g stroke={DARK} strokeWidth="1.1" strokeLinecap="round" opacity="0.85" pointerEvents="none">
+        <line x1="108" y1="248" x2="146" y2="298" />
+        <line x1="212" y1="248" x2="174" y2="298" />
+      </g>
+      <g fill={DARK} opacity="0.8" pointerEvents="none">
+        <circle cx="108" cy="248" r="2" />
+        <circle cx="212" cy="248" r="2" />
+      </g>
+
+      {/* Зеркала */}
+      <g>
+        <path d="M18,272 Q4,278 8,294 Q22,300 38,294 L42,278 Z"
+          fill={DARK} stroke={OUTLINE} strokeWidth="0.5" />
+        <path d="M22,284 Q34,288 38,282" fill="none" stroke={CHROME} strokeWidth="0.6" opacity="0.7" />
+        <path d="M302,272 Q316,278 312,294 Q298,300 282,294 L278,278 Z"
+          fill={DARK} stroke={OUTLINE} strokeWidth="0.5" />
+        <path d="M298,284 Q286,288 282,282" fill="none" stroke={CHROME} strokeWidth="0.6" opacity="0.7" />
+      </g>
+
+      {/* Крыша + панорамный люк */}
+      <path d="M104,308 L216,308 L216,548 L104,548 Z" {...zoneProps("roof")} />
+      <rect x="118" y="324" width="84" height="98" rx="6"
+        fill="url(#glassGrad)" opacity="0.7" stroke={OUTLINE} strokeWidth="0.5" pointerEvents="none" />
+      <rect x="118" y="426" width="84" height="100" rx="6"
+        fill="url(#glassGrad)" opacity="0.5" stroke={OUTLINE} strokeWidth="0.5" pointerEvents="none" />
+      <line x1="120" y1="424" x2="200" y2="424" stroke={DARK} strokeWidth="0.6" opacity="0.6" />
+
+      {/* Рейлинги */}
+      <g pointerEvents="none">
+        <rect x="98" y="308" width="8" height="240" rx="3" fill={DARK} />
+        <rect x="99" y="308" width="2" height="240" fill="oklch(0.45 0.012 250)" opacity="0.6" />
+        <rect x="214" y="308" width="8" height="240" rx="3" fill={DARK} />
+        <rect x="215" y="308" width="2" height="240" fill="oklch(0.45 0.012 250)" opacity="0.6" />
+        {[332, 422, 524].map((y) => (
+          <g key={y}>
+            <ellipse cx="102" cy={y} rx="6" ry="4" fill={INK} />
+            <ellipse cx="218" cy={y} rx="6" ry="4" fill={INK} />
+          </g>
+        ))}
+      </g>
+
+      {/* Антенна-плавник */}
+      <path d="M152,538 Q160,520 168,538 L166,548 L154,548 Z"
+        fill={DARK} stroke={OUTLINE} strokeWidth="0.5" />
+
+      {/* Пороги */}
+      <path d="M38,308 L80,308 L80,548 L44,548 Q34,432 38,308 Z" {...zoneProps("lthresh")} />
+      <path d="M282,308 L240,308 L240,548 L276,548 Q286,432 282,308 Z" {...zoneProps("rthresh")} />
+      <path d="M36,398 L42,398 L42,458 L36,458 Z" fill={CLAD} opacity="0.6" />
+      <path d="M284,398 L278,398 L278,458 L284,458 Z" fill={CLAD} opacity="0.6" />
+
+      {/* Двери */}
+      <path d="M80,308 L104,308 L104,422 L80,422 Z" {...zoneProps("fldoor")} />
+      <path d="M240,308 L216,308 L216,422 L240,422 Z" {...zoneProps("frdoor")} />
+      <path d="M80,424 L104,424 L104,548 L80,548 Z" {...zoneProps("rldoor")} />
+      <path d="M240,424 L216,424 L216,548 L240,548 Z" {...zoneProps("rrdoor")} />
+      <line x1="80" y1="423" x2="104" y2="423" stroke={INK} strokeWidth="0.7" />
+      <line x1="216" y1="423" x2="240" y2="423" stroke={INK} strokeWidth="0.7" />
+      {/* Стёкла дверей */}
+      <rect x="89" y="316" width="9" height="100" rx="2" fill="url(#glassGrad)" opacity="0.65" pointerEvents="none" />
+      <rect x="222" y="316" width="9" height="100" rx="2" fill="url(#glassGrad)" opacity="0.65" pointerEvents="none" />
+      <rect x="89" y="430" width="9" height="110" rx="2" fill="url(#glassGrad)" opacity="0.65" pointerEvents="none" />
+      <rect x="222" y="430" width="9" height="110" rx="2" fill="url(#glassGrad)" opacity="0.65" pointerEvents="none" />
+      {/* Ручки */}
+      <g fill={CHROME} stroke={OUTLINE} strokeWidth="0.4" pointerEvents="none">
+        <rect x="82" y="372" width="6" height="14" rx="1.5" />
+        <rect x="232" y="372" width="6" height="14" rx="1.5" />
+        <rect x="82" y="480" width="6" height="14" rx="1.5" />
+        <rect x="232" y="480" width="6" height="14" rx="1.5" />
+      </g>
+
+      {/* Задние крылья */}
+      <path d="M38,548 L80,548 L80,628 Q58,626 44,620 Q34,588 38,548 Z" {...zoneProps("rlfender")} />
+      <path d="M282,548 L240,548 L240,628 Q262,626 276,620 Q286,588 282,548 Z" {...zoneProps("rrfender")} />
+
+      {/* Заднее стекло + спойлер */}
+      <path d="M104,550 L216,550 L232,608 L88,608 Z" {...zoneProps("rear_window")} />
+      <path d="M106,552 L214,552 L228,604 L92,604 Z" fill="url(#glassGrad)" opacity="0.7" pointerEvents="none" />
+      <g stroke={CHROME} strokeWidth="0.35" opacity="0.55" pointerEvents="none">
+        <line x1="110" y1="566" x2="210" y2="566" />
+        <line x1="106" y1="578" x2="214" y2="578" />
+        <line x1="100" y1="590" x2="220" y2="590" />
+      </g>
+      <path d="M96,546 L224,546 L228,556 L92,556 Z" fill={DARK} opacity="0.55" pointerEvents="none" />
+      <rect x="148" y="540" width="24" height="3" rx="1" fill={TAIL} opacity="0.8" pointerEvents="none" />
+
+      {/* Крышка багажника */}
+      <path d="M80,610 L240,610 L240,684 L80,684 Z" {...zoneProps("trunk")} />
+      <line x1="160" y1="616" x2="160" y2="680" stroke={DIVIDER} strokeWidth="0.5" strokeDasharray="3 3" />
+      <g fill="none" stroke={CHROME} strokeWidth="1" opacity="0.95" pointerEvents="none">
+        <circle cx="146" cy="644" r="5" />
+        <circle cx="154" cy="644" r="5" />
+        <circle cx="162" cy="644" r="5" />
+        <circle cx="170" cy="644" r="5" />
+      </g>
+      <rect x="128" y="660" width="64" height="6" rx="1" fill={INK} opacity="0.55" pointerEvents="none" />
+
+      {/* Задний бампер */}
+      <path d="M62,686 L258,686 L262,720 Q160,742 58,720 Z" {...zoneProps("rbumper")} />
+      <path d="M110,706 L210,706 L206,722 L114,722 Z" fill={DARK} opacity="0.5" pointerEvents="none" />
+      <rect x="84" y="704" width="32" height="12" rx="2.5" fill={DARK} stroke={CHROME} strokeWidth="0.5" pointerEvents="none" />
+      <rect x="204" y="704" width="32" height="12" rx="2.5" fill={DARK} stroke={CHROME} strokeWidth="0.5" pointerEvents="none" />
+
+      {/* Задние фонари — красные «крылья» сверху */}
+      <path d="M44,612 L80,612 L80,632 L48,632 Q40,624 44,612 Z"
+        fill={TAIL} opacity="0.85" stroke={OUTLINE} strokeWidth="0.5" pointerEvents="none" />
+      <path d="M276,612 L240,612 L240,632 L272,632 Q280,624 276,612 Z"
+        fill={TAIL} opacity="0.85" stroke={OUTLINE} strokeWidth="0.5" pointerEvents="none" />
+
+      {/* Стрелка «перёд» */}
+      <g opacity="0.45">
+        <path d="M160,16 L168,32 L152,32 Z" fill={OUTLINE} />
+        <text x="160" y="42" textAnchor="middle" fontSize="7" fontFamily="ui-sans-serif, system-ui" fill={INK}>FRONT</text>
       </g>
     </svg>
   );
