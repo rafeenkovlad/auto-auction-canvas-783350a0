@@ -5,29 +5,29 @@ import carFront from "@/assets/car-front.png.asset.json";
 import carRear from "@/assets/car-rear.png.asset.json";
 
 // Hotspots are positioned over the photo using its native pixel dimensions.
-const IMG_W = 1512;
-const IMG_H = 988;
+const IMG_W = 1536;
+const IMG_H = 1024;
 
 const FRONT_ZONES: Zone[] = [
   {
     types: ["left_headlight", "front_left_headlight", "headlight_left"],
     label: "Левая фара",
-    shape: { kind: "rect", x: 300, y: 440, w: 230, h: 100, rx: 30 },
+    shape: { kind: "rect", x: 255, y: 455, w: 330, h: 110, rx: 30 },
   },
   {
     types: ["right_headlight", "front_right_headlight", "headlight_right"],
     label: "Правая фара",
-    shape: { kind: "rect", x: 985, y: 440, w: 230, h: 100, rx: 30 },
+    shape: { kind: "rect", x: 950, y: 455, w: 330, h: 110, rx: 30 },
   },
   {
     types: ["left_fog_light", "front_left_fog_light", "fog_light_left"],
     label: "Левая ПТФ",
-    shape: { kind: "rect", x: 325, y: 615, w: 155, h: 120, rx: 24 },
+    shape: { kind: "rect", x: 210, y: 620, w: 200, h: 130, rx: 24 },
   },
   {
     types: ["right_fog_light", "front_right_fog_light", "fog_light_right"],
     label: "Правая ПТФ",
-    shape: { kind: "rect", x: 1035, y: 615, w: 155, h: 120, rx: 24 },
+    shape: { kind: "rect", x: 1125, y: 620, w: 200, h: 130, rx: 24 },
   },
 ];
 
@@ -35,14 +35,15 @@ const REAR_ZONES: Zone[] = [
   {
     types: ["left_taillight", "rear_left_taillight", "taillight_left", "left_rear_light"],
     label: "Левый задний фонарь",
-    shape: { kind: "rect", x: 300, y: 340, w: 360, h: 130, rx: 28 },
+    shape: { kind: "rect", x: 225, y: 360, w: 390, h: 120, rx: 28 },
   },
   {
     types: ["right_taillight", "rear_right_taillight", "taillight_right", "right_rear_light"],
     label: "Правый задний фонарь",
-    shape: { kind: "rect", x: 855, y: 340, w: 360, h: 130, rx: 28 },
+    shape: { kind: "rect", x: 920, y: 360, w: 390, h: 120, rx: 28 },
   },
 ];
+
 
 const ALL_ZONES = [...FRONT_ZONES, ...REAR_ZONES];
 
