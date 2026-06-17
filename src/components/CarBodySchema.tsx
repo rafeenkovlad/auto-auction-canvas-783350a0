@@ -203,7 +203,7 @@ export function CarBodySchema({
                 ["ok", "Без замечаний", "var(--grade-good)"],
                 ["minor", "Внимание", "var(--grade-warn)"],
                 ["serious", "Повреждения", "var(--grade-bad)"],
-                ["none", "Не проверялось", "oklch(0.82 0.005 250)"],
+                
               ] as const
             ).map(([k, label, color]) => (
               <div key={k} className="flex items-center gap-2 text-xs">
