@@ -12,22 +12,22 @@ const FRONT_ZONES: Zone[] = [
   {
     types: ["left_headlight", "front_left_headlight", "headlight_left"],
     label: "Левая фара",
-    shape: { kind: "rect", x: 255, y: 455, w: 330, h: 110, rx: 30 },
+    shape: { kind: "polygon", points: "260,478 590,488 575,558 280,545" },
   },
   {
     types: ["right_headlight", "front_right_headlight", "headlight_right"],
     label: "Правая фара",
-    shape: { kind: "rect", x: 950, y: 455, w: 330, h: 110, rx: 30 },
+    shape: { kind: "polygon", points: "1276,478 946,488 961,558 1256,545" },
   },
   {
     types: ["left_fog_light", "front_left_fog_light", "fog_light_left"],
     label: "Левая ПТФ",
-    shape: { kind: "rect", x: 210, y: 620, w: 200, h: 130, rx: 24 },
+    shape: { kind: "rect", x: 220, y: 640, w: 195, h: 115, rx: 30 },
   },
   {
     types: ["right_fog_light", "front_right_fog_light", "fog_light_right"],
     label: "Правая ПТФ",
-    shape: { kind: "rect", x: 1125, y: 620, w: 200, h: 130, rx: 24 },
+    shape: { kind: "rect", x: 1121, y: 640, w: 195, h: 115, rx: 30 },
   },
 ];
 
@@ -35,14 +35,15 @@ const REAR_ZONES: Zone[] = [
   {
     types: ["left_taillight", "rear_left_taillight", "taillight_left", "left_rear_light"],
     label: "Левый задний фонарь",
-    shape: { kind: "rect", x: 225, y: 360, w: 390, h: 120, rx: 28 },
+    shape: { kind: "polygon", points: "235,377 610,387 595,440 370,475 235,470" },
   },
   {
     types: ["right_taillight", "rear_right_taillight", "taillight_right", "right_rear_light"],
     label: "Правый задний фонарь",
-    shape: { kind: "rect", x: 920, y: 360, w: 390, h: 120, rx: 28 },
+    shape: { kind: "polygon", points: "1301,377 926,387 941,440 1166,475 1301,470" },
   },
 ];
+
 
 
 const ALL_ZONES = [...FRONT_ZONES, ...REAR_ZONES];
@@ -79,35 +80,63 @@ function ImagePanel({
             const key = `${title}-${i}`;
             const s = el ? statusOf(el) : "none";
             const isHover = hovered === key;
-            // Invisible by default; show overlay only on hover, or when there's damage.
-            const showOverlay = isHover || (el && s !== "ok" && s !== "none");
-            const fill = showOverlay ? fillFor(s) : "transparent";
+            const hasDamage = el && s !== "ok" && s !== "none";
+            // Visible when hovered or damaged; otherwise fully invisible hotspot.
+            const showOverlay = isHover || hasDamage;
+            const fill = showOverlay
+              ? isHover
+                ? "color-mix(in oklab, var(--accent) 18%, transparent)"
+                : fillFor(s)
+              : "transparent";
             const stroke = showOverlay ? strokeFor(s, isHover) : "transparent";
-            const sw = isHover ? 4 : 2.5;
+            const sw = isHover ? 5 : 3;
             const handlers = el
               ? {
                   onMouseEnter: () => setHovered(key),
                   onMouseLeave: () => setHovered(null),
                   onClick: () => onElementClick?.(el),
-                  style: { cursor: "pointer" },
+                  style: { cursor: "pointer", transition: "all 140ms ease" },
                 }
               : { style: { pointerEvents: "none" as const } };
-            if (z.shape.kind !== "rect") return null;
-            return (
-              <rect
-                key={key}
-                x={z.shape.x}
-                y={z.shape.y}
-                width={z.shape.w}
-                height={z.shape.h}
-                rx={z.shape.rx ?? 8}
-                fill={fill}
-                stroke={stroke}
-                strokeWidth={sw}
-                {...handlers}
-              />
-            );
+            const common = {
+              fill,
+              stroke,
+              strokeWidth: sw,
+              strokeLinejoin: "round" as const,
+              vectorEffect: "non-scaling-stroke" as const,
+              ...handlers,
+            };
+            if (z.shape.kind === "rect") {
+              return (
+                <rect
+                  key={key}
+                  x={z.shape.x}
+                  y={z.shape.y}
+                  width={z.shape.w}
+                  height={z.shape.h}
+                  rx={z.shape.rx ?? 8}
+                  {...common}
+                />
+              );
+            }
+            if (z.shape.kind === "polygon") {
+              return <polygon key={key} points={z.shape.points} {...common} />;
+            }
+            if (z.shape.kind === "ellipse") {
+              return (
+                <ellipse
+                  key={key}
+                  cx={z.shape.cx}
+                  cy={z.shape.cy}
+                  rx={z.shape.rx}
+                  ry={z.shape.ry}
+                  {...common}
+                />
+              );
+            }
+            return null;
           })}
+
         </svg>
       </div>
     </div>
