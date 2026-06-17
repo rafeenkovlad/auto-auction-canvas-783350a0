@@ -42,14 +42,14 @@ function PlaceholderBoard({
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
       {elements.map((el) => {
-        const s = statusOf(el);
+        const s = getElementStatus(el);
         return (
           <button
             key={el.id}
             type="button"
             onClick={() => onElementClick?.(el)}
             className="text-left px-3 py-2.5 rounded-lg border text-xs font-medium transition-colors hover:border-accent"
-            style={{ background: fillFor(s), borderColor: strokeFor(s) }}
+            style={{ background: statusFill(s), borderColor: statusStroke(s) }}
           >
             {el.elementType.replace(/_/g, " ")}
           </button>
