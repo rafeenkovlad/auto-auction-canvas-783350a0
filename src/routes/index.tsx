@@ -460,7 +460,14 @@ function AuctionSheetPage() {
   }, [report]);
 
   return (
-    <main className="min-h-screen py-5 px-3 md:px-6">
+    <main
+      className="min-h-screen py-5 px-3 md:px-6"
+      // Hide underlying content (in particular native <video> thumbnails,
+      // which on iOS render in a separate compositor layer and can bleed
+      // through fullscreen overlays) while the lightbox is open.
+      style={activeIdx != null ? { visibility: "hidden" } : undefined}
+      aria-hidden={activeIdx != null ? true : undefined}
+    >
       <div className="mx-auto max-w-7xl space-y-4">
         {/* Top bar */}
         <header className="panel px-4 md:px-5 py-3 flex items-center gap-4 md:gap-6 flex-wrap">
