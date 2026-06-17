@@ -415,10 +415,12 @@ function AuctionSheetPage() {
       bodyElements: body,
       allElements: all,
       gallery: galleryItems,
+      additional: additionalItems,
       heroImage: hero,
       heroSrcSet,
     };
   }, [report]);
+
 
   const openElement = (el: InspectionElement) => {
     const idx = allElements.findIndex((e) => e.id === el.id);
