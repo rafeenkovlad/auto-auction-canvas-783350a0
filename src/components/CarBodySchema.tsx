@@ -1,5 +1,7 @@
 import { useState, useMemo } from "react";
 import type { InspectionElement } from "@/lib/report.functions";
+import carTopImg from "@/assets/car-top.png";
+
 
 type Status = "ok" | "minor" | "serious" | "none";
 type View = "top" | "front" | "rear" | "left" | "right";
