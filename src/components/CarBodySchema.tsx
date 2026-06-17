@@ -304,18 +304,49 @@ const STROKE = 1.4;
  * Координаты зон выверены под исходник 1024 × 1536.
  * ============================================================ */
 function TopView({ zoneProps }: { zoneProps: ZoneProps }) {
-  // Обёртка над zoneProps: для целой панели — полностью прозрачно
-  // (видно фото); для повреждённой — полупрозрачная цветная заливка.
+  // Зоны-пути остаются только кликабельной/hover-областью —
+  // подсветка повреждений показывается отдельными маркерами-кружками.
   const overlay = (id: string) => {
     const z = zoneProps(id);
-    const damaged = z.fill !== "white";
+    const isHover = z.stroke === "var(--accent)";
     return {
       ...z,
-      fill: damaged ? z.fill : "transparent",
-      fillOpacity: damaged ? 0.55 : 0,
-      stroke: damaged ? z.stroke : "transparent",
-      strokeWidth: damaged ? 1.6 : 0,
+      fill: "transparent",
+      fillOpacity: 0,
+      stroke: isHover ? "var(--accent)" : "transparent",
+      strokeWidth: isHover ? 2 : 0,
     };
+  };
+
+  // Центры зон в координатах исходника 1024×1536
+  const CENTERS: Record<string, [number, number]> = {
+    fbumper: [512, 230],
+    flfender: [310, 440],
+    frfender: [714, 440],
+    hood: [512, 433],
+    windshield: [512, 640],
+    fldoor: [403, 803],
+    frdoor: [621, 803],
+    rldoor: [403, 954],
+    rrdoor: [621, 954],
+    lfwin: [434, 800],
+    rfwin: [590, 800],
+    lrwin: [434, 953],
+    rrwin: [590, 953],
+    roof: [512, 870],
+    rear_window: [512, 1080],
+    rlfender: [310, 1135],
+    rrfender: [714, 1135],
+    trunk: [512, 1186],
+    rbumper: [512, 1245],
+  };
+
+  // Цвет маркера по статусу зоны
+  const markerColor = (id: string): string | null => {
+    const z = zoneProps(id);
+    if (z.fill === "white") return null; // нет данных — не рисуем
+    // fillFor возвращает зелёный/жёлтый/красный mix — используем как есть
+    return z.fill;
   };
 
   return (
@@ -332,53 +363,41 @@ function TopView({ zoneProps }: { zoneProps: ZoneProps }) {
         preserveAspectRatio="xMidYMid meet"
       />
 
-      {/* Передний бампер */}
+      {/* Кликабельные зоны (прозрачные) */}
       <path d="M400,140 Q512,118 624,140 L716,308 L308,308 Z" {...overlay("fbumper")} />
-
-      {/* Переднее левое крыло (с аркой) */}
       <path d="M288,310 L348,310 L348,560 L296,560 L280,440 Z" {...overlay("flfender")} />
-      {/* Переднее правое крыло (с аркой) */}
       <path d="M736,310 L676,310 L676,560 L728,560 L744,440 Z" {...overlay("frfender")} />
-
-      {/* Капот */}
       <path d="M350,310 L674,310 L674,556 L350,556 Z" {...overlay("hood")} />
-
-      {/* Лобовое стекло */}
       <path d="M352,562 L672,562 L660,720 L364,720 Z" {...overlay("windshield")} />
-
-      {/* Передняя левая дверь */}
       <path d="M298,724 L508,724 L508,882 L298,882 Z" {...overlay("fldoor")} />
-      {/* Передняя правая дверь */}
       <path d="M516,724 L726,724 L726,882 L516,882 Z" {...overlay("frdoor")} />
-      {/* Задняя левая дверь */}
       <path d="M298,888 L508,888 L508,1020 L298,1020 Z" {...overlay("rldoor")} />
-      {/* Задняя правая дверь */}
       <path d="M516,888 L726,888 L726,1020 L516,1020 Z" {...overlay("rrdoor")} />
-
-      {/* Боковые стёкла — передние */}
       <path d="M364,724 L504,724 L504,878 L364,878 Z" {...overlay("lfwin")} />
       <path d="M520,724 L660,724 L660,878 L520,878 Z" {...overlay("rfwin")} />
-      {/* Боковые стёкла — задние */}
       <path d="M364,888 L504,888 L504,1018 L364,1018 Z" {...overlay("lrwin")} />
       <path d="M520,888 L660,888 L660,1018 L520,1018 Z" {...overlay("rrwin")} />
-
-      {/* Крыша */}
       <path d="M364,722 L660,722 L660,1018 L364,1018 Z" {...overlay("roof")} />
-
-      {/* Заднее стекло */}
       <path d="M384,1020 L640,1020 L610,1140 L414,1140 Z" {...overlay("rear_window")} />
-
-      {/* Заднее левое крыло (с аркой) */}
       <path d="M288,1024 L350,1024 L350,1218 L312,1244 L280,1140 Z" {...overlay("rlfender")} />
-      {/* Заднее правое крыло (с аркой) */}
       <path d="M736,1024 L674,1024 L674,1218 L712,1244 L744,1140 Z" {...overlay("rrfender")} />
-
-      {/* Крышка багажника */}
       <path d="M352,1148 L672,1148 L672,1224 L352,1224 Z" {...overlay("trunk")} />
-
-      {/* Задний бампер */}
       <path d="M312,1224 L712,1224 Q512,1290 312,1224 Z" {...overlay("rbumper")} />
 
+      {/* Маркеры заметок — небольшие кружки по центру каждой зоны со статусом */}
+      {Object.entries(CENTERS).map(([id, [cx, cy]]) => {
+        const color = markerColor(id);
+        if (!color) return null;
+        const z = zoneProps(id);
+        return (
+          <g key={id} style={{ cursor: "pointer" }} onClick={z.onClick}
+             onMouseEnter={z.onMouseEnter} onMouseLeave={z.onMouseLeave}>
+            <circle cx={cx} cy={cy} r={22} fill="white" opacity={0.92} />
+            <circle cx={cx} cy={cy} r={22} fill={color} fillOpacity={0.85}
+                    stroke={z.stroke} strokeWidth={2} />
+          </g>
+        );
+      })}
 
       {/* Индикатор «перёд» */}
       <g opacity="0.45" pointerEvents="none">
