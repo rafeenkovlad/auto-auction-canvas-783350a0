@@ -335,7 +335,7 @@ function TopView({ zoneProps }: { zoneProps: ZoneProps }) {
     lthresh:     [240, 780],
     rthresh:     [784, 780],
     roof:        [512, 830],
-    rear_window: [512, 1170],
+    
     rlfender:    [298, 1130],
     rrfender:    [726, 1130],
     trunk:       [512, 1060],
