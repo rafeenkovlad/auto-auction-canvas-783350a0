@@ -22,21 +22,6 @@ const TABS: { key: TabKey; label: string; icon: LucideIcon }[] = [
 
 
 
-function statusOf(el: InspectionElement) {
-  if (el.seriousDamageTags.length > 0) return "serious" as const;
-  if (!el.noDamage || el.noSeriousDamageTags.length > 0) return "minor" as const;
-  return "ok" as const;
-}
-function fillFor(s: "ok" | "minor" | "serious") {
-  if (s === "serious") return "color-mix(in oklab, var(--grade-bad) 38%, white)";
-  if (s === "minor") return "color-mix(in oklab, var(--grade-warn) 42%, white)";
-  return "color-mix(in oklab, var(--grade-good) 18%, white)";
-}
-function strokeFor(s: "ok" | "minor" | "serious") {
-  if (s === "serious") return "var(--grade-bad)";
-  if (s === "minor") return "var(--grade-warn)";
-  return "color-mix(in oklab, var(--grade-good) 70%, oklch(0.45 0.01 250))";
-}
 
 function PlaceholderBoard({
   elements,
