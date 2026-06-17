@@ -19,6 +19,7 @@ const reportQuery = (token?: string) =>
   });
 
 export const Route = createFileRoute("/")({
+  ssr: false,
   validateSearch: (s: Record<string, unknown>) => ({
     token: typeof s.token === "string" ? s.token : undefined,
   }),
