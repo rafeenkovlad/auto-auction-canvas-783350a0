@@ -1,22 +1,22 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { FileRef, InspectionElement } from "@/lib/report.functions";
+import type { Status, StatusMeta } from "@/lib/report.utils";
 
 export type ViewerElement = InspectionElement & {
-  _status: "ok" | "minor" | "major";
+  _status: Status;
   _category: string;
   _displayName: string;
 };
-
-type StatusMeta = { icon: string; label: string; bg: string; fg: string };
 
 interface Props {
   elements: ViewerElement[];
   index: number | null;
   onClose: () => void;
   onChange: (i: number) => void;
-  statusMeta: (s: ViewerElement["_status"]) => StatusMeta;
+  statusMeta: (s: Status) => StatusMeta;
 }
+
 
 export function ElementViewer({
   elements,

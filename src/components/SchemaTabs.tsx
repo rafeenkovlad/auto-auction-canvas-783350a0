@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { getElementStatus, statusFill, statusStroke, type Status } from "@/lib/report.utils";
 import { Car, Armchair, Shield, Disc3, AppWindow, Lightbulb } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { InspectionElement } from "@/lib/report.functions";
@@ -21,21 +22,6 @@ const TABS: { key: TabKey; label: string; icon: LucideIcon }[] = [
 
 
 
-function statusOf(el: InspectionElement) {
-  if (el.seriousDamageTags.length > 0) return "serious" as const;
-  if (!el.noDamage || el.noSeriousDamageTags.length > 0) return "minor" as const;
-  return "ok" as const;
-}
-function fillFor(s: "ok" | "minor" | "serious") {
-  if (s === "serious") return "color-mix(in oklab, var(--grade-bad) 38%, white)";
-  if (s === "minor") return "color-mix(in oklab, var(--grade-warn) 42%, white)";
-  return "color-mix(in oklab, var(--grade-good) 18%, white)";
-}
-function strokeFor(s: "ok" | "minor" | "serious") {
-  if (s === "serious") return "var(--grade-bad)";
-  if (s === "minor") return "var(--grade-warn)";
-  return "color-mix(in oklab, var(--grade-good) 70%, oklch(0.45 0.01 250))";
-}
 
 function PlaceholderBoard({
   elements,
@@ -56,14 +42,14 @@ function PlaceholderBoard({
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
       {elements.map((el) => {
-        const s = statusOf(el);
+        const s = getElementStatus(el);
         return (
           <button
             key={el.id}
             type="button"
             onClick={() => onElementClick?.(el)}
             className="text-left px-3 py-2.5 rounded-lg border text-xs font-medium transition-colors hover:border-accent"
-            style={{ background: fillFor(s), borderColor: strokeFor(s) }}
+            style={{ background: statusFill(s), borderColor: statusStroke(s) }}
           >
             {el.elementType.replace(/_/g, " ")}
           </button>
@@ -92,25 +78,37 @@ export function SchemaTabs({
 }) {
   const [tab, setTab] = useState<TabKey>("body");
 
-  const elementsByTab: Record<TabKey, InspectionElement[]> = {
-    body: bodyElements,
-    interior: interiorElements,
-    frame: frameElements,
-    wheels: wheelsElements,
-    glass: glassElements,
-    lighting: lightingElements,
-  };
+  const elementsByTab = useMemo<Record<TabKey, InspectionElement[]>>(
+    () => ({
+      body: bodyElements,
+      interior: interiorElements,
+      frame: frameElements,
+      wheels: wheelsElements,
+      glass: glassElements,
+      lighting: lightingElements,
+    }),
+    [bodyElements, interiorElements, frameElements, wheelsElements, glassElements, lightingElements],
+  );
 
-  function worstStatus(els: InspectionElement[]): "ok" | "minor" | "serious" | "empty" {
-    if (!els || els.length === 0) return "empty";
-    let res: "ok" | "minor" | "serious" = "ok";
-    for (const el of els) {
-      const s = statusOf(el);
-      if (s === "serious") return "serious";
-      if (s === "minor") res = "minor";
-    }
+  const statusByTab = useMemo(() => {
+    const res = {} as Record<TabKey, Status | "empty">;
+    (Object.keys(elementsByTab) as TabKey[]).forEach((k) => {
+      const els = elementsByTab[k];
+      if (!els || els.length === 0) {
+        res[k] = "empty";
+        return;
+      }
+      let s: Status = "ok";
+      for (const el of els) {
+        const cur = getElementStatus(el);
+        if (cur === "serious") { s = "serious"; break; }
+        if (cur === "minor") s = "minor";
+      }
+      res[k] = s;
+    });
     return res;
-  }
+  }, [elementsByTab]);
+
 
   return (
     <div className="panel p-5 md:p-6 flex flex-col gap-4">
@@ -128,7 +126,7 @@ export function SchemaTabs({
       >
         {TABS.map((t) => {
           const active = tab === t.key;
-          const ws = worstStatus(elementsByTab[t.key]);
+          const ws = statusByTab[t.key];
           const dotColor =
             ws === "serious"
               ? "var(--grade-bad)"
