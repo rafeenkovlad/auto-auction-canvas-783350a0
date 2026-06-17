@@ -86,12 +86,15 @@ const VIEWS: { key: View; label: string }[] = [
 export function CarBodySchema({
   elements,
   onElementClick,
+  embedded = false,
 }: {
   elements: InspectionElement[];
   onElementClick?: (el: InspectionElement) => void;
+  embedded?: boolean;
 }) {
   const [view, setView] = useState<View>("top");
   const [hover, setHover] = useState<string | null>(null);
+
 
   const { zoneMap, zoneElement } = useMemo(() => {
     const m = new Map<string, Status>();
