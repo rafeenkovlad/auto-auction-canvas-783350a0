@@ -75,9 +75,9 @@ function ImagePanel({
         preserveAspectRatio="xMidYMid meet"
       >
         <image href={imageUrl} x={0} y={0} width={IMG_W} height={IMG_H} />
-        {zones.map((z, i) => {
+        {zones.map((z) => {
           const el = z.types.map((t) => byType.get(t)).find(Boolean);
-          const key = el?.elementType ?? `__zone_${i}`;
+          const key = z.types[0];
           const s = el ? getElementStatus(el) : "none";
           const isHover = hoverKey === key;
           const hasDamage = el && s !== "ok";
@@ -89,14 +89,13 @@ function ImagePanel({
             : "transparent";
           const stroke = showOverlay ? strokeFor(s, isHover) : "transparent";
           const sw = isHover ? 5 : 3;
-          const handlers = el
-            ? {
-                onMouseEnter: () => setHoverKey(key),
-                onMouseLeave: () => setHoverKey(null),
-                onClick: () => onElementClick?.(el),
-                style: { cursor: "pointer", transition: "all 140ms ease" },
-              }
-            : { style: { pointerEvents: "none" as const } };
+          const handlers = {
+            onMouseEnter: () => setHoverKey(key),
+            onMouseLeave: () => setHoverKey(null),
+            onClick: el ? () => onElementClick?.(el) : undefined,
+            style: { cursor: el ? "pointer" : "default", transition: "all 140ms ease" },
+          };
+
           const common = {
             fill,
             stroke,
