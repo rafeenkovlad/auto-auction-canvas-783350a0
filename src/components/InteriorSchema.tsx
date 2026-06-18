@@ -64,7 +64,12 @@ const FRONT_ZONES: Zone[] = [
   {
     types: ["front_seats"],
     label: "Передние сиденья",
-    shape: { kind: "rect", x: 140, y: 565, w: 1090, h: 203, rx: 16 },
+    shape: { kind: "rect", x: 140, y: 565, w: 410, h: 203, rx: 16 },
+  },
+  {
+    types: ["front_seats"],
+    label: "Передние сиденья",
+    shape: { kind: "rect", x: 830, y: 565, w: 400, h: 203, rx: 16 },
   },
 ];
 
