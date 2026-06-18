@@ -167,7 +167,7 @@ export function LightingSchema({
       hideHoverLabel
       alwaysRenderCanvas
       canvas={({ hoverKey, setHoverKey }: SchemaCanvasApi) => (
-        <div className="flex flex-col gap-0 items-stretch -space-y-2">
+        <div className="flex flex-col gap-3 items-stretch">
           <ImagePanel
             imageUrl={carFront}
             zones={FRONT_ZONES}
