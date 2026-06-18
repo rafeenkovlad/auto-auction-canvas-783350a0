@@ -13,73 +13,72 @@ const FRONT_ZONES: Zone[] = [
   {
     types: ["dashboard"],
     label: "Приборная панель (торпедо)",
-    shape: { kind: "polygon", points: "180,240 1356,240 1356,360 1180,400 360,400 180,360" },
+    shape: { kind: "polygon", points: "120,290 1420,290 1420,440 1240,470 300,470 120,440" },
   },
   {
     types: ["instrument_cluster"],
     label: "Панель приборов",
-    shape: { kind: "rect", x: 430, y: 320, w: 270, h: 110, rx: 14 },
+    shape: { kind: "rect", x: 340, y: 360, w: 470, h: 140, rx: 16 },
   },
   {
     types: ["steering_wheel"],
     label: "Рулевое колесо",
-    shape: { kind: "ellipse", cx: 568, cy: 530, rx: 175, ry: 145 },
+    shape: { kind: "ellipse", cx: 540, cy: 540, rx: 220, ry: 175 },
   },
   {
     types: ["buttons_left_of_steering_wheel"],
     label: "Кнопки слева от руля",
-    shape: { kind: "rect", x: 320, y: 470, w: 165, h: 60, rx: 10 },
+    shape: { kind: "rect", x: 280, y: 500, w: 110, h: 95, rx: 10 },
   },
   {
     types: ["central_monitor"],
     label: "Центральный монитор",
-    shape: { kind: "rect", x: 855, y: 410, w: 320, h: 150, rx: 10 },
+    shape: { kind: "rect", x: 810, y: 460, w: 440, h: 160, rx: 12 },
   },
   {
     types: ["climate_control_unit"],
     label: "Блок климат-контроля",
-    shape: { kind: "rect", x: 890, y: 565, w: 250, h: 105, rx: 10 },
+    shape: { kind: "rect", x: 830, y: 630, w: 270, h: 160, rx: 12 },
   },
   {
     types: ["gear_selector_area"],
     label: "Область селектора передач",
-    shape: { kind: "rect", x: 860, y: 690, w: 130, h: 140, rx: 14 },
+    shape: { kind: "rect", x: 850, y: 800, w: 170, h: 140, rx: 14 },
   },
   {
     types: ["center_console"],
     label: "Центральная консоль",
-    shape: { kind: "polygon", points: "820,675 1110,675 1110,1000 820,1000" },
+    shape: { kind: "polygon", points: "790,800 1130,800 1130,1024 790,1024" },
   },
   {
     types: ["front_seats"],
     label: "Передние сиденья",
-    shape: { kind: "polygon", points: "320,825 820,825 820,1020 320,1020 320,1020 320,825 M1110,825 L1310,825 L1310,1020 L1110,1020 Z" },
+    shape: { kind: "polygon", points: "180,820 780,820 780,1024 180,1024 180,820 M1140,820 L1410,820 L1410,1024 L1140,1024 Z" },
   },
 ];
 
-// Front seats как два отдельных прямоугольника проще представить одной зоной через polygon с двумя кусками невозможно — используем rect с шириной перекрывающей зазор, исключая консоль
-// Переопределяем front_seats: один широкий rect (визуально читается как пара сидений с консолью между ними поверх)
+// Передние сиденья — две раздельных области; используем единый широкий rect, исключая центральную консоль визуально
 FRONT_ZONES[FRONT_ZONES.length - 1] = {
   types: ["front_seats"],
   label: "Передние сиденья",
-  shape: { kind: "rect", x: 320, y: 825, w: 990, h: 200, rx: 18 },
+  shape: { kind: "rect", x: 180, y: 820, w: 1230, h: 204, rx: 18 },
 };
 
 const REAR_ZONES: Zone[] = [
   {
     types: ["ceiling"],
     label: "Потолок",
-    shape: { kind: "rect", x: 580, y: 130, w: 740, h: 130, rx: 20 },
+    shape: { kind: "rect", x: 130, y: 30, w: 1290, h: 130, rx: 24 },
   },
   {
     types: ["trunk_compartment"],
     label: "Багажное отделение",
-    shape: { kind: "rect", x: 620, y: 440, w: 670, h: 180, rx: 14 },
+    shape: { kind: "rect", x: 410, y: 175, w: 720, h: 130, rx: 14 },
   },
   {
     types: ["rear_seats"],
     label: "Задние сиденья",
-    shape: { kind: "rect", x: 590, y: 620, w: 720, h: 380, rx: 18 },
+    shape: { kind: "rect", x: 310, y: 290, w: 930, h: 520, rx: 20 },
   },
 ];
 
