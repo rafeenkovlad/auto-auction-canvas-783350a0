@@ -59,7 +59,6 @@ export function MediaGallery({
   renderTile: (item: GalleryItem) => React.ReactNode;
 }) {
   const [tab, setTab] = useState("all");
-  const [density, setDensity] = useState<Density>("three");
 
   const counts = useMemo(() => {
     const c: Record<string, number> = {};
