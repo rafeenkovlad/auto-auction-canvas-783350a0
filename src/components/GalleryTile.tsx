@@ -75,7 +75,9 @@ function VideoThumb({ url, isHls }: { url: string; isHls: boolean }) {
       muted
       playsInline
       preload="metadata"
-      className="w-full h-full object-cover"
+      crossOrigin="anonymous"
+      disableRemotePlayback
+      className="w-full h-full object-cover bg-muted"
     />
   );
 }
