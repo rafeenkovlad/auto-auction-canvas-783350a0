@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import type { InspectionElement } from "@/lib/report.api";
-import frameImg from "@/assets/frame-schema.png";
+import frameImg from "@/assets/frame-schema.webp";
 import { SchemaShell, type SchemaCanvasApi } from "@/components/SchemaShell";
 import { getElementStatus, statusFill, type Status } from "@/lib/report.utils";
 

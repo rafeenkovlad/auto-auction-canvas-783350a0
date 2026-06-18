@@ -3,7 +3,7 @@ import type { InspectionElement } from "@/lib/report.api";
 import { type Zone, fillFor, strokeFor } from "@/components/ZoneSchema";
 import { getElementStatus } from "@/lib/report.utils";
 import { SchemaShell, type SchemaCanvasApi } from "@/components/SchemaShell";
-import carSide from "@/assets/car-side.png";
+import carSide from "@/assets/car-side.webp";
 
 const IMG_W = 1536;
 const IMG_H = 1024;

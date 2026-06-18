@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { getReport, type InspectionElement } from "@/lib/report.api";
@@ -16,6 +16,7 @@ import { AdditionalMaterials } from "@/components/AdditionalMaterials";
 import { ExpertConclusion } from "@/components/ExpertConclusion";
 import { statusMeta } from "@/lib/report.utils";
 import { useReportData } from "@/hooks/useReportData";
+import { preloadSchemaImages } from "@/lib/schema-preload";
 
 const reportQuery = (token?: string) =>
   queryOptions({
@@ -51,6 +52,10 @@ export const Route = createFileRoute("/")({
 
 function AuctionSheetPage() {
   const { token } = Route.useSearch();
+  useEffect(() => {
+    // Warm cache for all schema backgrounds as soon as the page mounts.
+    preloadSchemaImages();
+  }, []);
   const reportResult = useQuery({
     ...reportQuery(token),
     enabled: Boolean(token),
