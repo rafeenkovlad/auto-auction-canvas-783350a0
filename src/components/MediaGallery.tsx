@@ -75,10 +75,7 @@ export function MediaGallery({
 
   const visibleTabs = TAB_DEFS.filter((d) => d.key === "all" || counts[d.key] > 0);
 
-  const gridClass =
-    density === "three"
-      ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 md:gap-4"
-      : "grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4";
+  const gridClass = "grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4";
 
   return (
     <section className="panel p-5 md:p-6 flex flex-col gap-4">
@@ -89,35 +86,6 @@ export function MediaGallery({
             ({items.length})
           </span>
         </h3>
-
-        <div
-          className="inline-flex rounded-md p-0.5 gap-0.5"
-          style={{ background: "color-mix(in oklab, var(--muted) 60%, transparent)" }}
-          role="group"
-          aria-label="Плотность сетки"
-        >
-          <DensityButton
-            active={density === "two"}
-            onClick={() => setDensity("two")}
-            label="2 в ряд"
-          >
-            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6">
-              <rect x="1.5" y="2.5" width="5.5" height="11" rx="1" />
-              <rect x="9" y="2.5" width="5.5" height="11" rx="1" />
-            </svg>
-          </DensityButton>
-          <DensityButton
-            active={density === "three"}
-            onClick={() => setDensity("three")}
-            label="3 в ряд"
-          >
-            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6">
-              <rect x="1" y="2.5" width="3.5" height="11" rx="0.8" />
-              <rect x="6.25" y="2.5" width="3.5" height="11" rx="0.8" />
-              <rect x="11.5" y="2.5" width="3.5" height="11" rx="0.8" />
-            </svg>
-          </DensityButton>
-        </div>
       </div>
 
       {/* Tabs — same segmented style as Схема осмотра */}
