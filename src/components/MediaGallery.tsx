@@ -47,7 +47,7 @@ const TAB_DEFS: Array<{
   { key: "video", label: "Видео", icon: Video, match: (i) => i.isVideo },
 ];
 
-type Density = "three" | "two";
+
 
 export function MediaGallery({
   items,
