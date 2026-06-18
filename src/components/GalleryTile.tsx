@@ -38,14 +38,22 @@ export function GalleryTileBody({ item }: { item: GalleryItem }) {
         )}
         {item.tag ? (
           <span
-            className="absolute top-1.5 left-1.5 max-w-[calc(100%-12px)] truncate px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider"
+            className="absolute top-1.5 left-1.5 inline-flex items-center gap-1 max-w-[calc(100%-12px)] truncate px-1.5 py-0.5 rounded-md text-[10px] font-medium border"
             style={{
-              background: item.tag.severe ? "var(--grade-bad)" : "var(--grade-warn)",
-              color: item.tag.severe ? "white" : "oklch(0.25 0.06 70)",
+              background: item.tag.severe
+                ? "color-mix(in oklab, var(--grade-bad) 12%, white)"
+                : "color-mix(in oklab, var(--grade-warn) 18%, white)",
+              borderColor: item.tag.severe ? "var(--grade-bad)" : "var(--grade-warn)",
+              color: "var(--foreground)",
             }}
             title={item.tag.name}
           >
-            {item.tag.name}
+            <span
+              className="w-1.5 h-1.5 rounded-full shrink-0"
+              style={{ background: item.tag.severe ? "var(--grade-bad)" : "var(--grade-warn)" }}
+              aria-hidden
+            />
+            <span className="truncate">{item.tag.name}</span>
           </span>
         ) : null}
       </div>
