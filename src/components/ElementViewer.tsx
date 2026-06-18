@@ -26,6 +26,7 @@ export function ElementViewer({
   statusMeta,
 }: Props) {
   const open = index != null && elements[index] != null;
+  const swipeRef = useRef<{ x: number; y: number; t: number; touches: number } | null>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -57,7 +58,6 @@ export function ElementViewer({
     el.noSeriousDamageTags.length > 0 ||
     (el.audioNotes && el.audioNotes.length > 0);
 
-  const swipeRef = useRef<{ x: number; y: number; t: number; touches: number } | null>(null);
   const onTouchStart = (e: React.TouchEvent) => {
     if (e.touches.length !== 1) {
       swipeRef.current = null;
@@ -83,6 +83,7 @@ export function ElementViewer({
     if (dx < 0 && canNext) onChange(index! + 1);
     else if (dx > 0 && canPrev) onChange(index! - 1);
   };
+
 
   return createPortal(
     <div
