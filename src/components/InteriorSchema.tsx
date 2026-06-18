@@ -70,14 +70,14 @@ const REAR_ZONES: Zone[] = [
     shape: { kind: "rect", x: 100, y: 25, w: 1070, h: 150, rx: 20 },
   },
   {
-    types: ["trunk_compartment"],
-    label: "Багажное отделение",
-    shape: { kind: "polygon", points: "560,260 1060,290 1060,560 720,560 560,470" },
-  },
-  {
     types: ["rear_seats"],
     label: "Задние сиденья",
-    shape: { kind: "rect", x: 240, y: 250, w: 540, h: 420, rx: 18 },
+    shape: { kind: "rect", x: 230, y: 240, w: 380, h: 430, rx: 18 },
+  },
+  {
+    types: ["trunk_compartment"],
+    label: "Багажное отделение",
+    shape: { kind: "polygon", points: "615,275 1075,300 1075,580 720,580 615,470" },
   },
 ];
 
