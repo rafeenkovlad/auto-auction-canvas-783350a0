@@ -62,14 +62,19 @@ function ImagePanel({
   onElementClick?: (el: InspectionElement) => void;
   mirrored?: boolean;
 }) {
+  const panelLabel =
+    hoverKey && zones.some((z) => z.types.includes(hoverKey))
+      ? zones.find((z) => z.types.includes(hoverKey))?.label ?? null
+      : null;
   return (
-    <div className="flex-1 min-w-0" style={mirrored ? { transform: "scaleX(-1)" } : undefined}>
-      <svg
-        viewBox={`0 0 ${IMG_W} ${IMG_H}`}
-        className="w-full h-auto block"
-        preserveAspectRatio="xMidYMid meet"
-      >
-        <image href={imageUrl} x={0} y={0} width={IMG_W} height={IMG_H} />
+    <div className="flex-1 min-w-0 relative">
+      <div style={mirrored ? { transform: "scaleX(-1)" } : undefined}>
+        <svg
+          viewBox={`0 0 ${IMG_W} ${IMG_H}`}
+          className="w-full h-auto block"
+          preserveAspectRatio="xMidYMid meet"
+        >
+          <image href={imageUrl} x={0} y={0} width={IMG_W} height={IMG_H} />
         {zones.map((z) => {
           const el = z.types.map((t) => byType.get(t)).find(Boolean);
           const key = z.types[0];
@@ -129,7 +134,16 @@ function ImagePanel({
           }
           return null;
         })}
-      </svg>
+        </svg>
+      </div>
+      {panelLabel && (
+        <div
+          className="pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-1.5 px-2 py-0.5 rounded-md text-[11px] font-medium shadow-sm"
+          style={{ background: "var(--card)", border: "1px solid var(--border)" }}
+        >
+          {panelLabel}
+        </div>
+      )}
     </div>
   );
 }
@@ -150,7 +164,7 @@ export function WheelsSchema({
   return (
     <SchemaShell
       elements={elements}
-      
+      hideHoverLabel
       canvas={({ hoverKey, setHoverKey }: SchemaCanvasApi) => (
         <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 items-start">
           <ImagePanel

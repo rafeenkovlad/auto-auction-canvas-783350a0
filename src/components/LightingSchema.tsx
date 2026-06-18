@@ -67,8 +67,12 @@ function ImagePanel({
   setHoverKey: (k: string | null) => void;
   onElementClick?: (el: InspectionElement) => void;
 }) {
+  const panelLabel =
+    hoverKey && zones.some((z) => z.types.includes(hoverKey))
+      ? zones.find((z) => z.types.includes(hoverKey))?.label ?? null
+      : null;
   return (
-    <div className="flex-1 min-w-0">
+    <div className="flex-1 min-w-0 relative">
       <svg
         viewBox={`0 0 ${IMG_W} ${IMG_H}`}
         className="w-full h-auto block"
@@ -135,6 +139,14 @@ function ImagePanel({
           return null;
         })}
       </svg>
+      {panelLabel && (
+        <div
+          className="pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-1.5 px-2 py-0.5 rounded-md text-[11px] font-medium shadow-sm"
+          style={{ background: "var(--card)", border: "1px solid var(--border)" }}
+        >
+          {panelLabel}
+        </div>
+      )}
     </div>
   );
 }
@@ -155,7 +167,7 @@ export function LightingSchema({
   return (
     <SchemaShell
       elements={elements}
-      
+      hideHoverLabel
       canvas={({ hoverKey, setHoverKey }: SchemaCanvasApi) => (
         <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 items-start">
           <ImagePanel
