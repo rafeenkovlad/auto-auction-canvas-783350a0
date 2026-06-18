@@ -117,32 +117,71 @@ export function FrameSchema({
       className="relative w-full mx-auto"
       style={{ aspectRatio: "1 / 1", maxWidth: 640 }}
     >
-      <img
-        src={frameImg}
-        alt="Схема силовых элементов"
-        className="absolute inset-0 w-full h-full object-contain select-none pointer-events-none"
-        loading="lazy"
-        width={1024}
-        height={1024}
-      />
       <svg
         viewBox="0 0 1024 1024"
         className="absolute inset-0 w-full h-full"
         preserveAspectRatio="xMidYMid meet"
+        style={{
+          // Side mirroring for right side
+          transform: side === "right" ? "scaleX(-1)" : undefined,
+        }}
       >
+        {/* === Car silhouette (non-interactive) === */}
+        <g
+          fill="none"
+          stroke="oklch(0.55 0.01 250 / 0.55)"
+          strokeWidth={2}
+          strokeLinejoin="round"
+          strokeLinecap="round"
+          vectorEffect="non-scaling-stroke"
+          pointerEvents="none"
+        >
+          {/* Body outline */}
+          <path d="M 150,560 Q 145,520 175,505 L 280,475 Q 310,470 340,465 L 360,460 L 490,300 Q 510,288 580,288 Q 660,288 680,300 L 820,470 L 870,478 Q 905,485 915,510 L 925,560 Q 928,600 920,640 L 905,695 L 880,710 L 700,710 L 360,710 L 180,710 L 150,695 Q 138,640 145,600 Z" 
+                fill="oklch(0.96 0.005 250 / 0.5)" />
+          {/* Belt line */}
+          <line x1="360" y1="465" x2="820" y2="470" />
+          {/* Door split at B-pillar (below belt) */}
+          <line x1="587" y1="465" x2="587" y2="695" />
+          {/* Door bottom (front door inner edge to A pillar base) */}
+          <line x1="395" y1="465" x2="395" y2="695" strokeDasharray="4 6" opacity="0.5" />
+          <line x1="680" y1="465" x2="680" y2="695" strokeDasharray="4 6" opacity="0.5" />
+          {/* Door handles */}
+          <rect x="450" y="540" width="55" height="10" rx="3" fill="oklch(0.7 0.01 250 / 0.4)" stroke="none" />
+          <rect x="635" y="540" width="55" height="10" rx="3" fill="oklch(0.7 0.01 250 / 0.4)" stroke="none" />
+          {/* Side mirror */}
+          <path d="M 405,455 L 380,440 L 360,445 L 365,460 Z" fill="oklch(0.88 0.005 250 / 0.8)" />
+          {/* Headlight */}
+          <path d="M 165,510 Q 195,500 235,508 L 230,540 Q 195,545 165,540 Z" fill="oklch(0.92 0.02 95 / 0.5)" />
+          {/* Taillight */}
+          <path d="M 880,505 Q 905,505 915,520 L 918,545 Q 900,548 875,545 Z" fill="oklch(0.65 0.18 25 / 0.4)" stroke="none" />
+        </g>
+
+        {/* Wheels */}
+        <g pointerEvents="none">
+          <circle cx="270" cy="715" r="98" fill="oklch(0.25 0.005 250)" />
+          <circle cx="270" cy="715" r="60" fill="oklch(0.85 0.005 250)" stroke="oklch(0.55 0.01 250)" strokeWidth={2} />
+          <circle cx="270" cy="715" r="14" fill="oklch(0.45 0.01 250)" />
+          <circle cx="790" cy="715" r="98" fill="oklch(0.25 0.005 250)" />
+          <circle cx="790" cy="715" r="60" fill="oklch(0.85 0.005 250)" stroke="oklch(0.55 0.01 250)" strokeWidth={2} />
+          <circle cx="790" cy="715" r="14" fill="oklch(0.45 0.01 250)" />
+        </g>
+
+        {/* === Interactive structural zones === */}
         {zones.map((zone) => {
           const elId = elementIdFor(zone, side);
           const el = byType.get(elId);
           const s = statusForZone(zone);
           const isHover = hoverKey === elId;
           const polys = zone === "side_beam" ? SIDE_BEAM_POLYS : [ZONE_POLYS[zone]];
-          const fill = s === "none" ? "transparent" : statusFill(s);
+          const baseFill = s === "none" ? "oklch(0.72 0.02 250 / 0.35)" : statusFill(s);
+          const fill = isHover ? "oklch(0.72 0.02 250 / 0.55)" : baseFill;
           const stroke = isHover
             ? "var(--accent)"
             : s === "none"
-              ? "oklch(0.62 0.008 250 / 0.6)"
+              ? "oklch(0.5 0.01 250 / 0.8)"
               : statusStroke(s);
-          const sw = isHover ? 3 : 2;
+          const sw = isHover ? 3 : 1.75;
           return (
             <g
               key={zone}
@@ -165,9 +204,25 @@ export function FrameSchema({
             </g>
           );
         })}
+
+        {/* Pillar labels */}
+        <g
+          fill="oklch(0.45 0.01 250)"
+          fontSize="22"
+          fontWeight={600}
+          textAnchor="middle"
+          pointerEvents="none"
+          style={{ transform: side === "right" ? "scaleX(-1)" : undefined, transformOrigin: "center" }}
+        >
+          <text x="442" y="395">A</text>
+          <text x="587" y="395">B</text>
+          <text x="763" y="395">D</text>
+        </g>
       </svg>
     </div>
   );
+
+
 
   return (
     <SchemaShell
