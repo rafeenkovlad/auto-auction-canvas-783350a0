@@ -3,9 +3,9 @@ import type { InspectionElement } from "@/lib/report.api";
 import { type Zone, fillFor, strokeFor } from "@/components/ZoneSchema";
 import { getElementStatus } from "@/lib/report.utils";
 import { SchemaShell, type SchemaCanvasApi } from "@/components/SchemaShell";
-import carFront from "@/assets/car-front.png.asset.json";
-import carRear from "@/assets/car-rear.png.asset.json";
-import carSide from "@/assets/car-side.png.asset.json";
+import carFront from "@/assets/car-front.png";
+import carRear from "@/assets/car-rear.png";
+import carSide from "@/assets/car-side.png";
 
 const IMG_W = 1536;
 const IMG_H = 1024;
@@ -206,7 +206,7 @@ export function GlassSchema({
       canvas={({ hoverKey, setHoverKey }: SchemaCanvasApi) => (
         <div className="grid grid-cols-2 gap-2 sm:gap-3">
           <ImagePanel
-            imageUrl={carFront.url}
+            imageUrl={carFront}
             zones={FRONT_ZONES}
             byType={byType}
             hoverKey={hoverKey}
@@ -214,7 +214,7 @@ export function GlassSchema({
             onElementClick={onElementClick}
           />
           <ImagePanel
-            imageUrl={carRear.url}
+            imageUrl={carRear}
             zones={REAR_ZONES}
             byType={byType}
             hoverKey={hoverKey}
@@ -222,7 +222,7 @@ export function GlassSchema({
             onElementClick={onElementClick}
           />
           <ImagePanel
-            imageUrl={carSide.url}
+            imageUrl={carSide}
             zones={LEFT_SIDE_ZONES}
             byType={byType}
             hoverKey={hoverKey}
@@ -230,7 +230,7 @@ export function GlassSchema({
             onElementClick={onElementClick}
           />
           <ImagePanel
-            imageUrl={carSide.url}
+            imageUrl={carSide}
             zones={RIGHT_SIDE_ZONES}
             byType={byType}
             hoverKey={hoverKey}
