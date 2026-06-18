@@ -70,7 +70,7 @@ function ImagePanel({
     <div className="flex-1 min-w-0 relative w-full max-w-[360px] sm:max-w-[400px] md:max-w-[460px] lg:max-w-[520px] mx-auto">
       <div style={mirrored ? { transform: "scaleX(-1)" } : undefined}>
         <svg
-          viewBox={`0 0 ${IMG_W} ${IMG_H}`}
+          viewBox={`100 420 1340 410`}
           className="w-full h-auto block"
           preserveAspectRatio="xMidYMid meet"
         >
@@ -165,7 +165,7 @@ export function WheelsSchema({
       hideHoverLabel
       alwaysRenderCanvas
       canvas={({ hoverKey, setHoverKey }: SchemaCanvasApi) => (
-        <div className="flex flex-col gap-3 items-stretch pt-4">
+        <div className="flex flex-col gap-3 items-stretch">
           <ImagePanel
             imageUrl={carSide}
             zones={LEFT_SIDE_ZONES}
