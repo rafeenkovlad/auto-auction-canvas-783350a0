@@ -202,6 +202,7 @@ export function GlassSchema({
     <SchemaShell
       elements={elements}
       hideHoverLabel
+      alwaysRenderCanvas
       canvas={({ hoverKey, setHoverKey }: SchemaCanvasApi) => (
         <div className="grid grid-cols-2 gap-2 sm:gap-3">
           <ImagePanel
