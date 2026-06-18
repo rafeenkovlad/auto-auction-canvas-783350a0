@@ -214,6 +214,7 @@ export function GlassSchema({
             hoverKey={hoverKey}
             setHoverKey={setHoverKey}
             onElementClick={onElementClick}
+            viewBox={`380 240 760 280`}
           />
           <ImagePanel
             imageUrl={carRear}
@@ -222,6 +223,7 @@ export function GlassSchema({
             hoverKey={hoverKey}
             setHoverKey={setHoverKey}
             onElementClick={onElementClick}
+            viewBox={`350 170 840 280`}
           />
           <ImagePanel
             imageUrl={carSide}
