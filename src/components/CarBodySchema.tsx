@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import type { InspectionElement } from "@/lib/report.api";
-import carTopImg from "@/assets/car-top.png";
+import carTopImg from "@/assets/car-top.webp";
 import { SchemaShell, type SchemaCanvasApi } from "@/components/SchemaShell";
 
 

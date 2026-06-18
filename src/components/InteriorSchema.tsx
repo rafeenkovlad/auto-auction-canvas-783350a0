@@ -3,8 +3,8 @@ import type { InspectionElement } from "@/lib/report.api";
 import { type Zone, fillFor } from "@/components/ZoneSchema";
 import { getElementStatus } from "@/lib/report.utils";
 import { SchemaShell, type SchemaCanvasApi } from "@/components/SchemaShell";
-import interiorFront from "@/assets/interior-front.png";
-import interiorRear from "@/assets/interior-rear.png";
+import interiorFront from "@/assets/interior-front.webp";
+import interiorRear from "@/assets/interior-rear.webp";
 
 // Per-image natural dimensions
 const FRONT_W = 1365;
