@@ -33,7 +33,7 @@ export function ReportHeader({ report }: { report: CarReport }) {
       </div>
 
       <div className="min-w-0 flex-1">
-        <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+        <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground truncate">
           Отчёт о проверке автомобиля
         </div>
         <div className="mono text-xs text-muted-foreground mt-0.5 truncate">
