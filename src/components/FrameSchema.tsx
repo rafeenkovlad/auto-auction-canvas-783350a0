@@ -84,7 +84,7 @@ function FramePanel({
     : null;
 
   return (
-    <div className="relative w-full mx-auto" style={{ maxWidth: 640 }}>
+    <div className="relative w-full mx-auto max-w-[360px] sm:max-w-[400px] md:max-w-[460px] lg:max-w-[520px]">
       <div className="relative w-full" style={{ aspectRatio: "1024 / 300" }}>
         <div
           className="absolute inset-0"
