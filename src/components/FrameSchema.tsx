@@ -84,24 +84,17 @@ function FramePanel({
     : null;
 
   return (
-    <div className="relative w-full mx-auto" style={{ aspectRatio: "1 / 1", maxWidth: 640 }}>
+    <div className="relative w-full mx-auto" style={{ aspectRatio: "1024 / 300", maxWidth: 640 }}>
       <div
         className="absolute inset-0"
         style={mirrored ? { transform: "scaleX(-1)" } : undefined}
       >
-        <img
-          src={frameImg}
-          alt={ariaLabel}
-          className="absolute inset-0 w-full h-full object-contain select-none pointer-events-none"
-          loading="lazy"
-          width={1024}
-          height={1024}
-        />
         <svg
-          viewBox="0 0 1024 1024"
+          viewBox="0 362 1024 300"
           className="absolute inset-0 w-full h-full"
           preserveAspectRatio="xMidYMid meet"
         >
+          <image href={frameImg} x={0} y={0} width={1024} height={1024} />
           {ZONES.map((zone) => {
             const elId = elementIdFor(zone, side);
             const el = byType.get(elId);
@@ -126,6 +119,7 @@ function FramePanel({
           })}
         </svg>
       </div>
+
       {hoverLabel && (
         <div
           className="pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-2 px-2.5 py-1 rounded-md text-xs font-medium shadow-sm whitespace-nowrap"
