@@ -55,6 +55,13 @@ function buildSectionsAndGallery(report: CarReport) {
   for (let i = 0; i < body.length; i++) {
     const el = body[i];
     if (el.file?.url) {
+      const severeTag = el.seriousDamageTags[0];
+      const minorTag = el.noSeriousDamageTags[0];
+      const tag = severeTag
+        ? { name: severeTag.name, severe: true }
+        : minorTag
+        ? { name: minorTag.name, severe: false }
+        : null;
       gallery.push({
         file: el.file,
         idx: i,
@@ -62,6 +69,7 @@ function buildSectionsAndGallery(report: CarReport) {
         sectionKey: el._sectionKey,
         isVideo: isVideoFile(el.file),
         isDamage: el._status !== "ok",
+        tag,
       });
     }
   }

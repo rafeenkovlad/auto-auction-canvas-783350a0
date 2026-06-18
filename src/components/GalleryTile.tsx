@@ -36,14 +36,18 @@ export function GalleryTileBody({ item }: { item: GalleryItem }) {
             </svg>
           </div>
         )}
-        {item.isDamage && (
+        {item.tag ? (
           <span
-            className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider"
-            style={{ background: "var(--grade-bad)", color: "white" }}
+            className="absolute top-1.5 left-1.5 max-w-[calc(100%-12px)] truncate px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider"
+            style={{
+              background: item.tag.severe ? "var(--grade-bad)" : "var(--grade-warn)",
+              color: item.tag.severe ? "white" : "oklch(0.25 0.06 70)",
+            }}
+            title={item.tag.name}
           >
-            замечание
+            {item.tag.name}
           </span>
-        )}
+        ) : null}
       </div>
       <div className="px-2 py-1.5 border-t border-border bg-card">
         <div className="text-xs font-medium ink truncate">{item.caption}</div>
