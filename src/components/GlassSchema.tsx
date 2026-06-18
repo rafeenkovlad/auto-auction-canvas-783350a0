@@ -204,7 +204,7 @@ export function GlassSchema({
       hideHoverLabel
       alwaysRenderCanvas
       canvas={({ hoverKey, setHoverKey }: SchemaCanvasApi) => (
-        <div className="grid grid-cols-2 gap-2 sm:gap-3">
+        <div className="grid grid-cols-2 gap-0">
           <ImagePanel
             imageUrl={carFront}
             zones={FRONT_ZONES}
