@@ -26,7 +26,8 @@ export function ElementViewer({
   statusMeta,
 }: Props) {
   const open = index != null && elements[index] != null;
-  const swipeRef = useRef<{ x: number; y: number; t: number; touches: number } | null>(null);
+  const swipeRef = useRef<{ x: number; y: number; t: number; touches: number; handled: boolean } | null>(null);
+  const [panelCollapsed, setPanelCollapsed] = useState(false);
 
   useEffect(() => {
     if (!open) return;
@@ -58,6 +59,7 @@ export function ElementViewer({
     el.noSeriousDamageTags.length > 0 ||
     (el.audioNotes && el.audioNotes.length > 0);
 
+  // Capture-phase swipe detection so we get events before native video controls / image handlers.
   const onTouchStart = (e: React.TouchEvent) => {
     if (e.touches.length !== 1) {
       swipeRef.current = null;
@@ -68,30 +70,40 @@ export function ElementViewer({
       y: e.touches[0].clientY,
       t: Date.now(),
       touches: 1,
+      handled: false,
     };
   };
   const onTouchEnd = (e: React.TouchEvent) => {
     const s = swipeRef.current;
     swipeRef.current = null;
-    if (!s) return;
+    if (!s || s.handled) return;
     const touch = e.changedTouches[0];
     if (!touch) return;
     const dx = touch.clientX - s.x;
     const dy = touch.clientY - s.y;
     const dt = Date.now() - s.t;
-    if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy) * 1.2 || dt > 600) return;
-    if (dx < 0 && canNext) onChange(index! + 1);
-    else if (dx > 0 && canPrev) onChange(index! - 1);
+    if (dt > 700) return;
+    const ax = Math.abs(dx);
+    const ay = Math.abs(dy);
+    // Vertical swipe (up or down) closes the viewer
+    if (ay > 90 && ay > ax * 1.3) {
+      onClose();
+      return;
+    }
+    // Horizontal swipe navigates
+    if (ax > 50 && ax > ay * 1.2) {
+      if (dx < 0 && canNext) onChange(index! + 1);
+      else if (dx > 0 && canPrev) onChange(index! - 1);
+    }
   };
-
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[100] bg-black text-white animate-in fade-in duration-150"
+      className="fixed inset-0 z-[100] bg-black text-white animate-in fade-in duration-150 overflow-hidden"
       role="dialog"
       aria-modal="true"
-      onTouchStart={onTouchStart}
-      onTouchEnd={onTouchEnd}
+      onTouchStartCapture={onTouchStart}
+      onTouchEndCapture={onTouchEnd}
     >
       {/* Media fills the whole viewport */}
       <MediaStage
@@ -99,16 +111,15 @@ export function ElementViewer({
         file={el.file}
       />
 
-
       {/* Minimal top bar: counter left, close right */}
-      <div className="absolute top-0 inset-x-0 h-12 flex items-center justify-between px-3 pointer-events-none z-10">
-        <div className="mono text-xs text-white/70 tabular-nums px-2 py-1 rounded bg-black/40 backdrop-blur pointer-events-auto">
+      <div className="absolute top-0 inset-x-0 h-12 flex items-center justify-between px-3 pointer-events-none z-20">
+        <div className="mono text-xs text-white/80 tabular-nums px-2 py-1 rounded bg-black/50 backdrop-blur pointer-events-auto">
           {index! + 1} / {elements.length}
         </div>
         <button
           type="button"
           onClick={onClose}
-          className="h-9 w-9 rounded-full bg-black/40 hover:bg-black/60 backdrop-blur flex items-center justify-center pointer-events-auto"
+          className="h-9 w-9 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur flex items-center justify-center pointer-events-auto"
           aria-label="Закрыть"
         >
           ✕
@@ -120,7 +131,7 @@ export function ElementViewer({
         <button
           type="button"
           onClick={() => onChange(index! - 1)}
-          className="hidden md:flex absolute left-3 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-black/40 hover:bg-black/60 backdrop-blur items-center justify-center z-10"
+          className="hidden md:flex absolute left-3 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-black/40 hover:bg-black/60 backdrop-blur items-center justify-center z-20"
           aria-label="Предыдущий"
         >
           ‹
@@ -130,62 +141,26 @@ export function ElementViewer({
         <button
           type="button"
           onClick={() => onChange(index! + 1)}
-          className="hidden md:flex absolute right-3 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-black/40 hover:bg-black/60 backdrop-blur items-center justify-center z-10"
+          className="hidden md:flex absolute right-3 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-black/40 hover:bg-black/60 backdrop-blur items-center justify-center z-20"
           aria-label="Следующий"
         >
           ›
         </button>
       )}
 
-      {/* Bottom info panel: compact, contains all useful data */}
-      <InfoPanel el={el} m={m} hasDetails={hasDetails} />
-
-      {/* Mobile swipe nav buttons in info panel header — handled via tap targets below */}
-      <MobileNav
-        canPrev={canPrev}
-        canNext={canNext}
-        onPrev={() => onChange(index! - 1)}
-        onNext={() => onChange(index! + 1)}
+      {/* Bottom info panel: collapsible */}
+      <InfoPanel
+        el={el}
+        m={m}
+        hasDetails={hasDetails}
+        collapsed={panelCollapsed}
+        onToggle={() => setPanelCollapsed((c) => !c)}
       />
     </div>,
     document.body,
   );
 }
 
-function MobileNav({
-  canPrev,
-  canNext,
-  onPrev,
-  onNext,
-}: {
-  canPrev: boolean;
-  canNext: boolean;
-  onPrev: () => void;
-  onNext: () => void;
-}) {
-  return (
-    <div className="md:hidden absolute top-1/2 -translate-y-1/2 inset-x-0 flex justify-between px-2 pointer-events-none z-[5]">
-      <button
-        type="button"
-        onClick={onPrev}
-        disabled={!canPrev}
-        className="h-10 w-10 rounded-full bg-black/30 disabled:opacity-0 backdrop-blur flex items-center justify-center pointer-events-auto"
-        aria-label="Предыдущий"
-      >
-        ‹
-      </button>
-      <button
-        type="button"
-        onClick={onNext}
-        disabled={!canNext}
-        className="h-10 w-10 rounded-full bg-black/30 disabled:opacity-0 backdrop-blur flex items-center justify-center pointer-events-auto"
-        aria-label="Следующий"
-      >
-        ›
-      </button>
-    </div>
-  );
-}
 
 function InfoPanel({
   el,
