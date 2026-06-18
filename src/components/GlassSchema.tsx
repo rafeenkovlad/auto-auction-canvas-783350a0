@@ -204,46 +204,42 @@ export function GlassSchema({
   return (
     <SchemaShell
       elements={elements}
-      
+      hideHoverLabel
       canvas={({ hoverKey, setHoverKey }: SchemaCanvasApi) => (
-        <div className="flex flex-col gap-4 sm:gap-6">
-          <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 items-start">
-            <ImagePanel
-              imageUrl={carFront.url}
-              zones={FRONT_ZONES}
-              byType={byType}
-              hoverKey={hoverKey}
-              setHoverKey={setHoverKey}
-              onElementClick={onElementClick}
-            />
-            <ImagePanel
-              imageUrl={carRear.url}
-              zones={REAR_ZONES}
-              byType={byType}
-              hoverKey={hoverKey}
-              setHoverKey={setHoverKey}
-              onElementClick={onElementClick}
-            />
-          </div>
-          <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 items-start">
-            <ImagePanel
-              imageUrl={carSide.url}
-              zones={LEFT_SIDE_ZONES}
-              byType={byType}
-              hoverKey={hoverKey}
-              setHoverKey={setHoverKey}
-              onElementClick={onElementClick}
-            />
-            <ImagePanel
-              imageUrl={carSide.url}
-              zones={RIGHT_SIDE_ZONES}
-              byType={byType}
-              hoverKey={hoverKey}
-              setHoverKey={setHoverKey}
-              onElementClick={onElementClick}
-              mirrored
-            />
-          </div>
+        <div className="grid grid-cols-2 gap-2 sm:gap-3">
+          <ImagePanel
+            imageUrl={carFront.url}
+            zones={FRONT_ZONES}
+            byType={byType}
+            hoverKey={hoverKey}
+            setHoverKey={setHoverKey}
+            onElementClick={onElementClick}
+          />
+          <ImagePanel
+            imageUrl={carRear.url}
+            zones={REAR_ZONES}
+            byType={byType}
+            hoverKey={hoverKey}
+            setHoverKey={setHoverKey}
+            onElementClick={onElementClick}
+          />
+          <ImagePanel
+            imageUrl={carSide.url}
+            zones={LEFT_SIDE_ZONES}
+            byType={byType}
+            hoverKey={hoverKey}
+            setHoverKey={setHoverKey}
+            onElementClick={onElementClick}
+          />
+          <ImagePanel
+            imageUrl={carSide.url}
+            zones={RIGHT_SIDE_ZONES}
+            byType={byType}
+            hoverKey={hoverKey}
+            setHoverKey={setHoverKey}
+            onElementClick={onElementClick}
+            mirrored
+          />
         </div>
       )}
       zoneKeyForElement={(el) => el.elementType}
