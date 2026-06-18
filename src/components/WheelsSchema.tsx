@@ -70,7 +70,7 @@ function ImagePanel({
     <div className="flex-1 min-w-0 relative w-full max-w-[360px] sm:max-w-[400px] md:max-w-[460px] lg:max-w-[520px] mx-auto">
       <div style={mirrored ? { transform: "scaleX(-1)" } : undefined}>
         <svg
-          viewBox={`200 530 1100 300`}
+          viewBox={`120 420 1300 440`}
           className="w-full h-auto block"
           preserveAspectRatio="xMidYMid meet"
         >
