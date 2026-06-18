@@ -57,17 +57,47 @@ export function ElementViewer({
     el.noSeriousDamageTags.length > 0 ||
     (el.audioNotes && el.audioNotes.length > 0);
 
+  const swipeRef = useRef<{ x: number; y: number; t: number; touches: number } | null>(null);
+  const onTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length !== 1) {
+      swipeRef.current = null;
+      return;
+    }
+    swipeRef.current = {
+      x: e.touches[0].clientX,
+      y: e.touches[0].clientY,
+      t: Date.now(),
+      touches: 1,
+    };
+  };
+  const onTouchEnd = (e: React.TouchEvent) => {
+    const s = swipeRef.current;
+    swipeRef.current = null;
+    if (!s) return;
+    const touch = e.changedTouches[0];
+    if (!touch) return;
+    const dx = touch.clientX - s.x;
+    const dy = touch.clientY - s.y;
+    const dt = Date.now() - s.t;
+    if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy) * 1.2 || dt > 600) return;
+    if (dx < 0 && canNext) onChange(index! + 1);
+    else if (dx > 0 && canPrev) onChange(index! - 1);
+  };
+
   return createPortal(
     <div
       className="fixed inset-0 z-[100] bg-black text-white animate-in fade-in duration-150"
       role="dialog"
       aria-modal="true"
+      onTouchStart={onTouchStart}
+      onTouchEnd={onTouchEnd}
     >
       {/* Media fills the whole viewport */}
       <MediaStage
         key={el.id}
         file={el.file}
       />
+
 
       {/* Minimal top bar: counter left, close right */}
       <div className="absolute top-0 inset-x-0 h-12 flex items-center justify-between px-3 pointer-events-none z-10">
@@ -283,14 +313,14 @@ function MediaStage({ file }: { file: FileRef | null | undefined }) {
   }
   if (isVideo) {
     return (
-      <div className="absolute inset-0 flex items-center justify-center">
+      <div className="absolute inset-x-0 top-12 bottom-[180px] md:bottom-[200px] flex items-center justify-center px-2">
         <VideoPlayer src={url} hls={isHls} />
       </div>
     );
   }
   if (isAudio) {
     return (
-      <div className="absolute inset-0 flex items-center justify-center px-6">
+      <div className="absolute inset-x-0 top-12 bottom-[180px] md:bottom-[200px] flex items-center justify-center px-6">
         <audio src={url} controls className="w-full max-w-md" />
       </div>
     );
