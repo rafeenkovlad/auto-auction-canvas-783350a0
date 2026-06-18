@@ -160,7 +160,7 @@ export function FrameSchema({
       alwaysRenderCanvas
       hideHoverLabel
       canvas={({ hoverKey, setHoverKey }: SchemaCanvasApi) => (
-        <div className="flex flex-col">
+        <div className="flex flex-col gap-3 items-stretch">
           <FramePanel
             side="left"
             ariaLabel="Схема силовых элементов — левая сторона"
