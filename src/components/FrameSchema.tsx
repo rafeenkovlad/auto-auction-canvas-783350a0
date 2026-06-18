@@ -139,7 +139,7 @@ export function FrameSchema({
         <div className="flex flex-col gap-3">
           <FramePanel
             side="left"
-            sideLabel="Левая сторона"
+            ariaLabel="Схема силовых элементов — левая сторона"
             byType={byType}
             hoverKey={hoverKey}
             setHoverKey={setHoverKey}
@@ -147,7 +147,7 @@ export function FrameSchema({
           />
           <FramePanel
             side="right"
-            sideLabel="Правая сторона"
+            ariaLabel="Схема силовых элементов — правая сторона"
             byType={byType}
             hoverKey={hoverKey}
             setHoverKey={setHoverKey}
