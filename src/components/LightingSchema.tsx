@@ -3,8 +3,8 @@ import type { InspectionElement } from "@/lib/report.api";
 import { type Zone, fillFor, strokeFor } from "@/components/ZoneSchema";
 import { getElementStatus } from "@/lib/report.utils";
 import { SchemaShell, type SchemaCanvasApi } from "@/components/SchemaShell";
-import carFront from "@/assets/car-front.png.asset.json";
-import carRear from "@/assets/car-rear.png.asset.json";
+import carFront from "@/assets/car-front.png";
+import carRear from "@/assets/car-rear.png";
 
 const IMG_W = 1536;
 const IMG_H = 1024;
@@ -169,7 +169,7 @@ export function LightingSchema({
       canvas={({ hoverKey, setHoverKey }: SchemaCanvasApi) => (
         <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 items-start">
           <ImagePanel
-            imageUrl={carFront.url}
+            imageUrl={carFront}
             zones={FRONT_ZONES}
             byType={byType}
             hoverKey={hoverKey}
@@ -177,7 +177,7 @@ export function LightingSchema({
             onElementClick={onElementClick}
           />
           <ImagePanel
-            imageUrl={carRear.url}
+            imageUrl={carRear}
             zones={REAR_ZONES}
             byType={byType}
             hoverKey={hoverKey}
