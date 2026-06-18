@@ -64,7 +64,12 @@ const FRONT_ZONES: Zone[] = [
   {
     types: ["front_seats"],
     label: "Передние сиденья",
-    shape: { kind: "rect", x: 140, y: 565, w: 1090, h: 203, rx: 16 },
+    shape: { kind: "rect", x: 140, y: 565, w: 410, h: 203, rx: 16 },
+  },
+  {
+    types: ["front_seats"],
+    label: "Передние сиденья",
+    shape: { kind: "rect", x: 830, y: 565, w: 400, h: 203, rx: 16 },
   },
 ];
 
@@ -128,14 +133,15 @@ function ImagePanel({
         aria-label={ariaLabel}
       >
         <image href={imageUrl} x={0} y={0} width={width} height={height} />
-        {zones.map((z) => {
+        {zones.map((z, i) => {
           const el = z.types.map((t) => byType.get(t)).find(Boolean);
-          const key = z.types[0];
+          const key = `${z.types[0]}_${i}`;
+          const hoverId = z.types[0];
           const s = el ? getElementStatus(el) : "none";
           const hasDamage = el && s !== "ok";
           const fill = hasDamage ? fillFor(s) : "transparent";
           const handlers = {
-            onMouseEnter: () => setHoverKey(key),
+            onMouseEnter: () => setHoverKey(hoverId),
             onMouseLeave: () => setHoverKey(null),
             onClick: el ? () => onElementClick?.(el) : undefined,
             style: { cursor: el ? "pointer" : "default", transition: "all 140ms ease" },
