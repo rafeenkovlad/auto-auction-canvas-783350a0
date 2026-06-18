@@ -1,11 +1,18 @@
 import type { CarReport } from "@/lib/report.api";
-import { MetaCell } from "@/components/ReportPrimitives";
 import { fmtDate, fmtMileage } from "@/lib/report.utils";
 
 export function ReportHeader({ report }: { report: CarReport }) {
+  const inspectionDate = fmtDate(
+    report.carStep.dateInspection ?? report.reportDate,
+  );
+  const city = report.carStep.cityInspection;
+  const mileage = fmtMileage(report.carStep.mileage);
+  const gosNumber = report.carStep.gosNumber;
+
   return (
-    <header className="panel px-4 md:px-5 py-3 flex flex-col md:flex-row md:items-center gap-4 md:gap-6">
-      <div className="flex items-center gap-2.5 min-w-0">
+    <header className="panel px-4 md:px-5 py-3 flex flex-col lg:flex-row lg:items-center gap-3 lg:gap-5">
+      {/* Brand + report id */}
+      <div className="flex items-center gap-3 min-w-0 lg:pr-5 lg:border-r lg:border-border">
         <div
           className="w-9 h-9 shrink-0 rounded-lg flex items-center justify-center"
           style={{ background: "var(--ink)" }}
@@ -22,48 +29,102 @@ export function ReportHeader({ report }: { report: CarReport }) {
             <circle cx="16.5" cy="16" r="1.5" fill="white" />
           </svg>
         </div>
-        <div className="min-w-0 flex-1 leading-tight">
-          <div className="text-[10px] font-bold tracking-[0.18em] text-muted-foreground">
-            AUTO AUCTION
+        <div className="min-w-0 leading-tight">
+          <div className="flex items-baseline gap-1.5">
+            <span className="text-[10px] font-bold tracking-[0.18em] text-muted-foreground">
+              AUTO AUCTION
+            </span>
+            <span className="text-sm font-black ink tracking-wider">
+              CANVAS
+            </span>
           </div>
-          <div className="text-sm font-black ink tracking-wider truncate">
-            CANVAS
+          <div className="mono text-[11px] text-muted-foreground mt-0.5 truncate">
+            ID:{" "}
+            <span className="ink font-semibold">{report.reportNumber}</span>
           </div>
         </div>
       </div>
 
-      <div className="min-w-0 flex-1">
-        <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground truncate">
-          Отчёт о проверке автомобиля
-        </div>
-        <div className="mono text-xs text-muted-foreground mt-0.5 truncate">
-          ID отчёта:{" "}
-          <span className="ink font-semibold">{report.reportNumber}</span>
-        </div>
-      </div>
-
-      <div className="flex flex-wrap items-center gap-3 md:gap-6">
-        <MetaCell
+      {/* Meta cells */}
+      <dl className="flex-1 flex flex-wrap items-center gap-x-5 gap-y-2 min-w-0">
+        <MetaItem
+          icon={
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+              <rect x="3.5" y="5" width="17" height="15" rx="2" />
+              <path d="M3.5 9.5h17M8 3v4M16 3v4" />
+            </svg>
+          }
           label="Дата осмотра"
-          value={fmtDate(
-            report.carStep.dateInspection ?? report.reportDate,
-          )}
+          value={inspectionDate}
         />
-        {report.carStep.cityInspection && (
-          <MetaCell label="Город" value={report.carStep.cityInspection} />
+        {city && (
+          <MetaItem
+            icon={
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                <path d="M12 21s-7-6.2-7-12a7 7 0 1 1 14 0c0 5.8-7 12-7 12z" />
+                <circle cx="12" cy="9" r="2.5" />
+              </svg>
+            }
+            label="Город"
+            value={city}
+            truncate
+          />
         )}
-        <MetaCell label="Пробег" value={fmtMileage(report.carStep.mileage)} />
-        {report.carStep.gosNumber && (
-          <div className="flex flex-col items-center justify-center px-3 py-1 border-2 border-foreground bg-white rounded">
-            <span className="mono text-[8px] uppercase tracking-widest text-muted-foreground">
-              Гос. номер
+        <MetaItem
+          icon={
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+              <circle cx="12" cy="12" r="9" />
+              <path d="M12 7v5l3.5 2" />
+            </svg>
+          }
+          label="Пробег"
+          value={mileage}
+        />
+      </dl>
+
+      {gosNumber && (
+        <div className="shrink-0 self-start lg:self-center">
+          <div className="flex items-stretch rounded-md overflow-hidden border-2 border-foreground bg-white">
+            <span className="flex items-center px-1.5 bg-[#1a4a8a] text-white mono text-[8px] font-bold tracking-widest">
+              RU
             </span>
-            <span className="mono text-sm font-bold ink tracking-wider">
-              {report.carStep.gosNumber}
+            <span className="mono text-sm font-bold ink tracking-wider px-2.5 py-1">
+              {gosNumber}
             </span>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </header>
+  );
+}
+
+function MetaItem({
+  icon,
+  label,
+  value,
+  truncate,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  truncate?: boolean;
+}) {
+  return (
+    <div className="flex items-center gap-2.5 min-w-0">
+      <span className="w-7 h-7 shrink-0 rounded-md bg-muted text-muted-foreground flex items-center justify-center [&>svg]:w-3.5 [&>svg]:h-3.5">
+        {icon}
+      </span>
+      <div className="leading-tight min-w-0">
+        <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
+          {label}
+        </div>
+        <div
+          className={`text-sm font-semibold ink ${truncate ? "truncate max-w-[180px] xl:max-w-[260px]" : ""}`}
+          title={truncate ? value : undefined}
+        >
+          {value}
+        </div>
+      </div>
+    </div>
   );
 }
