@@ -58,6 +58,7 @@ function labelForElement(el: InspectionElement): string {
 function FramePanel({
   side,
   byType,
+  hoverKey,
   setHoverKey,
   onElementClick,
   mirrored,
@@ -71,6 +72,17 @@ function FramePanel({
   mirrored?: boolean;
   ariaLabel: string;
 }) {
+  const hoverZS = hoverKey ? zoneSideFromElType(hoverKey) : null;
+  const showLabel = hoverZS?.side === side;
+  const hoverEl = hoverKey ? byType.get(hoverKey) : null;
+  const hoverLabel = showLabel
+    ? hoverEl
+      ? labelForElement(hoverEl)
+      : hoverZS
+        ? labelForElement({ elementType: hoverKey! } as InspectionElement)
+        : null
+    : null;
+
   return (
     <div className="relative w-full mx-auto" style={{ aspectRatio: "1 / 1", maxWidth: 640 }}>
       <div
@@ -114,6 +126,17 @@ function FramePanel({
           })}
         </svg>
       </div>
+      {hoverLabel && (
+        <div
+          className="pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-2 px-2.5 py-1 rounded-md text-xs font-medium shadow-sm whitespace-nowrap"
+          style={{
+            background: "var(--card)",
+            border: "1px solid var(--border)",
+          }}
+        >
+          {hoverLabel}
+        </div>
+      )}
     </div>
   );
 }
@@ -135,8 +158,9 @@ export function FrameSchema({
     <SchemaShell
       elements={elements}
       alwaysRenderCanvas
+      hideHoverLabel
       canvas={({ hoverKey, setHoverKey }: SchemaCanvasApi) => (
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col">
           <FramePanel
             side="left"
             ariaLabel="Схема силовых элементов — левая сторона"
