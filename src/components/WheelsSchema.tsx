@@ -70,10 +70,11 @@ function ImagePanel({
     <div className="flex-1 min-w-0 relative w-full max-w-[360px] sm:max-w-[400px] md:max-w-[460px] lg:max-w-[520px] mx-auto">
       <div style={mirrored ? { transform: "scaleX(-1)" } : undefined}>
         <svg
-          viewBox={`0 0 ${IMG_W} ${IMG_H}`}
+          viewBox={`0 360 ${IMG_W} 520`}
           className="w-full h-auto block"
           preserveAspectRatio="xMidYMid meet"
         >
+
           <image href={imageUrl} x={0} y={0} width={IMG_W} height={IMG_H} />
         {zones.map((z) => {
           const el = z.types.map((t) => byType.get(t)).find(Boolean);
