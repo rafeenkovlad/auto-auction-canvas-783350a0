@@ -84,60 +84,57 @@ function FramePanel({
     : null;
 
   return (
-    <div className="relative w-full mx-auto pb-9" style={{ maxWidth: 640 }}>
+    <div className="relative w-full mx-auto" style={{ maxWidth: 640 }}>
       <div className="relative w-full" style={{ aspectRatio: "1024 / 300" }}>
-
-      <div
-        className="absolute inset-0"
-        style={mirrored ? { transform: "scaleX(-1)" } : undefined}
-      >
-        <svg
-          viewBox="0 362 1024 300"
-          className="absolute inset-0 w-full h-full"
-          preserveAspectRatio="xMidYMid meet"
-        >
-          <image href={frameImg} x={0} y={0} width={1024} height={1024} />
-          {ZONES.map((zone) => {
-            const elId = elementIdFor(zone, side);
-            const el = byType.get(elId);
-            const s = el ? getElementStatus(el) : "none";
-            const hasDamage = el && s !== "ok" && s !== "none";
-            const fill = hasDamage ? statusFill(s as Status) : "transparent";
-            return (
-              <polygon
-                key={zone}
-                points={ZONE_POLYS[zone]}
-                fill={fill}
-                stroke="transparent"
-                strokeWidth={0}
-                strokeLinejoin="round"
-                vectorEffect="non-scaling-stroke"
-                onMouseEnter={() => setHoverKey(elId)}
-                onMouseLeave={() => setHoverKey(null)}
-                onClick={() => el && onElementClick?.(el)}
-                style={{ cursor: el ? "pointer" : "default", transition: "all 140ms ease", pointerEvents: "all" }}
-              />
-            );
-          })}
-        </svg>
-      </div>
-      </div>
-
-      {hoverLabel && (
         <div
-          className="pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-0 px-2.5 py-1 rounded-md text-xs font-medium shadow-sm whitespace-nowrap"
-          style={{
-            background: "var(--card)",
-            border: "1px solid var(--border)",
-          }}
+          className="absolute inset-0"
+          style={mirrored ? { transform: "scaleX(-1)" } : undefined}
         >
-          {hoverLabel}
+          <svg
+            viewBox="0 362 1024 300"
+            className="absolute inset-0 w-full h-full"
+            preserveAspectRatio="xMidYMid meet"
+          >
+            <image href={frameImg} x={0} y={0} width={1024} height={1024} />
+            {ZONES.map((zone) => {
+              const elId = elementIdFor(zone, side);
+              const el = byType.get(elId);
+              const s = el ? getElementStatus(el) : "none";
+              const hasDamage = el && s !== "ok" && s !== "none";
+              const fill = hasDamage ? statusFill(s as Status) : "transparent";
+              return (
+                <polygon
+                  key={zone}
+                  points={ZONE_POLYS[zone]}
+                  fill={fill}
+                  stroke="transparent"
+                  strokeWidth={0}
+                  strokeLinejoin="round"
+                  vectorEffect="non-scaling-stroke"
+                  onMouseEnter={() => setHoverKey(elId)}
+                  onMouseLeave={() => setHoverKey(null)}
+                  onClick={() => el && onElementClick?.(el)}
+                  style={{ cursor: el ? "pointer" : "default", transition: "all 140ms ease", pointerEvents: "all" }}
+                />
+              );
+            })}
+          </svg>
         </div>
-      )}
+      </div>
+      <div className="mt-1.5 h-5 flex items-center justify-center">
+        {hoverLabel && (
+          <span
+            className="px-2 py-0.5 rounded-md text-[11px] font-medium shadow-sm"
+            style={{ background: "var(--card)", border: "1px solid var(--border)" }}
+          >
+            {hoverLabel}
+          </span>
+        )}
+      </div>
     </div>
-
   );
 }
+
 
 export function FrameSchema({
   elements,
