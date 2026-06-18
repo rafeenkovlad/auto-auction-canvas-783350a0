@@ -79,9 +79,9 @@ export function MediaGallery({
     "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3 md:gap-4";
 
   return (
-    <section className="panel p-5 md:p-6 flex flex-col gap-4">
+    <section className="panel p-4 sm:p-5 md:p-6 flex flex-col gap-3 sm:gap-4">
       <div className="flex items-center justify-between gap-3 flex-wrap">
-        <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+        <h3 className="text-xs sm:text-sm font-semibold uppercase tracking-wider text-muted-foreground">
           Фото и видео с осмотра
           <span className="ml-2 mono text-[11px] normal-case tracking-normal text-muted-foreground/70">
             ({items.length})
@@ -105,7 +105,7 @@ export function MediaGallery({
               role="tab"
               aria-selected={active}
               onClick={() => setTab(d.key)}
-              className="relative flex flex-col items-center justify-center gap-1 px-2 py-2.5 rounded-lg text-[11px] font-medium transition-all"
+              className="relative flex flex-col items-center justify-center gap-1 px-1.5 sm:px-2 py-2 sm:py-2.5 rounded-lg text-[10px] sm:text-[11px] font-medium transition-all"
               style={{
                 background: active ? "var(--card)" : "transparent",
                 color: active ? "var(--foreground)" : "var(--muted-foreground)",
@@ -115,7 +115,7 @@ export function MediaGallery({
               }}
             >
               <span
-                className="absolute top-1.5 right-1.5 mono text-[9px] leading-none px-1 py-0.5 rounded"
+                className="absolute top-1 right-1 sm:top-1.5 sm:right-1.5 mono text-[9px] leading-none px-1 py-0.5 rounded"
                 style={{
                   background: active ? "var(--muted)" : "transparent",
                   color: "var(--muted-foreground)",
@@ -125,7 +125,7 @@ export function MediaGallery({
                 {counts[d.key]}
               </span>
               <Icon size={16} strokeWidth={1.75} aria-hidden />
-              <span>{d.label}</span>
+              <span className="truncate max-w-full">{d.label}</span>
             </button>
           );
         })}
