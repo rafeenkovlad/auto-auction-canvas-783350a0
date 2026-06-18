@@ -164,7 +164,7 @@ export function WheelsSchema({
       hideHoverLabel
       alwaysRenderCanvas
       canvas={({ hoverKey, setHoverKey }: SchemaCanvasApi) => (
-        <div className="flex flex-col gap-1 items-stretch">
+        <div className="flex flex-col gap-0 items-stretch -space-y-2">
           <ImagePanel
             imageUrl={carSide}
             zones={LEFT_SIDE_ZONES}
