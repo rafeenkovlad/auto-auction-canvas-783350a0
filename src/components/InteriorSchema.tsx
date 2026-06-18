@@ -6,79 +6,78 @@ import { SchemaShell, type SchemaCanvasApi } from "@/components/SchemaShell";
 import interiorFront from "@/assets/interior-front.png";
 import interiorRear from "@/assets/interior-rear.png";
 
-const IMG_W = 1536;
-const IMG_H = 1024;
+// Per-image natural dimensions
+const FRONT_W = 1365;
+const FRONT_H = 768;
+const REAR_W = 1536;
+const REAR_H = 1024;
 
 const FRONT_ZONES: Zone[] = [
   {
     types: ["dashboard"],
     label: "Приборная панель (торпедо)",
-    shape: { kind: "polygon", points: "120,290 1420,290 1420,440 1240,470 300,470 120,440" },
+    shape: {
+      kind: "polygon",
+      points: "150,210 1220,210 1220,330 1080,360 285,360 150,330",
+    },
   },
   {
     types: ["instrument_cluster"],
     label: "Панель приборов",
-    shape: { kind: "rect", x: 340, y: 360, w: 470, h: 140, rx: 16 },
+    shape: { kind: "rect", x: 310, y: 240, w: 240, h: 110, rx: 12 },
   },
   {
     types: ["steering_wheel"],
     label: "Рулевое колесо",
-    shape: { kind: "ellipse", cx: 540, cy: 540, rx: 220, ry: 175 },
+    shape: { kind: "ellipse", cx: 415, cy: 365, rx: 145, ry: 120 },
   },
   {
     types: ["buttons_left_of_steering_wheel"],
     label: "Кнопки слева от руля",
-    shape: { kind: "rect", x: 280, y: 500, w: 110, h: 95, rx: 10 },
+    shape: { kind: "rect", x: 230, y: 340, w: 75, h: 70, rx: 8 },
   },
   {
     types: ["central_monitor"],
     label: "Центральный монитор",
-    shape: { kind: "rect", x: 810, y: 460, w: 440, h: 160, rx: 12 },
+    shape: { kind: "rect", x: 580, y: 275, w: 250, h: 135, rx: 10 },
   },
   {
     types: ["climate_control_unit"],
     label: "Блок климат-контроля",
-    shape: { kind: "rect", x: 830, y: 630, w: 270, h: 160, rx: 12 },
+    shape: { kind: "rect", x: 600, y: 415, w: 175, h: 110, rx: 10 },
   },
   {
     types: ["gear_selector_area"],
     label: "Область селектора передач",
-    shape: { kind: "rect", x: 850, y: 800, w: 170, h: 140, rx: 14 },
+    shape: { kind: "rect", x: 615, y: 540, w: 160, h: 140, rx: 12 },
   },
   {
     types: ["center_console"],
     label: "Центральная консоль",
-    shape: { kind: "polygon", points: "790,800 1130,800 1130,1024 790,1024" },
+    shape: { kind: "polygon", points: "555,525 825,525 825,768 555,768" },
   },
   {
     types: ["front_seats"],
     label: "Передние сиденья",
-    shape: { kind: "polygon", points: "180,820 780,820 780,1024 180,1024 180,820 M1140,820 L1410,820 L1410,1024 L1140,1024 Z" },
+    shape: { kind: "rect", x: 140, y: 565, w: 1090, h: 203, rx: 16 },
   },
 ];
-
-// Передние сиденья — две раздельных области; используем единый широкий rect, исключая центральную консоль визуально
-FRONT_ZONES[FRONT_ZONES.length - 1] = {
-  types: ["front_seats"],
-  label: "Передние сиденья",
-  shape: { kind: "rect", x: 180, y: 820, w: 1230, h: 204, rx: 18 },
-};
 
 const REAR_ZONES: Zone[] = [
   {
     types: ["ceiling"],
     label: "Потолок",
-    shape: { kind: "rect", x: 130, y: 30, w: 1290, h: 130, rx: 24 },
+    shape: { kind: "rect", x: 120, y: 30, w: 1300, h: 175, rx: 22 },
   },
   {
     types: ["trunk_compartment"],
     label: "Багажное отделение",
-    shape: { kind: "rect", x: 410, y: 175, w: 720, h: 130, rx: 14 },
+    shape: { kind: "rect", x: 400, y: 205, w: 740, h: 110, rx: 12 },
   },
   {
     types: ["rear_seats"],
     label: "Задние сиденья",
-    shape: { kind: "rect", x: 310, y: 290, w: 930, h: 520, rx: 20 },
+    shape: { kind: "rect", x: 340, y: 305, w: 855, h: 510, rx: 18 },
   },
 ];
 
@@ -93,6 +92,8 @@ function ImagePanel({
   imageUrl,
   ariaLabel,
   zones,
+  width,
+  height,
   byType,
   hoverKey,
   setHoverKey,
@@ -101,6 +102,8 @@ function ImagePanel({
   imageUrl: string;
   ariaLabel: string;
   zones: Zone[];
+  width: number;
+  height: number;
   byType: Map<string, InspectionElement>;
   hoverKey: string | null;
   setHoverKey: (k: string | null) => void;
@@ -113,13 +116,13 @@ function ImagePanel({
   return (
     <div className="flex-1 min-w-0 relative w-full max-w-[360px] sm:max-w-[420px] md:max-w-[500px] lg:max-w-[580px] mx-auto">
       <svg
-        viewBox={`0 0 ${IMG_W} ${IMG_H}`}
+        viewBox={`0 0 ${width} ${height}`}
         className="w-full h-auto block"
         preserveAspectRatio="xMidYMid meet"
         role="img"
         aria-label={ariaLabel}
       >
-        <image href={imageUrl} x={0} y={0} width={IMG_W} height={IMG_H} />
+        <image href={imageUrl} x={0} y={0} width={width} height={height} />
         {zones.map((z) => {
           const el = z.types.map((t) => byType.get(t)).find(Boolean);
           const key = z.types[0];
@@ -209,6 +212,8 @@ export function InteriorSchema({
             imageUrl={interiorRear}
             ariaLabel="Салон — задний ряд"
             zones={REAR_ZONES}
+            width={REAR_W}
+            height={REAR_H}
             byType={byType}
             hoverKey={hoverKey}
             setHoverKey={setHoverKey}
@@ -218,6 +223,8 @@ export function InteriorSchema({
             imageUrl={interiorFront}
             ariaLabel="Салон — передний ряд и торпедо"
             zones={FRONT_ZONES}
+            width={FRONT_W}
+            height={FRONT_H}
             byType={byType}
             hoverKey={hoverKey}
             setHoverKey={setHoverKey}
