@@ -151,32 +151,3 @@ export function MediaGallery({
     </section>
   );
 }
-
-function DensityButton({
-  active,
-  onClick,
-  label,
-  children,
-}: {
-  active: boolean;
-  onClick: () => void;
-  label: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={active}
-      title={label}
-      className="inline-flex items-center justify-center w-7 h-7 rounded transition-all"
-      style={{
-        background: active ? "var(--card)" : "transparent",
-        color: active ? "var(--foreground)" : "var(--muted-foreground)",
-        boxShadow: active ? "0 1px 2px rgba(0,0,0,0.06), 0 0 0 1px var(--border)" : undefined,
-      }}
-    >
-      {children}
-    </button>
-  );
-}
