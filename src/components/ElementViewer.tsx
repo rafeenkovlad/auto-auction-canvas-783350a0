@@ -313,14 +313,14 @@ function MediaStage({ file }: { file: FileRef | null | undefined }) {
   }
   if (isVideo) {
     return (
-      <div className="absolute inset-0 flex items-center justify-center">
+      <div className="absolute inset-x-0 top-12 bottom-[180px] md:bottom-[200px] flex items-center justify-center px-2">
         <VideoPlayer src={url} hls={isHls} />
       </div>
     );
   }
   if (isAudio) {
     return (
-      <div className="absolute inset-0 flex items-center justify-center px-6">
+      <div className="absolute inset-x-0 top-12 bottom-[180px] md:bottom-[200px] flex items-center justify-center px-6">
         <audio src={url} controls className="w-full max-w-md" />
       </div>
     );
