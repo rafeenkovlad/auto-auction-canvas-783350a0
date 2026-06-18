@@ -123,32 +123,23 @@ export function FrameSchema({
           const elId = elementIdFor(zone, side);
           const el = byType.get(elId);
           const s = statusForZone(zone);
-          const isHover = hoverKey === elId;
           const poly = ZONE_POLYS[zone];
-          const fill = s === "none" ? "transparent" : statusFill(s);
-          const stroke = isHover
-            ? "var(--accent)"
-            : s === "none"
-              ? "transparent"
-              : statusStroke(s);
-          const sw = isHover ? 3 : 2;
+          const hasDamage = el && s !== "ok" && s !== "none";
+          const fill = hasDamage ? statusFill(s as Status) : "transparent";
           return (
-            <g
+            <polygon
               key={zone}
+              points={poly}
+              fill={fill}
+              stroke="transparent"
+              strokeWidth={0}
+              strokeLinejoin="round"
+              vectorEffect="non-scaling-stroke"
               onMouseEnter={() => el && setHoverKey(elId)}
               onMouseLeave={() => setHoverKey(null)}
               onClick={() => el && onElementClick?.(el)}
               style={{ cursor: el ? "pointer" : "default", transition: "all 140ms ease" }}
-            >
-              <polygon
-                points={poly}
-                fill={fill}
-                stroke={stroke}
-                strokeWidth={sw}
-                strokeLinejoin="round"
-                vectorEffect="non-scaling-stroke"
-              />
-            </g>
+            />
           );
         })}
       </svg>
