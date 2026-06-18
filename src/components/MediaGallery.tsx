@@ -92,7 +92,7 @@ export function MediaGallery({
 
       {/* Tabs — same segmented style as Схема осмотра */}
       <div
-        className="grid grid-cols-3 sm:grid-cols-6 gap-1 p-1 rounded-xl"
+        className="grid grid-cols-3 sm:flex sm:flex-wrap gap-1 p-1 rounded-xl"
         style={{ background: "color-mix(in oklab, var(--muted) 60%, transparent)" }}
         role="tablist"
       >
@@ -106,7 +106,7 @@ export function MediaGallery({
               role="tab"
               aria-selected={active}
               onClick={() => setTab(d.key)}
-              className="relative flex flex-col items-center justify-center gap-1 px-1.5 sm:px-2 py-2 sm:py-2.5 rounded-lg text-[10px] sm:text-[11px] font-medium transition-all"
+              className="relative flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 px-2 sm:px-3.5 py-2 sm:py-2 rounded-lg text-[10px] sm:text-[13px] font-medium transition-all sm:flex-1 sm:min-w-0"
               style={{
                 background: active ? "var(--card)" : "transparent",
                 color: active ? "var(--foreground)" : "var(--muted-foreground)",
@@ -115,22 +115,23 @@ export function MediaGallery({
                   : undefined,
               }}
             >
+              <Icon size={16} strokeWidth={1.75} aria-hidden className="shrink-0 sm:size-[18px]" />
+              <span className="truncate max-w-full sm:flex-1 sm:text-left">{d.label}</span>
               <span
-                className="absolute top-1 right-1 sm:top-1.5 sm:right-1.5 mono text-[9px] leading-none px-1 py-0.5 rounded"
+                className="absolute top-1 right-1 sm:static mono text-[9px] sm:text-[11px] leading-none px-1 sm:px-1.5 py-0.5 rounded shrink-0"
                 style={{
-                  background: active ? "var(--muted)" : "transparent",
+                  background: active ? "var(--muted)" : "color-mix(in oklab, var(--muted) 70%, transparent)",
                   color: "var(--muted-foreground)",
                 }}
                 aria-hidden
               >
                 {counts[d.key]}
               </span>
-              <Icon size={16} strokeWidth={1.75} aria-hidden />
-              <span className="truncate max-w-full">{d.label}</span>
             </button>
           );
         })}
       </div>
+
 
       {visible.length === 0 ? (
         <div className="text-center text-muted-foreground py-8 text-sm">
