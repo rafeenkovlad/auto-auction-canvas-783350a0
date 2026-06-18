@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import type { InspectionElement } from "@/lib/report.api";
 import frameImg from "@/assets/frame-schema.png";
 import { SchemaShell, type SchemaCanvasApi } from "@/components/SchemaShell";
-import { getElementStatus, statusFill, statusStroke, type Status } from "@/lib/report.utils";
+import { getElementStatus, statusFill, type Status } from "@/lib/report.utils";
 
 type Side = "left" | "right";
 type ZoneKey = "front_pillar" | "center_pillar" | "rear_pillar" | "sill";
