@@ -37,13 +37,7 @@ export function HeroSection({
       ) : null}
 
       <div className="min-w-0 flex flex-col">
-        {/* Eyebrow */}
-        <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
-          <span className="w-1.5 h-1.5 rounded-full" style={{ background: "var(--ink)" }} />
-          Объект осмотра
-        </div>
-
-        <h1 className="mt-1.5 text-2xl md:text-3xl font-bold ink leading-tight">
+        <h1 className="text-2xl md:text-3xl font-bold ink leading-tight">
           {carName}
         </h1>
 
