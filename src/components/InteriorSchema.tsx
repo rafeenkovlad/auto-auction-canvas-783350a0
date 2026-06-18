@@ -104,6 +104,7 @@ function ImagePanel({
   hoverKey,
   setHoverKey,
   onElementClick,
+  viewBox,
 }: {
   imageUrl: string;
   ariaLabel: string;
@@ -114,6 +115,7 @@ function ImagePanel({
   hoverKey: string | null;
   setHoverKey: (k: string | null) => void;
   onElementClick?: (el: InspectionElement) => void;
+  viewBox?: string;
 }) {
   const panelLabel =
     hoverKey && zones.some((z) => z.types.includes(hoverKey))
@@ -122,7 +124,7 @@ function ImagePanel({
   return (
     <div className="flex-1 min-w-0 relative w-full max-w-[360px] sm:max-w-[400px] md:max-w-[460px] lg:max-w-[520px] mx-auto">
       <svg
-        viewBox={`0 0 ${width} ${height}`}
+        viewBox={viewBox ?? `0 0 ${width} ${height}`}
         className="w-full h-auto block"
         preserveAspectRatio="xMidYMid meet"
         role="img"
@@ -225,6 +227,7 @@ export function InteriorSchema({
             hoverKey={hoverKey}
             setHoverKey={setHoverKey}
             onElementClick={onElementClick}
+            viewBox={`60 10 1144 670`}
           />
           <ImagePanel
             imageUrl={interiorFront}
@@ -236,6 +239,7 @@ export function InteriorSchema({
             hoverKey={hoverKey}
             setHoverKey={setHoverKey}
             onElementClick={onElementClick}
+            viewBox={`100 180 1170 588`}
           />
         </div>
       )}
