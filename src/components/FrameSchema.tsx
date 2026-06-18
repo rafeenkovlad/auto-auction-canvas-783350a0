@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 import type { InspectionElement } from "@/lib/report.api";
 import frameImg from "@/assets/frame-schema.png";
 import { SchemaShell, type SchemaCanvasApi } from "@/components/SchemaShell";
@@ -21,11 +21,7 @@ const ZONE_POLYS: Record<ZoneKey, string> = {
   sill: "285,592 705,592 705,645 285,645",
 };
 
-
-const SIDES: { key: Side; label: string }[] = [
-  { key: "left", label: "Левая сторона" },
-  { key: "right", label: "Правая сторона" },
-];
+const ZONES: ZoneKey[] = ["front_pillar", "center_pillar", "rear_pillar", "sill"];
 
 function elementIdFor(zone: ZoneKey, side: Side): string {
   if (zone === "sill") return side === "left" ? "left_sill" : "right_sill";
@@ -53,6 +49,80 @@ function labelForElement(el: InspectionElement): string {
   return `${sidePrefix} ${pillarName} стойка`;
 }
 
+function FramePanel({
+  side,
+  byType,
+  hoverKey,
+  setHoverKey,
+  onElementClick,
+  mirrored,
+  sideLabel,
+}: {
+  side: Side;
+  byType: Map<string, InspectionElement>;
+  hoverKey: string | null;
+  setHoverKey: (k: string | null) => void;
+  onElementClick?: (el: InspectionElement) => void;
+  mirrored?: boolean;
+  sideLabel: string;
+}) {
+  return (
+    <div className="relative w-full mx-auto" style={{ aspectRatio: "1 / 1", maxWidth: 640 }}>
+      <div
+        className="absolute top-2 left-2 z-10 px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wider"
+        style={{
+          background: "var(--card)",
+          border: "1px solid var(--border)",
+          color: "var(--muted-foreground)",
+        }}
+      >
+        {sideLabel}
+      </div>
+      <div
+        className="absolute inset-0"
+        style={mirrored ? { transform: "scaleX(-1)" } : undefined}
+      >
+        <img
+          src={frameImg}
+          alt={`Схема силовых элементов — ${sideLabel}`}
+          className="absolute inset-0 w-full h-full object-contain select-none pointer-events-none"
+          loading="lazy"
+          width={1024}
+          height={1024}
+        />
+        <svg
+          viewBox="0 0 1024 1024"
+          className="absolute inset-0 w-full h-full"
+          preserveAspectRatio="xMidYMid meet"
+        >
+          {ZONES.map((zone) => {
+            const elId = elementIdFor(zone, side);
+            const el = byType.get(elId);
+            const s = el ? getElementStatus(el) : "none";
+            const hasDamage = el && s !== "ok" && s !== "none";
+            const fill = hasDamage ? statusFill(s as Status) : "transparent";
+            return (
+              <polygon
+                key={zone}
+                points={ZONE_POLYS[zone]}
+                fill={fill}
+                stroke="transparent"
+                strokeWidth={0}
+                strokeLinejoin="round"
+                vectorEffect="non-scaling-stroke"
+                onMouseEnter={() => el && setHoverKey(elId)}
+                onMouseLeave={() => setHoverKey(null)}
+                onClick={() => el && onElementClick?.(el)}
+                style={{ cursor: el ? "pointer" : "default", transition: "all 140ms ease" }}
+              />
+            );
+          })}
+        </svg>
+      </div>
+    </div>
+  );
+}
+
 export function FrameSchema({
   elements,
   onElementClick,
@@ -60,97 +130,37 @@ export function FrameSchema({
   elements: InspectionElement[];
   onElementClick?: (el: InspectionElement) => void;
 }) {
-  const [side, setSide] = useState<Side>("left");
-
   const byType = useMemo(() => {
     const m = new Map<string, InspectionElement>();
     for (const el of elements) m.set(el.elementType, el);
     return m;
   }, [elements]);
 
-  const zones: ZoneKey[] = ["front_pillar", "center_pillar", "rear_pillar", "sill"];
-
-  function getEl(zone: ZoneKey): InspectionElement | undefined {
-    return byType.get(elementIdFor(zone, side));
-  }
-  function statusForZone(zone: ZoneKey): Status | "none" {
-    const el = getEl(zone);
-    return el ? getElementStatus(el) : "none";
-  }
-
-  const sideHeader = (
-    <div className="flex flex-wrap gap-1.5 justify-end">
-      {SIDES.map((s) => {
-        const active = side === s.key;
-        return (
-          <button
-            key={s.key}
-            type="button"
-            onClick={() => setSide(s.key)}
-            className="px-3 py-1.5 rounded-md text-xs font-medium border transition-colors"
-            style={{
-              background: active ? "var(--accent)" : "var(--card)",
-              color: active ? "var(--accent-foreground)" : "var(--foreground)",
-              borderColor: active ? "var(--accent)" : "var(--border)",
-            }}
-          >
-            {s.label}
-          </button>
-        );
-      })}
-    </div>
-  );
-
-  const renderCanvas = ({ hoverKey, setHoverKey }: SchemaCanvasApi) => (
-    <div
-      className="relative w-full mx-auto"
-      style={{ aspectRatio: "1 / 1", maxWidth: 640 }}
-    >
-      <img
-        src={frameImg}
-        alt="Схема силовых элементов"
-        className="absolute inset-0 w-full h-full object-contain select-none pointer-events-none"
-        loading="lazy"
-        width={1024}
-        height={1024}
-      />
-      <svg
-        viewBox="0 0 1024 1024"
-        className="absolute inset-0 w-full h-full"
-        preserveAspectRatio="xMidYMid meet"
-      >
-        {zones.map((zone) => {
-          const elId = elementIdFor(zone, side);
-          const el = byType.get(elId);
-          const s = statusForZone(zone);
-          const poly = ZONE_POLYS[zone];
-          const hasDamage = el && s !== "ok" && s !== "none";
-          const fill = hasDamage ? statusFill(s as Status) : "transparent";
-          return (
-            <polygon
-              key={zone}
-              points={poly}
-              fill={fill}
-              stroke="transparent"
-              strokeWidth={0}
-              strokeLinejoin="round"
-              vectorEffect="non-scaling-stroke"
-              onMouseEnter={() => el && setHoverKey(elId)}
-              onMouseLeave={() => setHoverKey(null)}
-              onClick={() => el && onElementClick?.(el)}
-              style={{ cursor: el ? "pointer" : "default", transition: "all 140ms ease" }}
-            />
-          );
-        })}
-      </svg>
-    </div>
-  );
-
   return (
     <SchemaShell
       elements={elements}
-      header={sideHeader}
-      canvas={renderCanvas}
+      alwaysRenderCanvas
+      canvas={({ hoverKey, setHoverKey }: SchemaCanvasApi) => (
+        <div className="flex flex-col gap-3">
+          <FramePanel
+            side="left"
+            sideLabel="Левая сторона"
+            byType={byType}
+            hoverKey={hoverKey}
+            setHoverKey={setHoverKey}
+            onElementClick={onElementClick}
+          />
+          <FramePanel
+            side="right"
+            sideLabel="Правая сторона"
+            byType={byType}
+            hoverKey={hoverKey}
+            setHoverKey={setHoverKey}
+            onElementClick={onElementClick}
+            mirrored
+          />
+        </div>
+      )}
       zoneKeyForElement={(el) => el.elementType}
       zoneLabelForElement={labelForElement}
       zoneLabelForKey={(k) => {
