@@ -85,7 +85,7 @@ export function SchemaTabs({
 
 
       <div
-        className="grid grid-cols-3 sm:grid-cols-6 gap-1 p-1 rounded-xl"
+        className="flex sm:grid sm:grid-cols-6 gap-1 p-1 rounded-xl overflow-x-auto no-scrollbar -mx-1 px-1 snap-x snap-mandatory"
         style={{ background: "color-mix(in oklab, var(--muted) 60%, transparent)" }}
         role="tablist"
       >
@@ -108,7 +108,7 @@ export function SchemaTabs({
               role="tab"
               aria-selected={active}
               onClick={() => setTab(t.key)}
-              className="relative flex flex-col items-center justify-center gap-1 px-2 py-2.5 rounded-lg text-[11px] font-medium transition-all"
+              className="relative flex items-center sm:flex-col justify-center gap-1.5 sm:gap-1 px-3 sm:px-2 py-2 sm:py-2.5 rounded-lg text-[12px] sm:text-[11px] font-medium transition-all shrink-0 sm:shrink snap-start"
               style={{
                 background: active ? "var(--card)" : "transparent",
                 color: active ? "var(--foreground)" : "var(--muted-foreground)",
@@ -123,11 +123,12 @@ export function SchemaTabs({
                 aria-hidden
               />
               <Icon size={16} strokeWidth={1.75} aria-hidden />
-              <span>{t.label}</span>
+              <span className="whitespace-nowrap">{t.label}</span>
             </button>
           );
         })}
       </div>
+
 
 
 
