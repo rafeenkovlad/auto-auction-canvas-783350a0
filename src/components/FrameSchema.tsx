@@ -78,7 +78,7 @@ export function FrameSchema({
     return m;
   }, [elements]);
 
-  const zones: ZoneKey[] = ["front_pillar", "center_pillar", "rear_pillar", "sill", "side_beam"];
+  const zones: ZoneKey[] = ["front_pillar", "center_pillar", "rear_pillar", "sill"];
 
   function getEl(zone: ZoneKey): InspectionElement | undefined {
     return byType.get(elementIdFor(zone, side));
