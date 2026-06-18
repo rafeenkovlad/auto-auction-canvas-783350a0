@@ -1,4 +1,6 @@
 import { useMemo, useState } from "react";
+import { Images, Car, Armchair, Wrench, AlertTriangle, Video } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import type { FileRef } from "@/lib/report.api";
 
 export type GalleryItem = {
@@ -11,29 +13,41 @@ export type GalleryItem = {
   timestamp?: string | null;
 };
 
-const TAB_DEFS: Array<{ key: string; label: string; match: (i: GalleryItem) => boolean }> = [
-  { key: "all", label: "Все", match: () => true },
+const TAB_DEFS: Array<{
+  key: string;
+  label: string;
+  icon: LucideIcon;
+  match: (i: GalleryItem) => boolean;
+}> = [
+  { key: "all", label: "Все", icon: Images, match: () => true },
   {
     key: "exterior",
     label: "Экстерьер",
+    icon: Car,
     match: (i) =>
       i.sectionKey === "bodyElements" ||
       i.sectionKey === "glassElements" ||
       i.sectionKey === "lightningElements",
   },
-  { key: "interior", label: "Интерьер", match: (i) => i.sectionKey === "interiorElements" },
+  {
+    key: "interior",
+    label: "Интерьер",
+    icon: Armchair,
+    match: (i) => i.sectionKey === "interiorElements",
+  },
   {
     key: "engine",
     label: "Двигатель",
+    icon: Wrench,
     match: (i) =>
       i.sectionKey === "underHoodElements" ||
       i.sectionKey === "computerDiagnosticsElements",
   },
-  { key: "damage", label: "Повреждения", match: (i) => i.isDamage },
-  { key: "video", label: "Видео", match: (i) => i.isVideo },
+  { key: "damage", label: "Повреждения", icon: AlertTriangle, match: (i) => i.isDamage },
+  { key: "video", label: "Видео", icon: Video, match: (i) => i.isVideo },
 ];
 
-type Density = "comfortable" | "compact";
+type Density = "three" | "two";
 
 export function MediaGallery({
   items,
@@ -45,7 +59,7 @@ export function MediaGallery({
   renderTile: (item: GalleryItem) => React.ReactNode;
 }) {
   const [tab, setTab] = useState("all");
-  const [density, setDensity] = useState<Density>("comfortable");
+  const [density, setDensity] = useState<Density>("three");
 
   const counts = useMemo(() => {
     const c: Record<string, number> = {};
@@ -60,14 +74,16 @@ export function MediaGallery({
 
   if (items.length === 0) return null;
 
+  const visibleTabs = TAB_DEFS.filter((d) => d.key === "all" || counts[d.key] > 0);
+
   const gridClass =
-    density === "comfortable"
-      ? "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3"
-      : "grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2";
+    density === "three"
+      ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 md:gap-4"
+      : "grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4";
 
   return (
-    <section className="panel p-5 md:p-6">
-      <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
+    <section className="panel p-5 md:p-6 flex flex-col gap-4">
+      <div className="flex items-center justify-between gap-3 flex-wrap">
         <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
           Фото и видео с осмотра
           <span className="ml-2 mono text-[11px] normal-case tracking-normal text-muted-foreground/70">
@@ -76,62 +92,72 @@ export function MediaGallery({
         </h3>
 
         <div
-          className="inline-flex rounded-md border border-border bg-card overflow-hidden"
+          className="inline-flex rounded-md p-0.5 gap-0.5"
+          style={{ background: "color-mix(in oklab, var(--muted) 60%, transparent)" }}
           role="group"
           aria-label="Плотность сетки"
         >
           <DensityButton
-            active={density === "comfortable"}
-            onClick={() => setDensity("comfortable")}
-            label="Крупно"
+            active={density === "two"}
+            onClick={() => setDensity("two")}
+            label="2 в ряд"
           >
             <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6">
-              <rect x="1.5" y="1.5" width="5.5" height="5.5" rx="1" />
-              <rect x="9" y="1.5" width="5.5" height="5.5" rx="1" />
-              <rect x="1.5" y="9" width="5.5" height="5.5" rx="1" />
-              <rect x="9" y="9" width="5.5" height="5.5" rx="1" />
+              <rect x="1.5" y="2.5" width="5.5" height="11" rx="1" />
+              <rect x="9" y="2.5" width="5.5" height="11" rx="1" />
             </svg>
           </DensityButton>
           <DensityButton
-            active={density === "compact"}
-            onClick={() => setDensity("compact")}
-            label="Компактно"
+            active={density === "three"}
+            onClick={() => setDensity("three")}
+            label="3 в ряд"
           >
-            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4">
-              <rect x="1" y="1" width="4" height="4" rx="0.6" />
-              <rect x="6" y="1" width="4" height="4" rx="0.6" />
-              <rect x="11" y="1" width="4" height="4" rx="0.6" />
-              <rect x="1" y="6" width="4" height="4" rx="0.6" />
-              <rect x="6" y="6" width="4" height="4" rx="0.6" />
-              <rect x="11" y="6" width="4" height="4" rx="0.6" />
-              <rect x="1" y="11" width="4" height="4" rx="0.6" />
-              <rect x="6" y="11" width="4" height="4" rx="0.6" />
-              <rect x="11" y="11" width="4" height="4" rx="0.6" />
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6">
+              <rect x="1" y="2.5" width="3.5" height="11" rx="0.8" />
+              <rect x="6.25" y="2.5" width="3.5" height="11" rx="0.8" />
+              <rect x="11.5" y="2.5" width="3.5" height="11" rx="0.8" />
             </svg>
           </DensityButton>
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-1.5 mb-4">
-        {TAB_DEFS.map((d) => {
+      {/* Tabs — same segmented style as Схема осмотра */}
+      <div
+        className="grid grid-cols-3 sm:grid-cols-6 gap-1 p-1 rounded-xl"
+        style={{ background: "color-mix(in oklab, var(--muted) 60%, transparent)" }}
+        role="tablist"
+      >
+        {visibleTabs.map((d) => {
           const active = tab === d.key;
-          const count = counts[d.key];
-          if (count === 0 && d.key !== "all") return null;
+          const Icon = d.icon;
           return (
             <button
               key={d.key}
               type="button"
+              role="tab"
+              aria-selected={active}
               onClick={() => setTab(d.key)}
-              aria-pressed={active}
-              className="px-3 py-1.5 rounded-md text-xs font-medium border transition-colors"
+              className="relative flex flex-col items-center justify-center gap-1 px-2 py-2.5 rounded-lg text-[11px] font-medium transition-all"
               style={{
-                background: active ? "var(--accent)" : "var(--card)",
-                color: active ? "var(--accent-foreground)" : "var(--foreground)",
-                borderColor: active ? "var(--accent)" : "var(--border)",
+                background: active ? "var(--card)" : "transparent",
+                color: active ? "var(--foreground)" : "var(--muted-foreground)",
+                boxShadow: active
+                  ? "0 1px 2px rgba(0,0,0,0.06), 0 0 0 1px var(--border)"
+                  : undefined,
               }}
             >
-              {d.label}
-              <span className="ml-1.5 mono opacity-70">({count})</span>
+              <span
+                className="absolute top-1.5 right-1.5 mono text-[9px] leading-none px-1 py-0.5 rounded"
+                style={{
+                  background: active ? "var(--muted)" : "transparent",
+                  color: "var(--muted-foreground)",
+                }}
+                aria-hidden
+              >
+                {counts[d.key]}
+              </span>
+              <Icon size={16} strokeWidth={1.75} aria-hidden />
+              <span>{d.label}</span>
             </button>
           );
         })}
@@ -176,10 +202,11 @@ function DensityButton({
       onClick={onClick}
       aria-pressed={active}
       title={label}
-      className="inline-flex items-center justify-center w-7 h-7 transition-colors"
+      className="inline-flex items-center justify-center w-7 h-7 rounded transition-all"
       style={{
-        background: active ? "var(--accent)" : "transparent",
-        color: active ? "var(--accent-foreground)" : "var(--muted-foreground)",
+        background: active ? "var(--card)" : "transparent",
+        color: active ? "var(--foreground)" : "var(--muted-foreground)",
+        boxShadow: active ? "0 1px 2px rgba(0,0,0,0.06), 0 0 0 1px var(--border)" : undefined,
       }}
     >
       {children}
