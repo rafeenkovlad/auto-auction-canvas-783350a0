@@ -84,7 +84,9 @@ function FramePanel({
     : null;
 
   return (
-    <div className="relative w-full mx-auto" style={{ aspectRatio: "1024 / 300", maxWidth: 640 }}>
+    <div className="relative w-full mx-auto pb-9" style={{ maxWidth: 640 }}>
+      <div className="relative w-full" style={{ aspectRatio: "1024 / 300" }}>
+
       <div
         className="absolute inset-0"
         style={mirrored ? { transform: "scaleX(-1)" } : undefined}
