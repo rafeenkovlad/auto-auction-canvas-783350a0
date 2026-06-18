@@ -305,9 +305,15 @@ function VideoPlayer({ src, hls }: { src: string; hls: boolean }) {
     const video = videoRef.current;
     if (!video) return;
 
+    const tryPlay = () => {
+      const p = video.play();
+      if (p && typeof p.catch === "function") p.catch(() => {});
+    };
+
     // Native HLS (Safari/iOS)
     if (!hls || video.canPlayType("application/vnd.apple.mpegurl")) {
       video.src = src;
+      tryPlay();
       return;
     }
 
@@ -321,8 +327,10 @@ function VideoPlayer({ src, hls }: { src: string; hls: boolean }) {
         instance.loadSource(src);
         instance.attachMedia(video);
         hlsInstance = instance;
+        tryPlay();
       } else {
         video.src = src;
+        tryPlay();
       }
     });
 
@@ -336,6 +344,7 @@ function VideoPlayer({ src, hls }: { src: string; hls: boolean }) {
     <video
       ref={videoRef}
       controls
+      autoPlay
       playsInline
       className="max-w-full max-h-full"
     />
