@@ -174,7 +174,16 @@ function ImagePanel({
           }
           return null;
         })}
-      </svg>
+        </svg>
+      </div>
+      {panelLabel && (
+        <div
+          className="pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-1.5 px-2 py-0.5 rounded-md text-[11px] font-medium shadow-sm"
+          style={{ background: "var(--card)", border: "1px solid var(--border)" }}
+        >
+          {panelLabel}
+        </div>
+      )}
     </div>
   );
 }
