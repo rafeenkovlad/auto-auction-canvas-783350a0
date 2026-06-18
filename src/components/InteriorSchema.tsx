@@ -14,11 +14,7 @@ const REAR_H = 843;
 
 const FRONT_ZONES: Zone[] = [
   {
-    types: ["ceiling"],
-    label: "Потолок",
-    shape: { kind: "polygon", points: "150,0 1215,0 1215,180 950,210 415,210 150,180" },
-  },
-  {
+
     types: ["dashboard"],
     label: "Приборная панель (торпедо)",
     shape: {
