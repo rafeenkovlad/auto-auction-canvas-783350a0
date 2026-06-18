@@ -239,7 +239,7 @@ function TopView({ zoneProps }: { zoneProps: ZoneProps }) {
   return (
     <svg
       viewBox="0 0 1024 1536"
-      className="w-full h-auto max-h-[620px] mx-auto block"
+      className="w-full h-auto max-h-[60vh] sm:max-h-[620px] max-w-[300px] sm:max-w-[360px] lg:max-w-[420px] mx-auto block"
       role="img"
       aria-label="Автомобиль — вид сверху"
     >
@@ -309,7 +309,7 @@ function FrontView({ zoneProps }: { zoneProps: ZoneProps }) {
   return (
     <svg
       viewBox="0 0 460 310"
-      className="w-full h-auto max-h-[420px] mx-auto block"
+      className="w-full h-auto max-h-[50vh] sm:max-h-[420px] max-w-[360px] sm:max-w-[420px] lg:max-w-[480px] mx-auto block"
       role="img"
       aria-label="Audi A6 Allroad — вид спереди"
     >
@@ -431,7 +431,7 @@ function RearView({ zoneProps }: { zoneProps: ZoneProps }) {
   return (
     <svg
       viewBox="0 0 460 310"
-      className="w-full h-auto max-h-[420px] mx-auto block"
+      className="w-full h-auto max-h-[50vh] sm:max-h-[420px] max-w-[360px] sm:max-w-[420px] lg:max-w-[480px] mx-auto block"
       role="img"
       aria-label="Audi A6 Allroad — вид сзади"
     >
@@ -572,7 +572,7 @@ function SideView({
   return (
     <svg
       viewBox="0 0 720 280"
-      className="w-full h-auto max-h-[360px] mx-auto block"
+      className="w-full h-auto max-h-[45vh] sm:max-h-[360px] max-w-[460px] sm:max-w-[560px] lg:max-w-[680px] mx-auto block"
       role="img"
       aria-label={`Audi A6 Allroad — вид ${isLeft ? "слева" : "справа"}`}
     >
