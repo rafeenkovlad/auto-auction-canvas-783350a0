@@ -5,28 +5,22 @@ import { SchemaShell, type SchemaCanvasApi } from "@/components/SchemaShell";
 import { getElementStatus, statusFill, statusStroke, type Status } from "@/lib/report.utils";
 
 type Side = "left" | "right";
-type ZoneKey = "front_pillar" | "center_pillar" | "rear_pillar" | "sill" | "side_beam";
+type ZoneKey = "front_pillar" | "center_pillar" | "rear_pillar" | "sill";
 
 const ZONE_LABEL: Record<ZoneKey, string> = {
   front_pillar: "Передняя стойка (A)",
   center_pillar: "Центральная стойка (B)",
   rear_pillar: "Задняя стойка (D)",
   sill: "Порог",
-  side_beam: "Боковая балка",
 };
 
 const ZONE_POLYS: Record<ZoneKey, string> = {
-  front_pillar: "295,620 310,500 360,420 415,385 440,385 405,460 360,540 340,620",
-  center_pillar: "515,620 520,500 530,400 555,385 580,385 575,460 565,540 565,620",
-  rear_pillar: "660,615 685,500 710,420 735,390 780,395 775,460 745,540 705,615",
-  sill: "285,615 765,615 745,665 305,665",
-  side_beam: "320,510 535,510 535,545 320,545 M 555,510 690,510 690,545 555,545",
+  front_pillar: "415,395 430,395 355,455 322,512 312,570 322,628 288,628 285,560 290,510 325,455",
+  center_pillar: "565,388 580,388 568,441 558,494 552,546 525,602 505,602 506,546 519,494 535,441",
+  rear_pillar: "700,388 800,388 880,440 770,500 720,560 670,618 645,618 690,560 715,500 690,440",
+  sill: "285,592 705,592 705,645 285,645",
 };
 
-const SIDE_BEAM_POLYS = [
-  "320,510 535,510 535,545 320,545",
-  "555,510 690,510 690,545 555,545",
-];
 
 const SIDES: { key: Side; label: string }[] = [
   { key: "left", label: "Левая сторона" },
@@ -35,7 +29,6 @@ const SIDES: { key: Side; label: string }[] = [
 
 function elementIdFor(zone: ZoneKey, side: Side): string {
   if (zone === "sill") return side === "left" ? "left_sill" : "right_sill";
-  if (zone === "side_beam") return side === "left" ? "left_side_beam" : "right_side_beam";
   if (zone === "front_pillar") return side === "left" ? "front_left_pillar" : "front_right_pillar";
   if (zone === "center_pillar")
     return side === "left" ? "center_left_pillar" : "center_right_pillar";
@@ -45,8 +38,6 @@ function elementIdFor(zone: ZoneKey, side: Side): string {
 function zoneSideFromElType(t: string): { zone: ZoneKey; side: Side } | null {
   if (t === "left_sill") return { zone: "sill", side: "left" };
   if (t === "right_sill") return { zone: "sill", side: "right" };
-  if (t === "left_side_beam") return { zone: "side_beam", side: "left" };
-  if (t === "right_side_beam") return { zone: "side_beam", side: "right" };
   const m = t.match(/^(front|center|rear)_(left|right)_pillar$/);
   if (m) return { zone: `${m[1]}_pillar` as ZoneKey, side: m[2] as Side };
   return null;
@@ -57,7 +48,6 @@ function labelForElement(el: InspectionElement): string {
   if (!zs) return el.elementType.replace(/_/g, " ");
   const sidePrefix = zs.side === "left" ? "Левая" : "Правая";
   if (zs.zone === "sill") return `${zs.side === "left" ? "Левый" : "Правый"} порог`;
-  if (zs.zone === "side_beam") return `${sidePrefix} боковая балка`;
   const pillarName =
     zs.zone === "front_pillar" ? "передняя" : zs.zone === "center_pillar" ? "центральная" : "задняя";
   return `${sidePrefix} ${pillarName} стойка`;
@@ -134,12 +124,12 @@ export function FrameSchema({
           const el = byType.get(elId);
           const s = statusForZone(zone);
           const isHover = hoverKey === elId;
-          const polys = zone === "side_beam" ? SIDE_BEAM_POLYS : [ZONE_POLYS[zone]];
+          const poly = ZONE_POLYS[zone];
           const fill = s === "none" ? "transparent" : statusFill(s);
           const stroke = isHover
             ? "var(--accent)"
             : s === "none"
-              ? "oklch(0.62 0.008 250 / 0.6)"
+              ? "transparent"
               : statusStroke(s);
           const sw = isHover ? 3 : 2;
           return (
@@ -150,17 +140,14 @@ export function FrameSchema({
               onClick={() => el && onElementClick?.(el)}
               style={{ cursor: el ? "pointer" : "default", transition: "all 140ms ease" }}
             >
-              {polys.map((p, i) => (
-                <polygon
-                  key={i}
-                  points={p}
-                  fill={fill}
-                  stroke={stroke}
-                  strokeWidth={sw}
-                  strokeLinejoin="round"
-                  vectorEffect="non-scaling-stroke"
-                />
-              ))}
+              <polygon
+                points={poly}
+                fill={fill}
+                stroke={stroke}
+                strokeWidth={sw}
+                strokeLinejoin="round"
+                vectorEffect="non-scaling-stroke"
+              />
             </g>
           );
         })}
