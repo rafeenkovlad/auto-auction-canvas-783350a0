@@ -75,7 +75,8 @@ export function MediaGallery({
 
   const visibleTabs = TAB_DEFS.filter((d) => d.key === "all" || counts[d.key] > 0);
 
-  const gridClass = "grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4";
+  const gridClass =
+    "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3 md:gap-4";
 
   return (
     <section className="panel p-5 md:p-6 flex flex-col gap-4">
