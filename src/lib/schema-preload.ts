@@ -27,8 +27,7 @@ export function preloadSchemaImages() {
   for (const src of SCHEMA_IMAGES) {
     const img = new Image();
     img.decoding = "async";
-    // @ts-expect-error – not yet in lib.dom in all TS versions
-    img.fetchPriority = "low";
+    (img as HTMLImageElement & { fetchPriority?: string }).fetchPriority = "low";
     img.src = src;
   }
 }
