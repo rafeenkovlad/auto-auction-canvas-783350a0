@@ -124,12 +124,12 @@ export function FrameSchema({
           const el = byType.get(elId);
           const s = statusForZone(zone);
           const isHover = hoverKey === elId;
-          const polys = zone === "side_beam" ? SIDE_BEAM_POLYS : [ZONE_POLYS[zone]];
+          const poly = ZONE_POLYS[zone];
           const fill = s === "none" ? "transparent" : statusFill(s);
           const stroke = isHover
             ? "var(--accent)"
             : s === "none"
-              ? "oklch(0.62 0.008 250 / 0.6)"
+              ? "transparent"
               : statusStroke(s);
           const sw = isHover ? 3 : 2;
           return (
@@ -140,17 +140,14 @@ export function FrameSchema({
               onClick={() => el && onElementClick?.(el)}
               style={{ cursor: el ? "pointer" : "default", transition: "all 140ms ease" }}
             >
-              {polys.map((p, i) => (
-                <polygon
-                  key={i}
-                  points={p}
-                  fill={fill}
-                  stroke={stroke}
-                  strokeWidth={sw}
-                  strokeLinejoin="round"
-                  vectorEffect="non-scaling-stroke"
-                />
-              ))}
+              <polygon
+                points={poly}
+                fill={fill}
+                stroke={stroke}
+                strokeWidth={sw}
+                strokeLinejoin="round"
+                vectorEffect="non-scaling-stroke"
+              />
             </g>
           );
         })}
