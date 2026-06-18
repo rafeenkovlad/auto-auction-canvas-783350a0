@@ -59,6 +59,7 @@ function ImagePanel({
   hoverKey,
   setHoverKey,
   onElementClick,
+  viewBox,
 }: {
   imageUrl: string;
   zones: Zone[];
@@ -66,6 +67,7 @@ function ImagePanel({
   hoverKey: string | null;
   setHoverKey: (k: string | null) => void;
   onElementClick?: (el: InspectionElement) => void;
+  viewBox?: string;
 }) {
   const panelLabel =
     hoverKey && zones.some((z) => z.types.includes(hoverKey))
@@ -74,7 +76,7 @@ function ImagePanel({
   return (
     <div className="flex-1 min-w-0 relative w-full max-w-[360px] sm:max-w-[400px] md:max-w-[460px] lg:max-w-[520px] mx-auto">
       <svg
-        viewBox={`0 0 ${IMG_W} ${IMG_H}`}
+        viewBox={viewBox ?? `0 0 ${IMG_W} ${IMG_H}`}
         className="w-full h-auto block"
         preserveAspectRatio="xMidYMid meet"
       >
@@ -175,6 +177,7 @@ export function LightingSchema({
             hoverKey={hoverKey}
             setHoverKey={setHoverKey}
             onElementClick={onElementClick}
+            viewBox={`180 440 1180 380`}
           />
           <ImagePanel
             imageUrl={carRear}
@@ -183,6 +186,7 @@ export function LightingSchema({
             hoverKey={hoverKey}
             setHoverKey={setHoverKey}
             onElementClick={onElementClick}
+            viewBox={`200 320 1140 240`}
           />
         </div>
       )}
