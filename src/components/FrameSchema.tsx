@@ -5,14 +5,13 @@ import { SchemaShell, type SchemaCanvasApi } from "@/components/SchemaShell";
 import { getElementStatus, statusFill, statusStroke, type Status } from "@/lib/report.utils";
 
 type Side = "left" | "right";
-type ZoneKey = "front_pillar" | "center_pillar" | "rear_pillar" | "sill" | "side_beam";
+type ZoneKey = "front_pillar" | "center_pillar" | "rear_pillar" | "sill";
 
 const ZONE_LABEL: Record<ZoneKey, string> = {
   front_pillar: "Передняя стойка (A)",
   center_pillar: "Центральная стойка (B)",
   rear_pillar: "Задняя стойка (D)",
   sill: "Порог",
-  side_beam: "Боковая балка",
 };
 
 const ZONE_POLYS: Record<ZoneKey, string> = {
