@@ -85,7 +85,7 @@ export function SchemaTabs({
 
 
       <div
-        className="flex sm:grid sm:grid-cols-6 gap-1 p-1 rounded-xl overflow-x-auto scrollbar-none -mx-1 px-1 snap-x snap-mandatory"
+        className="flex sm:grid sm:grid-cols-6 gap-1 p-1 rounded-xl overflow-x-auto no-scrollbar -mx-1 px-1 snap-x snap-mandatory"
         style={{ background: "color-mix(in oklab, var(--muted) 60%, transparent)" }}
         role="tablist"
       >

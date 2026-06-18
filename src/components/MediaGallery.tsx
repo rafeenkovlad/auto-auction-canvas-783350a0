@@ -92,7 +92,7 @@ export function MediaGallery({
 
       {/* Tabs — same segmented style as Схема осмотра */}
       <div
-        className="flex sm:flex-wrap gap-1 p-1 rounded-xl overflow-x-auto scrollbar-none snap-x snap-mandatory"
+        className="flex sm:flex-wrap gap-1 p-1 rounded-xl overflow-x-auto no-scrollbar snap-x snap-mandatory"
         style={{ background: "color-mix(in oklab, var(--muted) 60%, transparent)" }}
         role="tablist"
       >
