@@ -238,8 +238,8 @@ function TopView({ zoneProps }: { zoneProps: ZoneProps }) {
 
   return (
     <svg
-      viewBox="0 0 1024 1536"
-      className="w-full h-auto max-h-[60vh] sm:max-h-[620px] max-w-[300px] sm:max-w-[360px] lg:max-w-[420px] mx-auto block"
+      viewBox="0 110 1024 1290"
+      className="w-full h-auto max-h-[60vh] sm:max-h-[620px] max-w-[360px] sm:max-w-[400px] md:max-w-[460px] lg:max-w-[520px] mx-auto block"
       role="img"
       aria-label="Автомобиль — вид сверху"
     >
