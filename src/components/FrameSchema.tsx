@@ -1,6 +1,5 @@
 import { useState, useMemo } from "react";
 import type { InspectionElement } from "@/lib/report.api";
-import frameImg from "@/assets/frame-schema.png";
 import { SchemaShell, type SchemaCanvasApi } from "@/components/SchemaShell";
 import { getElementStatus, statusFill, statusStroke, type Status } from "@/lib/report.utils";
 
@@ -15,18 +14,20 @@ const ZONE_LABEL: Record<ZoneKey, string> = {
   side_beam: "Боковая балка",
 };
 
+// Car side view, 1024x1024 viewBox
 const ZONE_POLYS: Record<ZoneKey, string> = {
-  front_pillar: "295,560 305,395 345,345 380,340 365,400 360,560",
-  center_pillar: "510,575 510,400 520,335 560,335 565,400 565,575",
-  rear_pillar: "720,575 725,400 740,335 790,340 785,420 775,575",
-  sill: "285,580 790,580 790,628 285,628",
-  side_beam: "325,510 510,510 510,540 325,540 M 565,510 720,510 720,540 565,540",
+  front_pillar: "360,460 395,460 515,300 490,300",
+  center_pillar: "570,465 605,465 605,305 570,305",
+  rear_pillar: "680,300 705,300 845,470 820,470",
+  sill: "360,695 700,695 700,735 360,735",
+  side_beam: "",
 };
 
 const SIDE_BEAM_POLYS = [
-  "325,510 510,510 510,540 325,540",
-  "565,510 720,510 720,540 565,540",
+  "395,580 570,580 570,610 395,610",
+  "605,580 680,580 680,610 605,610",
 ];
+
 
 const SIDES: { key: Side; label: string }[] = [
   { key: "left", label: "Левая сторона" },
