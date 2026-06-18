@@ -107,7 +107,7 @@ function ImagePanel({
       ? zones.find((z) => z.types.includes(hoverKey))?.label ?? null
       : null;
   return (
-    <div className="flex-1 min-w-0 relative">
+    <div className="flex-1 min-w-0 relative w-full max-w-[260px] sm:max-w-[340px] md:max-w-[400px] lg:max-w-[480px] mx-auto">
       <div style={mirrored ? { transform: "scaleX(-1)" } : undefined}>
         <svg
           viewBox={`0 0 ${IMG_W} ${IMG_H}`}
