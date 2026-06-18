@@ -121,10 +121,11 @@ function FramePanel({
           })}
         </svg>
       </div>
+      </div>
 
       {hoverLabel && (
         <div
-          className="pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-2 px-2.5 py-1 rounded-md text-xs font-medium shadow-sm whitespace-nowrap"
+          className="pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-0 px-2.5 py-1 rounded-md text-xs font-medium shadow-sm whitespace-nowrap"
           style={{
             background: "var(--card)",
             border: "1px solid var(--border)",
@@ -134,6 +135,7 @@ function FramePanel({
         </div>
       )}
     </div>
+
   );
 }
 
