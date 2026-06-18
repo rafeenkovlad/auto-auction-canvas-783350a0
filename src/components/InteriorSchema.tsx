@@ -9,8 +9,8 @@ import interiorRear from "@/assets/interior-rear.png";
 // Per-image natural dimensions
 const FRONT_W = 1365;
 const FRONT_H = 768;
-const REAR_W = 1536;
-const REAR_H = 1024;
+const REAR_W = 1264;
+const REAR_H = 843;
 
 const FRONT_ZONES: Zone[] = [
   {
@@ -67,17 +67,17 @@ const REAR_ZONES: Zone[] = [
   {
     types: ["ceiling"],
     label: "Потолок",
-    shape: { kind: "rect", x: 120, y: 30, w: 1300, h: 175, rx: 22 },
+    shape: { kind: "rect", x: 100, y: 25, w: 1070, h: 150, rx: 20 },
   },
   {
     types: ["trunk_compartment"],
     label: "Багажное отделение",
-    shape: { kind: "rect", x: 400, y: 205, w: 740, h: 110, rx: 12 },
+    shape: { kind: "polygon", points: "560,260 1060,290 1060,560 720,560 560,470" },
   },
   {
     types: ["rear_seats"],
     label: "Задние сиденья",
-    shape: { kind: "rect", x: 340, y: 305, w: 855, h: 510, rx: 18 },
+    shape: { kind: "rect", x: 240, y: 250, w: 540, h: 420, rx: 18 },
   },
 ];
 
