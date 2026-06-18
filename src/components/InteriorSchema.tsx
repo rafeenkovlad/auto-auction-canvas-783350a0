@@ -133,9 +133,10 @@ function ImagePanel({
         aria-label={ariaLabel}
       >
         <image href={imageUrl} x={0} y={0} width={width} height={height} />
-        {zones.map((z) => {
+        {zones.map((z, i) => {
           const el = z.types.map((t) => byType.get(t)).find(Boolean);
-          const key = z.types[0];
+          const key = `${z.types[0]}_${i}`;
+          const hoverId = z.types[0];
           const s = el ? getElementStatus(el) : "none";
           const hasDamage = el && s !== "ok";
           const fill = hasDamage ? fillFor(s) : "transparent";
