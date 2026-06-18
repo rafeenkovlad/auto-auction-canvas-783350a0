@@ -10,6 +10,7 @@ export type GalleryItem = {
   sectionKey: string;
   isVideo: boolean;
   isDamage: boolean;
+  tag?: { name: string; severe: boolean } | null;
   timestamp?: string | null;
 };
 
