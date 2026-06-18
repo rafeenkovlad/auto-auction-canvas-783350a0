@@ -28,6 +28,8 @@ export interface SchemaShellProps {
   header?: ReactNode;
   /** Wrap canvas in the soft panel background (default true). Disable for photo backdrops. */
   canvasPanel?: boolean;
+  /** Hide the floating hover label rendered at the bottom of the canvas. */
+  hideHoverLabel?: boolean;
   /** Empty-state copy when no elements in this section. */
   emptyText?: string;
   /** Hint shown under the layout. */
@@ -49,6 +51,7 @@ export function SchemaShell({
   onElementClick,
   header,
   canvasPanel = true,
+  hideHoverLabel = false,
   emptyText = "Нет данных",
   footerHint = "Наведите или нажмите на элемент, чтобы увидеть детали и связанные фото",
 }: SchemaShellProps) {
@@ -99,7 +102,7 @@ export function SchemaShell({
           ) : (
             <>
               {canvas({ hoverKey, setHoverKey })}
-              {hoverLabel && (
+              {hoverLabel && !hideHoverLabel && (
                 <div
                   className="pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-2 px-2.5 py-1 rounded-md text-xs font-medium shadow-sm"
                   style={{
