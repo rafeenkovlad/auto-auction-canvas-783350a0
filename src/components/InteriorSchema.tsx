@@ -141,7 +141,7 @@ function ImagePanel({
           const hasDamage = el && s !== "ok";
           const fill = hasDamage ? fillFor(s) : "transparent";
           const handlers = {
-            onMouseEnter: () => setHoverKey(key),
+            onMouseEnter: () => setHoverKey(hoverId),
             onMouseLeave: () => setHoverKey(null),
             onClick: el ? () => onElementClick?.(el) : undefined,
             style: { cursor: el ? "pointer" : "default", transition: "all 140ms ease" },
