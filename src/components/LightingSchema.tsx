@@ -85,14 +85,9 @@ function ImagePanel({
           const s = el ? getElementStatus(el) : "none";
           const isHover = hoverKey === key;
           const hasDamage = el && s !== "ok";
-          const showOverlay = isHover || hasDamage;
-          const fill = showOverlay
-            ? isHover
-              ? "color-mix(in oklab, var(--accent) 18%, transparent)"
-              : fillFor(s)
-            : "transparent";
-          const stroke = showOverlay ? strokeFor(s, isHover) : "transparent";
-          const sw = isHover ? 5 : 3;
+          const fill = hasDamage ? fillFor(s) : "transparent";
+          const stroke = "transparent";
+          const sw = 0;
           const handlers = {
             onMouseEnter: () => setHoverKey(key),
             onMouseLeave: () => setHoverKey(null),
