@@ -139,14 +139,16 @@ function ImagePanel({
           return null;
         })}
       </svg>
-      {panelLabel && (
-        <div
-          className="pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-1.5 px-2 py-0.5 rounded-md text-[11px] font-medium shadow-sm"
-          style={{ background: "var(--card)", border: "1px solid var(--border)" }}
-        >
-          {panelLabel}
-        </div>
-      )}
+      <div className="mt-1.5 h-5 flex items-center justify-center">
+        {panelLabel && (
+          <span
+            className="px-2 py-0.5 rounded-md text-[11px] font-medium shadow-sm"
+            style={{ background: "var(--card)", border: "1px solid var(--border)" }}
+          >
+            {panelLabel}
+          </span>
+        )}
+      </div>
     </div>
   );
 }
