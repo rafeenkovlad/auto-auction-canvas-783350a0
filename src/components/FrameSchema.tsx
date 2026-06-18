@@ -22,11 +22,6 @@ const ZONE_POLYS: Record<ZoneKey, string> = {
 };
 
 
-const SIDE_BEAM_POLYS = [
-  "320,510 535,510 535,545 320,545",
-  "555,510 690,510 690,545 555,545",
-];
-
 const SIDES: { key: Side; label: string }[] = [
   { key: "left", label: "Левая сторона" },
   { key: "right", label: "Правая сторона" },
@@ -34,7 +29,6 @@ const SIDES: { key: Side; label: string }[] = [
 
 function elementIdFor(zone: ZoneKey, side: Side): string {
   if (zone === "sill") return side === "left" ? "left_sill" : "right_sill";
-  if (zone === "side_beam") return side === "left" ? "left_side_beam" : "right_side_beam";
   if (zone === "front_pillar") return side === "left" ? "front_left_pillar" : "front_right_pillar";
   if (zone === "center_pillar")
     return side === "left" ? "center_left_pillar" : "center_right_pillar";
@@ -44,8 +38,6 @@ function elementIdFor(zone: ZoneKey, side: Side): string {
 function zoneSideFromElType(t: string): { zone: ZoneKey; side: Side } | null {
   if (t === "left_sill") return { zone: "sill", side: "left" };
   if (t === "right_sill") return { zone: "sill", side: "right" };
-  if (t === "left_side_beam") return { zone: "side_beam", side: "left" };
-  if (t === "right_side_beam") return { zone: "side_beam", side: "right" };
   const m = t.match(/^(front|center|rear)_(left|right)_pillar$/);
   if (m) return { zone: `${m[1]}_pillar` as ZoneKey, side: m[2] as Side };
   return null;
@@ -56,7 +48,6 @@ function labelForElement(el: InspectionElement): string {
   if (!zs) return el.elementType.replace(/_/g, " ");
   const sidePrefix = zs.side === "left" ? "Левая" : "Правая";
   if (zs.zone === "sill") return `${zs.side === "left" ? "Левый" : "Правый"} порог`;
-  if (zs.zone === "side_beam") return `${sidePrefix} боковая балка`;
   const pillarName =
     zs.zone === "front_pillar" ? "передняя" : zs.zone === "center_pillar" ? "центральная" : "задняя";
   return `${sidePrefix} ${pillarName} стойка`;
