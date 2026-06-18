@@ -166,10 +166,14 @@ function InfoPanel({
   el,
   m,
   hasDetails,
+  collapsed,
+  onToggle,
 }: {
   el: ViewerElement;
   m: StatusMeta;
   hasDetails: boolean;
+  collapsed: boolean;
+  onToggle: () => void;
 }) {
   const tags = [
     ...el.seriousDamageTags.map((t) => ({ ...t, severe: true })),
@@ -179,8 +183,25 @@ function InfoPanel({
   void hasDetails;
 
   return (
-    <div className="absolute inset-x-0 bottom-0 z-10">
-      <div className="bg-gradient-to-t from-black via-black/85 to-transparent pt-8">
+    <div
+      className="absolute inset-x-0 bottom-0 z-20 transition-transform duration-300 ease-out"
+      style={{
+        transform: collapsed ? "translateY(calc(100% - 44px))" : "translateY(0)",
+      }}
+    >
+      <div className="bg-gradient-to-t from-black via-black/90 to-transparent pt-6">
+        {/* Toggle handle */}
+        <button
+          type="button"
+          onClick={onToggle}
+          className="w-full flex flex-col items-center gap-1 pt-1 pb-2 select-none"
+          aria-label={collapsed ? "Показать детали" : "Скрыть детали"}
+        >
+          <span className="block h-1 w-10 rounded-full bg-white/40" />
+          <span className="text-[10px] uppercase tracking-wider text-white/60">
+            {collapsed ? "Показать детали" : "Скрыть"}
+          </span>
+        </button>
         <div className="px-4 pb-[max(env(safe-area-inset-bottom),12px)] max-w-3xl mx-auto">
           {/* Header row */}
           <div className="flex items-center gap-2 mb-1">
@@ -211,7 +232,7 @@ function InfoPanel({
             </div>
           )}
 
-          {/* Tags — always visible, minimal chips */}
+          {/* Tags */}
           {tags.length > 0 && (
             <div className="mt-2 flex flex-wrap gap-1.5">
               {tags.map((t) => (
@@ -250,6 +271,7 @@ function InfoPanel({
     </div>
   );
 }
+
 
 /* ===== Media stage ===== */
 function MediaStage({ file }: { file: FileRef | null | undefined }) {
