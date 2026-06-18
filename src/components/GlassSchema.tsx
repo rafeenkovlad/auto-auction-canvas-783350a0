@@ -93,6 +93,7 @@ function ImagePanel({
   setHoverKey,
   onElementClick,
   mirrored = false,
+  viewBox,
 }: {
   imageUrl: string;
   zones: Zone[];
@@ -101,6 +102,7 @@ function ImagePanel({
   setHoverKey: (k: string | null) => void;
   onElementClick?: (el: InspectionElement) => void;
   mirrored?: boolean;
+  viewBox?: string;
 }) {
   const panelLabel =
     hoverKey && zones.some((z) => z.types.includes(hoverKey))
@@ -110,7 +112,7 @@ function ImagePanel({
     <div className="flex-1 min-w-0 relative w-full max-w-[260px] sm:max-w-[340px] md:max-w-[400px] lg:max-w-[480px] mx-auto">
       <div style={mirrored ? { transform: "scaleX(-1)" } : undefined}>
         <svg
-          viewBox={`0 0 ${IMG_W} ${IMG_H}`}
+          viewBox={viewBox ?? `0 0 ${IMG_W} ${IMG_H}`}
           className="w-full h-auto block"
           preserveAspectRatio="xMidYMid meet"
         >
@@ -228,6 +230,7 @@ export function GlassSchema({
             hoverKey={hoverKey}
             setHoverKey={setHoverKey}
             onElementClick={onElementClick}
+            viewBox={`230 130 1080 720`}
           />
           <ImagePanel
             imageUrl={carSide}
@@ -237,6 +240,7 @@ export function GlassSchema({
             setHoverKey={setHoverKey}
             onElementClick={onElementClick}
             mirrored
+            viewBox={`230 130 1080 720`}
           />
         </div>
       )}
