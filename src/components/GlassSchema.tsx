@@ -16,7 +16,7 @@ const FRONT_ZONES: Zone[] = [
     label: "Лобовое стекло",
     shape: {
       kind: "polygon",
-      points: "470,275 1066,275 1110,395 426,395",
+      points: "470,235 1066,235 1110,355 426,355",
     },
   },
 ];
@@ -214,7 +214,7 @@ export function GlassSchema({
             hoverKey={hoverKey}
             setHoverKey={setHoverKey}
             onElementClick={onElementClick}
-            viewBox={`380 240 760 280`}
+            viewBox={`380 180 760 280`}
           />
           <ImagePanel
             imageUrl={carRear}
