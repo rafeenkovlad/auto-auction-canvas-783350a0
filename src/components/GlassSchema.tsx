@@ -230,6 +230,7 @@ export function GlassSchema({
             hoverKey={hoverKey}
             setHoverKey={setHoverKey}
             onElementClick={onElementClick}
+            viewBox={`230 130 1080 720`}
           />
           <ImagePanel
             imageUrl={carSide}
@@ -239,6 +240,7 @@ export function GlassSchema({
             setHoverKey={setHoverKey}
             onElementClick={onElementClick}
             mirrored
+            viewBox={`230 130 1080 720`}
           />
         </div>
       )}
