@@ -85,7 +85,7 @@ export function SchemaShell({
         <div
           className={
             canvasPanel
-              ? "relative rounded-lg p-3 body-schema-canvas"
+              ? "relative rounded-lg px-3 py-1 body-schema-canvas"
               : "relative"
           }
           style={
