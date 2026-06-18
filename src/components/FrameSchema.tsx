@@ -84,7 +84,9 @@ function FramePanel({
     : null;
 
   return (
-    <div className="relative w-full mx-auto" style={{ aspectRatio: "1024 / 300", maxWidth: 640 }}>
+    <div className="relative w-full mx-auto pb-9" style={{ maxWidth: 640 }}>
+      <div className="relative w-full" style={{ aspectRatio: "1024 / 300" }}>
+
       <div
         className="absolute inset-0"
         style={mirrored ? { transform: "scaleX(-1)" } : undefined}
@@ -119,10 +121,11 @@ function FramePanel({
           })}
         </svg>
       </div>
+      </div>
 
       {hoverLabel && (
         <div
-          className="pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-2 px-2.5 py-1 rounded-md text-xs font-medium shadow-sm whitespace-nowrap"
+          className="pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-0 px-2.5 py-1 rounded-md text-xs font-medium shadow-sm whitespace-nowrap"
           style={{
             background: "var(--card)",
             border: "1px solid var(--border)",
@@ -132,6 +135,7 @@ function FramePanel({
         </div>
       )}
     </div>
+
   );
 }
 
