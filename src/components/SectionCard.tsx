@@ -9,21 +9,32 @@ export function SectionCard({
   elements: EnrichedElement[];
 }) {
   const { status } = sectionSummary(elements);
-  const labelText =
-    status === "ok"
-      ? "Хорошо"
-      : status === "minor"
-        ? "Внимание"
-        : status === "serious"
-          ? "Замечания"
-          : "Нет данных";
-  const meta = status ? statusMeta(status) : null;
 
   const tags: Array<{ name: string; severe: boolean }> = [];
   for (const el of elements) {
     for (const t of el.seriousDamageTags) tags.push({ name: t.name, severe: true });
     for (const t of el.noSeriousDamageTags) tags.push({ name: t.name, severe: false });
   }
+
+  const noteCount = tags.length;
+  const labelText =
+    status === "ok"
+      ? "Хорошо"
+      : noteCount > 0
+        ? `Заметки (${noteCount})`
+        : status === "minor"
+          ? "Внимание"
+          : status === "serious"
+            ? "Заметки"
+            : "Нет данных";
+
+  // Notes always highlighted yellow; only "Хорошо" uses good color, "Нет данных" — skip.
+  const badge =
+    noteCount > 0 || status === "minor" || status === "serious"
+      ? { bg: "color-mix(in oklab, var(--grade-warn) 22%, white)", fg: "oklch(0.35 0.08 70)" }
+      : status === "ok"
+        ? statusMeta("ok")
+        : null;
 
   return (
     <div className="panel p-4 flex flex-col gap-3">
@@ -39,10 +50,10 @@ export function SectionCard({
             {SECTION_LABELS[sectionKey] ?? sectionKey}
           </span>
         </div>
-        {meta && (
+        {badge && (
           <span
             className="px-2 py-0.5 rounded-md text-[11px] font-semibold"
-            style={{ background: meta.bg, color: meta.fg }}
+            style={{ background: badge.bg, color: badge.fg }}
           >
             {labelText}
           </span>
