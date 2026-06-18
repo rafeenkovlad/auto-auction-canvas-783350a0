@@ -102,14 +102,19 @@ function ImagePanel({
   onElementClick?: (el: InspectionElement) => void;
   mirrored?: boolean;
 }) {
+  const panelLabel =
+    hoverKey && zones.some((z) => z.types.includes(hoverKey))
+      ? zones.find((z) => z.types.includes(hoverKey))?.label ?? null
+      : null;
   return (
-    <div className="flex-1 min-w-0" style={mirrored ? { transform: "scaleX(-1)" } : undefined}>
-      <svg
-        viewBox={`0 0 ${IMG_W} ${IMG_H}`}
-        className="w-full h-auto block"
-        preserveAspectRatio="xMidYMid meet"
-      >
-        <image href={imageUrl} x={0} y={0} width={IMG_W} height={IMG_H} />
+    <div className="flex-1 min-w-0 relative">
+      <div style={mirrored ? { transform: "scaleX(-1)" } : undefined}>
+        <svg
+          viewBox={`0 0 ${IMG_W} ${IMG_H}`}
+          className="w-full h-auto block"
+          preserveAspectRatio="xMidYMid meet"
+        >
+          <image href={imageUrl} x={0} y={0} width={IMG_W} height={IMG_H} />
         {zones.map((z) => {
           const el = z.types.map((t) => byType.get(t)).find(Boolean);
           const key = z.types[0];
