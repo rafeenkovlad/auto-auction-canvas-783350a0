@@ -58,11 +58,10 @@ function labelForElement(el: InspectionElement): string {
 function FramePanel({
   side,
   byType,
-  hoverKey,
   setHoverKey,
   onElementClick,
   mirrored,
-  sideLabel,
+  ariaLabel,
 }: {
   side: Side;
   byType: Map<string, InspectionElement>;
@@ -70,27 +69,17 @@ function FramePanel({
   setHoverKey: (k: string | null) => void;
   onElementClick?: (el: InspectionElement) => void;
   mirrored?: boolean;
-  sideLabel: string;
+  ariaLabel: string;
 }) {
   return (
     <div className="relative w-full mx-auto" style={{ aspectRatio: "1 / 1", maxWidth: 640 }}>
-      <div
-        className="absolute top-2 left-2 z-10 px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wider"
-        style={{
-          background: "var(--card)",
-          border: "1px solid var(--border)",
-          color: "var(--muted-foreground)",
-        }}
-      >
-        {sideLabel}
-      </div>
       <div
         className="absolute inset-0"
         style={mirrored ? { transform: "scaleX(-1)" } : undefined}
       >
         <img
           src={frameImg}
-          alt={`Схема силовых элементов — ${sideLabel}`}
+          alt={ariaLabel}
           className="absolute inset-0 w-full h-full object-contain select-none pointer-events-none"
           loading="lazy"
           width={1024}
@@ -116,10 +105,10 @@ function FramePanel({
                 strokeWidth={0}
                 strokeLinejoin="round"
                 vectorEffect="non-scaling-stroke"
-                onMouseEnter={() => el && setHoverKey(elId)}
+                onMouseEnter={() => setHoverKey(elId)}
                 onMouseLeave={() => setHoverKey(null)}
                 onClick={() => el && onElementClick?.(el)}
-                style={{ cursor: el ? "pointer" : "default", transition: "all 140ms ease" }}
+                style={{ cursor: el ? "pointer" : "default", transition: "all 140ms ease", pointerEvents: "all" }}
               />
             );
           })}
