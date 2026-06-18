@@ -30,6 +30,8 @@ export interface SchemaShellProps {
   canvasPanel?: boolean;
   /** Hide the floating hover label rendered at the bottom of the canvas. */
   hideHoverLabel?: boolean;
+  /** Render the canvas even when there are no elements (suppresses empty-state). */
+  alwaysRenderCanvas?: boolean;
   /** Empty-state copy when no elements in this section. */
   emptyText?: string;
   /** Hint shown under the layout. */
@@ -52,6 +54,7 @@ export function SchemaShell({
   header,
   canvasPanel = true,
   hideHoverLabel = false,
+  alwaysRenderCanvas = false,
   emptyText = "Нет данных",
   footerHint = "Наведите или нажмите на элемент, чтобы увидеть детали и связанные фото",
 }: SchemaShellProps) {
@@ -95,7 +98,7 @@ export function SchemaShell({
               : undefined
           }
         >
-          {isEmpty ? (
+          {isEmpty && !alwaysRenderCanvas ? (
             <div className="flex items-center justify-center text-sm text-muted-foreground py-16">
               {emptyText}
             </div>
