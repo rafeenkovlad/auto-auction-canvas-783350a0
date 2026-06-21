@@ -1,4 +1,4 @@
-import { useState } from "react";
+
 import { Check, AlertTriangle, AlertOctagon } from "lucide-react";
 
 type Severity = "ok" | "minor" | "serious";
