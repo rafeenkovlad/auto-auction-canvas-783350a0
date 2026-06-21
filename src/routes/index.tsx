@@ -167,10 +167,10 @@ function ReportContent({ report }: { report: Awaited<ReturnType<typeof getReport
 
         <InspectionHistoryTimeline />
 
-        <MediaGallery items={gallery} onOpen={setActiveIdx} />
+        <MediaGallery items={gallery} onOpenGroup={openGroup} />
 
 
-        <AdditionalMaterials items={additional} onOpen={setActiveIdx} />
+        <AdditionalMaterials items={additional} onOpen={openAdditional} />
 
         <ExpertConclusion result={report.resultStep} />
 
@@ -180,9 +180,9 @@ function ReportContent({ report }: { report: Awaited<ReturnType<typeof getReport
       </div>
 
       <ElementViewer
-        elements={allElements}
+        elements={viewerElements}
         index={activeIdx}
-        onClose={() => setActiveIdx(null)}
+        onClose={closeViewer}
         onChange={(i) => setActiveIdx(i)}
         statusMeta={statusMeta}
       />
