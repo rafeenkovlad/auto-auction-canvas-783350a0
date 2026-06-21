@@ -96,11 +96,9 @@ function severityVisual(s: Severity) {
 export function InspectionHistoryTimeline({
   entries,
 }: {
-  /** Pass real history entries. When omitted, demo mock data is shown. */
   entries?: HistoryEntry[];
 } = {}) {
-  const isDemo = !entries;
-  const source = entries ?? MOCK_HISTORY;
+  const source = entries ?? [];
   if (source.length === 0) return null;
 
   return (
@@ -109,12 +107,8 @@ export function InspectionHistoryTimeline({
         <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
           История замечаний
         </h3>
-        {isDemo && (
-          <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
-            Демо
-          </span>
-        )}
       </div>
+
 
       <div className="max-h-[520px] overflow-y-auto pr-2 -mr-2">
         <ol className="relative flex flex-col gap-5">
