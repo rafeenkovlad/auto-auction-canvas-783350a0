@@ -29,11 +29,6 @@ export function ReportHeaderCard({
       "Поколение",
       "Рестайлинг",
       "Кузов (frame)",
-      "Двигатель",
-      "Объём",
-      "КПП",
-      "Привод",
-      "Цвет",
     ];
     const map = new Map(characteristics.map(([k, v]) => [k, v]));
     const rows: Array<{ label: string; value: string }> = [];
