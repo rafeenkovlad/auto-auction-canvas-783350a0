@@ -8,7 +8,8 @@ import { MediaGallery } from "@/components/MediaGallery";
 import { InspectionHistoryTimeline } from "@/components/InspectionHistoryTimeline";
 import { GalleryTileBody } from "@/components/GalleryTile";
 import { ReportHeader } from "@/components/ReportHeader";
-import { HeroSection } from "@/components/HeroSection";
+import { ReportHeaderCard } from "@/components/ReportHeaderCard";
+import { PhotoCategories } from "@/components/PhotoCategories";
 import { TechnicalStatePanel } from "@/components/TechnicalStatePanel";
 import { DocumentsCard } from "@/components/DocumentsCard";
 import { TestDriveCard } from "@/components/TestDriveCard";
@@ -31,11 +32,11 @@ export const Route = createFileRoute("/")({
   }),
   head: () => ({
     meta: [
-      { title: "Отчёт о проверке автомобиля — Auto Auction Canvas" },
+      { title: "Отчёт о проверке автомобиля — VIN DIEZEL" },
       {
         name: "description",
         content:
-          "Подробный отчёт о техническом состоянии автомобиля: схема кузова, осмотр элементов, тест-драйв и заключение специалиста.",
+          "Независимый отчёт VIN DIEZEL: оценка состояния, схема осмотра, фото по категориям, тест-драйв и заключение специалиста.",
       },
     ],
   }),
@@ -116,12 +117,13 @@ function ReportContent({ report }: { report: Awaited<ReturnType<typeof getReport
       <div className="mx-auto max-w-7xl space-y-4">
         <ReportHeader report={report} />
 
-        <HeroSection
+        <ReportHeaderCard
           report={report}
           carName={carName}
           heroImage={heroImage}
           heroSrcSet={heroSrcSet}
           characteristics={characteristics}
+          allElements={allElements}
         />
 
         <section className="grid lg:grid-cols-2 gap-4">
@@ -139,6 +141,8 @@ function ReportContent({ report }: { report: Awaited<ReturnType<typeof getReport
             inspection={report.inspectionStep}
           />
         </section>
+
+        <PhotoCategories allElements={allElements} onOpen={setActiveIdx} />
 
         <InspectionHistoryTimeline />
 
@@ -158,7 +162,7 @@ function ReportContent({ report }: { report: Awaited<ReturnType<typeof getReport
         <ExpertConclusion result={report.resultStep} />
 
         <footer className="text-center mono text-[11px] text-muted-foreground py-4">
-          Сгенерировано на основе данных carreports.ru · {report.reportNumber}
+          VIN DIEZEL · Независимая экспертиза автомобиля · {report.reportNumber}
         </footer>
       </div>
 

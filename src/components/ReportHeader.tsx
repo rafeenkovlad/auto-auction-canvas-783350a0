@@ -24,18 +24,19 @@ export function ReportHeader({ report }: { report: CarReport }) {
             strokeWidth="1.8"
             className="w-5 h-5"
           >
-            <path d="M3 13l2-5a2 2 0 0 1 2-1h10a2 2 0 0 1 2 1l2 5v5a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1v-1H7v1a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z" />
-            <circle cx="7.5" cy="16" r="1.5" fill="white" />
-            <circle cx="16.5" cy="16" r="1.5" fill="white" />
+            <path d="M4 12l3-7h10l3 7M4 12v6a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-1h8v1a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-6M4 12h16" />
+            <circle cx="8" cy="15.5" r="1.2" fill="white" />
+            <circle cx="16" cy="15.5" r="1.2" fill="white" />
           </svg>
         </div>
         <div className="min-w-0 leading-tight">
-          <div className="flex items-baseline gap-1.5">
-            <span className="text-[10px] font-bold tracking-[0.18em] text-muted-foreground">
-              AUTO AUCTION
-            </span>
-            <span className="text-sm font-black ink tracking-wider">
-              CANVAS
+          <div className="flex items-baseline gap-1">
+            <span className="text-sm font-black ink tracking-[0.18em]">VIN</span>
+            <span
+              className="text-sm font-black tracking-[0.22em]"
+              style={{ color: "var(--accent)" }}
+            >
+              DIEZEL
             </span>
           </div>
           <div className="mono text-[11px] text-muted-foreground mt-0.5 truncate">
