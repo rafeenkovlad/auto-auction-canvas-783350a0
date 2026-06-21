@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { getElementStatus, type Status } from "@/lib/report.utils";
-import { Car, Armchair, Shield, Disc3, AppWindow, Lightbulb } from "lucide-react";
+import { Car, Armchair, Shield, Disc3, AppWindow, Lightbulb, History, Check } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { InspectionElement } from "@/lib/report.api";
 import { CarBodySchema } from "@/components/CarBodySchema";
@@ -12,6 +12,23 @@ import { InteriorSchema } from "@/components/InteriorSchema";
 
 
 type TabKey = "body" | "interior" | "frame" | "wheels" | "glass" | "lighting";
+
+type ReportHistoryEntry = {
+  id: string;
+  date: string;
+  time: string;
+  reportNumber: string;
+  inspector?: string;
+  mileage?: string;
+  status: Status;
+};
+
+const MOCK_REPORT_HISTORY: ReportHistoryEntry[] = [
+  { id: "cur", date: "12.04.2024", time: "10:37", reportNumber: "REP-A872416", inspector: "А. Петров", mileage: "84 320 км", status: "minor" },
+  { id: "r2", date: "08.02.2024", time: "09:20", reportNumber: "REP-A754118", inspector: "И. Соколов", mileage: "79 110 км", status: "serious" },
+  { id: "r3", date: "15.11.2023", time: "14:02", reportNumber: "REP-A612084", inspector: "А. Петров", mileage: "71 540 км", status: "minor" },
+  { id: "r4", date: "03.07.2023", time: "11:48", reportNumber: "REP-A488733", inspector: "М. Иванов", mileage: "63 220 км", status: "ok" },
+];
 
 const TABS: { key: TabKey; label: string; icon: LucideIcon }[] = [
   { key: "body", label: "Кузов", icon: Car },
