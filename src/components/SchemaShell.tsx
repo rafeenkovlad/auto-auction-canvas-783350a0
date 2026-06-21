@@ -1,6 +1,7 @@
 import { useMemo, useState, type ReactNode } from "react";
 import type { InspectionElement } from "@/lib/report.api";
-import { getElementStatus, statusStroke, type Status } from "@/lib/report.utils";
+import { getElementStatus, isImageFile, isVideoFile, statusStroke, type Status } from "@/lib/report.utils";
+import { Play } from "lucide-react";
 
 function rank(s: Status) {
   return s === "serious" ? 3 : s === "minor" ? 2 : 1;
