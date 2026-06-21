@@ -164,7 +164,7 @@ function ReportContent({ report }: { report: Awaited<ReturnType<typeof getReport
       </div>
 
       <ElementViewer
-        elements={viewerElements}
+        elements={allElements}
         index={activeIdx}
         onClose={closeViewer}
         onChange={(i) => setActiveIdx(i)}
