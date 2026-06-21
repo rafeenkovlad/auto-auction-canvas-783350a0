@@ -133,6 +133,12 @@ function ReportContent({ report }: { report: Awaited<ReturnType<typeof getReport
           characteristics={characteristics}
         />
 
+        <TechnicalCondition
+          report={report}
+          allElements={allElements}
+          onElementClick={openElement}
+        />
+
         <SchemaTabs
           bodyElements={report.inspectionStep.bodyElements ?? []}
           interiorElements={report.inspectionStep.interiorElements ?? []}
@@ -143,11 +149,6 @@ function ReportContent({ report }: { report: Awaited<ReturnType<typeof getReport
           onElementClick={openElement}
         />
 
-        <TechnicalCondition
-          report={report}
-          allElements={allElements}
-          onElementClick={openElement}
-        />
 
 
 
