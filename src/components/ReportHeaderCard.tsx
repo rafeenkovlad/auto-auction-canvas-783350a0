@@ -60,7 +60,7 @@ export function ReportHeaderCard({
           </div>
         )}
 
-        {heroImage ? (
+        {heroImage && (
           <div className="relative aspect-[16/9] rounded-lg overflow-hidden border border-border bg-muted">
             <img
               src={heroImage}
@@ -71,11 +71,8 @@ export function ReportHeaderCard({
               className="w-full h-full object-cover"
             />
           </div>
-        ) : (
-          <div className="aspect-[16/9] rounded-lg border border-dashed border-border bg-muted/30 flex items-center justify-center text-xs text-muted-foreground">
-            Изображение не предоставлено
-          </div>
         )}
+
 
         {report.carStep.uriListing && (
           <a
