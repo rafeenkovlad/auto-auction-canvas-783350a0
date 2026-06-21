@@ -40,11 +40,10 @@ const SECTION_GROUPS: Array<{
 
 export function MediaGallery({
   items,
-  onOpen,
+  onOpenGroup,
 }: {
   items: GalleryItem[];
-  onOpen: (idx: number) => void;
-  renderTile?: unknown;
+  onOpenGroup: (indices: number[]) => void;
 }) {
   const groups = useMemo(() => {
     const used = new Set<number>();
@@ -53,7 +52,7 @@ export function MediaGallery({
       label: string;
       icon: LucideIcon;
       count: number;
-      firstIdx: number;
+      indices: number[];
       cover: string | null;
     }> = [];
     for (const g of SECTION_GROUPS) {
@@ -66,7 +65,7 @@ export function MediaGallery({
         label: g.label,
         icon: g.icon,
         count: groupItems.length,
-        firstIdx: groupItems[0].idx,
+        indices: groupItems.map((i) => i.idx),
         cover: coverItem.file.url ?? null,
       });
     }
@@ -78,7 +77,7 @@ export function MediaGallery({
         label: "Прочее",
         icon: Images,
         count: other.length,
-        firstIdx: other[0].idx,
+        indices: other.map((i) => i.idx),
         cover: coverItem.file.url ?? null,
       });
     }
@@ -105,7 +104,7 @@ export function MediaGallery({
             <button
               key={g.key}
               type="button"
-              onClick={() => onOpen(g.firstIdx)}
+              onClick={() => onOpenGroup(g.indices)}
               className="group relative aspect-[4/3] rounded-lg border border-border bg-card overflow-hidden text-left hover:border-accent hover:shadow-sm transition-all"
               title={`${g.label} · ${g.count}`}
             >
