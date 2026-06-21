@@ -127,18 +127,15 @@ function ReportContent({ report }: { report: Awaited<ReturnType<typeof getReport
           allElements={allElements}
         />
 
-        <section className="grid lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] gap-4">
-          <SchemaTabs
-            bodyElements={report.inspectionStep.bodyElements ?? []}
-            interiorElements={report.inspectionStep.interiorElements ?? []}
-            frameElements={report.inspectionStep.bodyReinforcementElements ?? []}
-            wheelsElements={report.inspectionStep.wheelsAndBrakesElements ?? []}
-            glassElements={report.inspectionStep.glassElements ?? []}
-            lightingElements={report.inspectionStep.lightningElements ?? []}
-            onElementClick={openElement}
-          />
-          <TechStateCompact sections={sections} />
-        </section>
+        <SchemaTabs
+          bodyElements={report.inspectionStep.bodyElements ?? []}
+          interiorElements={report.inspectionStep.interiorElements ?? []}
+          frameElements={report.inspectionStep.bodyReinforcementElements ?? []}
+          wheelsElements={report.inspectionStep.wheelsAndBrakesElements ?? []}
+          glassElements={report.inspectionStep.glassElements ?? []}
+          lightingElements={report.inspectionStep.lightningElements ?? []}
+          onElementClick={openElement}
+        />
 
         <PhotoCategories allElements={allElements} onOpen={setActiveIdx} />
 
@@ -146,11 +143,6 @@ function ReportContent({ report }: { report: Awaited<ReturnType<typeof getReport
           <TestDriveCard report={report} />
           <DocumentsCard docs={report.documentReconciliationStep} />
         </section>
-
-        <TechnicalStatePanel
-          sections={sections}
-          inspection={report.inspectionStep}
-        />
 
         <InspectionHistoryTimeline />
 
