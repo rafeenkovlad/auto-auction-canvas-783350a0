@@ -59,6 +59,10 @@ export function SchemaTabs({
   onElementClick?: (el: InspectionElement) => void;
 }) {
   const [tab, setTab] = useState<TabKey>("body");
+  const [extended, setExtended] = useState(false);
+  const [selectedReportId, setSelectedReportId] = useState<string>(MOCK_REPORT_HISTORY[0].id);
+  const selectedReport = MOCK_REPORT_HISTORY.find((r) => r.id === selectedReportId) ?? MOCK_REPORT_HISTORY[0];
+  const isArchived = selectedReportId !== MOCK_REPORT_HISTORY[0].id;
 
   const elementsByTab = useMemo<Record<TabKey, InspectionElement[]>>(
     () => ({
