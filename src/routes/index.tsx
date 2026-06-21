@@ -167,7 +167,7 @@ function ReportContent({ report }: { report: Awaited<ReturnType<typeof getReport
 
         <InspectionHistoryTimeline />
 
-        <MediaGallery items={gallery} onOpenGroup={openGroup} />
+        <MediaGallery items={gallery} onOpen={openAdditional} />
 
 
         <AdditionalMaterials items={additional} onOpen={openAdditional} />
