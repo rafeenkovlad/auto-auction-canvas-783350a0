@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { getReport, type InspectionElement } from "@/lib/report.api";
@@ -9,6 +9,7 @@ import { InspectionHistoryTimeline } from "@/components/InspectionHistoryTimelin
 import { GalleryTileBody } from "@/components/GalleryTile";
 import { ReportHeader } from "@/components/ReportHeader";
 import { HeroSection } from "@/components/HeroSection";
+import { SummaryHero } from "@/components/SummaryHero";
 import { TechnicalStatePanel } from "@/components/TechnicalStatePanel";
 import { DocumentsCard } from "@/components/DocumentsCard";
 import { TestDriveCard } from "@/components/TestDriveCard";
@@ -16,6 +17,7 @@ import { AdditionalMaterials } from "@/components/AdditionalMaterials";
 import { ExpertConclusion } from "@/components/ExpertConclusion";
 import { statusMeta } from "@/lib/report.utils";
 import { useReportData } from "@/hooks/useReportData";
+import { computeReportScore } from "@/lib/report.score";
 import { preloadSchemaImages } from "@/lib/schema-preload";
 
 const reportQuery = (token?: string) =>
