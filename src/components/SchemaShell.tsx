@@ -205,7 +205,7 @@ export function SchemaShell({
                               </div>
                             ) : null}
                             {el.note && (
-                              <div className="text-[11px] text-muted-foreground whitespace-pre-wrap break-words">
+                              <div className="text-[11px] leading-[1.35] text-muted-foreground whitespace-pre-wrap break-words">
                                 {el.note}
                               </div>
                             )}
