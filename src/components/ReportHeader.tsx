@@ -20,14 +20,13 @@ export function ReportHeader({ report }: { report: CarReport }) {
           <svg
             viewBox="0 0 24 24"
             fill="none"
-            stroke="#10B981"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
+            stroke="white"
+            strokeWidth="1.8"
             className="w-5 h-5"
           >
-            <path d="M12 2 4 5v6c0 5 3.5 9.5 8 11 4.5-1.5 8-6 8-11V5l-8-3z" />
-            <path d="m9 12 2 2 4-4" />
+            <path d="M4 12l3-7h10l3 7M4 12v6a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-1h8v1a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-6M4 12h16" />
+            <circle cx="8" cy="15.5" r="1.2" fill="white" />
+            <circle cx="16" cy="15.5" r="1.2" fill="white" />
           </svg>
         </div>
         <div className="min-w-0 leading-tight">

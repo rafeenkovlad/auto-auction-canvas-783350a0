@@ -76,7 +76,7 @@ export function SchemaTabs({
 
 
   return (
-    <div className="panel px-5 md:px-6 py-3 md:py-4 flex flex-col gap-3 h-full">
+    <div className="panel px-5 md:px-6 py-3 md:py-4 flex flex-col gap-3">
       <div className="flex items-center justify-between gap-3">
         <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
           Схема осмотра

@@ -133,13 +133,6 @@ function ReportContent({ report }: { report: Awaited<ReturnType<typeof getReport
           characteristics={characteristics}
         />
 
-        <div className="grid lg:grid-cols-2 gap-4">
-        <TechnicalCondition
-          report={report}
-          allElements={allElements}
-          onElementClick={openElement}
-        />
-
         <SchemaTabs
           bodyElements={report.inspectionStep.bodyElements ?? []}
           interiorElements={report.inspectionStep.interiorElements ?? []}
@@ -149,9 +142,12 @@ function ReportContent({ report }: { report: Awaited<ReturnType<typeof getReport
           lightingElements={report.inspectionStep.lightningElements ?? []}
           onElementClick={openElement}
         />
-        </div>
 
-
+        <TechnicalCondition
+          report={report}
+          allElements={allElements}
+          onElementClick={openElement}
+        />
 
 
 

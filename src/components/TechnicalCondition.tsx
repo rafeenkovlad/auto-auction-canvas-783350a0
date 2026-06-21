@@ -150,7 +150,7 @@ export function TechnicalCondition({ report, allElements, onElementClick }: Prop
   );
 
   return (
-    <section className="panel p-5 md:p-6 flex flex-col gap-5 h-full">
+    <section className="panel p-5 md:p-6 flex flex-col gap-5">
       <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
         Техническое состояние
       </h3>
