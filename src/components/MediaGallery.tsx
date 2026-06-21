@@ -1,5 +1,6 @@
-import { useMemo } from "react";
-import { Car, Armchair, Wrench, Disc3, AppWindow, Lightbulb, Shield, Hash, FileText, Images } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Car, Armchair, Wrench, Disc3, AppWindow, Lightbulb, Shield, Hash, FileText, Images, ChevronLeft } from "lucide-react";
+import { GalleryTileBody } from "@/components/GalleryTile";
 import type { LucideIcon } from "lucide-react";
 import type { FileRef } from "@/lib/report.api";
 
@@ -40,11 +41,13 @@ const SECTION_GROUPS: Array<{
 
 export function MediaGallery({
   items,
-  onOpenGroup,
+  onOpen,
 }: {
   items: GalleryItem[];
-  onOpenGroup: (indices: number[]) => void;
+  onOpen: (idx: number) => void;
 }) {
+  const [activeKey, setActiveKey] = useState<string | null>(null);
+
   const groups = useMemo(() => {
     const used = new Set<number>();
     const result: Array<{
@@ -52,7 +55,7 @@ export function MediaGallery({
       label: string;
       icon: LucideIcon;
       count: number;
-      indices: number[];
+      items: GalleryItem[];
       cover: string | null;
     }> = [];
     for (const g of SECTION_GROUPS) {
@@ -65,7 +68,7 @@ export function MediaGallery({
         label: g.label,
         icon: g.icon,
         count: groupItems.length,
-        indices: groupItems.map((i) => i.idx),
+        items: groupItems,
         cover: coverItem.file.url ?? null,
       });
     }
@@ -77,7 +80,7 @@ export function MediaGallery({
         label: "Прочее",
         icon: Images,
         count: other.length,
-        indices: other.map((i) => i.idx),
+        items: other,
         cover: coverItem.file.url ?? null,
       });
     }
@@ -86,57 +89,85 @@ export function MediaGallery({
 
   if (items.length === 0) return null;
 
+  const active = activeKey ? groups.find((g) => g.key === activeKey) ?? null : null;
+
   return (
     <section className="panel p-4 sm:p-5 md:p-6 flex flex-col gap-3 sm:gap-4">
       <div className="flex items-center justify-between gap-3 flex-wrap">
-        <h3 className="text-xs sm:text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-          Фото и видео с осмотра
-          <span className="ml-2 mono text-[11px] normal-case tracking-normal text-muted-foreground/70">
-            ({items.length})
+        <h3 className="text-xs sm:text-sm font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
+          {active ? (
+            <button
+              type="button"
+              onClick={() => setActiveKey(null)}
+              className="inline-flex items-center gap-1 hover:text-foreground transition-colors"
+            >
+              <ChevronLeft size={14} />
+              <span>Фото и видео с осмотра</span>
+            </button>
+          ) : (
+            <span>Фото и видео с осмотра</span>
+          )}
+          <span className="mono text-[11px] normal-case tracking-normal text-muted-foreground/70">
+            ({active ? `${active.label} · ${active.count}` : items.length})
           </span>
         </h3>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3">
-        {groups.map((g) => {
-          const Icon = g.icon;
-          return (
+      {active ? (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3">
+          {active.items.map((item) => (
             <button
-              key={g.key}
+              key={item.idx}
               type="button"
-              onClick={() => onOpenGroup(g.indices)}
-              className="group relative aspect-[4/3] rounded-lg border border-border bg-card overflow-hidden text-left hover:border-accent hover:shadow-sm transition-all"
-              title={`${g.label} · ${g.count}`}
+              onClick={() => onOpen(item.idx)}
+              className="group rounded-lg border border-border bg-card overflow-hidden text-left hover:border-accent hover:shadow-sm transition-all"
             >
-              {g.cover ? (
-                <img
-                  src={g.cover}
-                  alt={g.label}
-                  loading="lazy"
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                />
-              ) : null}
-              <span
-                aria-hidden
-                className="absolute inset-0"
-                style={{
-                  background:
-                    "linear-gradient(180deg, oklch(0.15 0.02 250 / 0.05) 0%, oklch(0.15 0.02 250 / 0.7) 100%)",
-                }}
-              />
-              <div className="absolute inset-x-0 bottom-0 p-2.5 flex items-center justify-between gap-2 text-white">
-                <span className="flex items-center gap-1.5 min-w-0">
-                  <Icon size={14} strokeWidth={2} className="shrink-0" />
-                  <span className="text-xs font-semibold truncate">{g.label}</span>
-                </span>
-                <span className="mono text-[10px] px-1.5 py-0.5 rounded bg-white/20 backdrop-blur-sm tabular-nums">
-                  {g.count}
-                </span>
-              </div>
+              <GalleryTileBody item={item} />
             </button>
-          );
-        })}
-      </div>
+          ))}
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3">
+          {groups.map((g) => {
+            const Icon = g.icon;
+            return (
+              <button
+                key={g.key}
+                type="button"
+                onClick={() => setActiveKey(g.key)}
+                className="group relative aspect-[4/3] rounded-lg border border-border bg-card overflow-hidden text-left hover:border-accent hover:shadow-sm transition-all"
+                title={`${g.label} · ${g.count}`}
+              >
+                {g.cover ? (
+                  <img
+                    src={g.cover}
+                    alt={g.label}
+                    loading="lazy"
+                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  />
+                ) : null}
+                <span
+                  aria-hidden
+                  className="absolute inset-0"
+                  style={{
+                    background:
+                      "linear-gradient(180deg, oklch(0.15 0.02 250 / 0.05) 0%, oklch(0.15 0.02 250 / 0.7) 100%)",
+                  }}
+                />
+                <div className="absolute inset-x-0 bottom-0 p-2.5 flex items-center justify-between gap-2 text-white">
+                  <span className="flex items-center gap-1.5 min-w-0">
+                    <Icon size={14} strokeWidth={2} className="shrink-0" />
+                    <span className="text-xs font-semibold truncate">{g.label}</span>
+                  </span>
+                  <span className="mono text-[10px] px-1.5 py-0.5 rounded bg-white/20 backdrop-blur-sm tabular-nums">
+                    {g.count}
+                  </span>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      )}
     </section>
   );
 }
