@@ -1,6 +1,6 @@
 import type { CarReport, InspectionElement } from "@/lib/report.api";
 import { getElementStatus, type Status } from "@/lib/report.utils";
-import { SECTION_KEYS, SECTION_LABELS } from "@/lib/report.constants";
+import { SECTION_KEYS, SECTION_LABELS, ELEMENT_LABEL } from "@/lib/report.constants";
 
 export type Verdict = "buy" | "caution" | "avoid";
 
@@ -150,7 +150,7 @@ export function computeReportScore(report: CarReport): ReportScore {
         el.noSeriousDamageTags[0]?.name ??
         "повреждение";
       issues.push({
-        label: el.elementType.replace(/_/g, " "),
+        label: ELEMENT_LABEL[el.elementType] ?? el.elementType.replace(/_/g, " "),
         detail: tag,
         severity: s,
         sectionKey: key,
