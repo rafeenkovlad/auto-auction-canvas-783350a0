@@ -71,13 +71,13 @@ export function ReportHeaderCard({
         </h1>
 
         {specs.length > 0 && (
-          <dl className="text-[13px] leading-relaxed">
+          <dl className="text-[12.5px] leading-snug space-y-1">
             {specs.map((s) => (
-              <div key={s.label} className="flex flex-wrap gap-x-2">
-                <dt className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium self-center">
-                  {s.label}:
+              <div key={s.label} className="flex items-baseline gap-1.5 min-w-0">
+                <dt className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium shrink-0">
+                  {s.label}
                 </dt>
-                <dd className="ink font-semibold min-w-0 break-words">
+                <dd className="ink font-semibold min-w-0 truncate" title={s.value}>
                   {s.value}
                 </dd>
               </div>
