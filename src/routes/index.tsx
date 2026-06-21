@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { getReport, type InspectionElement } from "@/lib/report.api";
@@ -9,6 +9,7 @@ import { InspectionHistoryTimeline } from "@/components/InspectionHistoryTimelin
 import { GalleryTileBody } from "@/components/GalleryTile";
 import { ReportHeader } from "@/components/ReportHeader";
 import { HeroSection } from "@/components/HeroSection";
+import { SummaryHero } from "@/components/SummaryHero";
 import { TechnicalStatePanel } from "@/components/TechnicalStatePanel";
 import { DocumentsCard } from "@/components/DocumentsCard";
 import { TestDriveCard } from "@/components/TestDriveCard";
@@ -16,6 +17,7 @@ import { AdditionalMaterials } from "@/components/AdditionalMaterials";
 import { ExpertConclusion } from "@/components/ExpertConclusion";
 import { statusMeta } from "@/lib/report.utils";
 import { useReportData } from "@/hooks/useReportData";
+import { computeReportScore } from "@/lib/report.score";
 import { preloadSchemaImages } from "@/lib/schema-preload";
 
 const reportQuery = (token?: string) =>
@@ -105,6 +107,17 @@ function ReportContent({ report }: { report: Awaited<ReturnType<typeof getReport
     [allElements],
   );
 
+  const score = useMemo(() => computeReportScore(report), [report]);
+  const [view, setView] = useState<"summary" | "diagnostics" | "full">(
+    "summary",
+  );
+
+  const tabs: Array<{ key: typeof view; label: string; hint: string }> = [
+    { key: "summary", label: "Сводка", hint: "Главное за 30 сек" },
+    { key: "diagnostics", label: "Диагностика", hint: "Кузов, узлы, фото" },
+    { key: "full", label: "Полные данные", hint: "Документы, тест-драйв" },
+  ];
+
   return (
     <main
       className="min-h-screen py-5 px-3 md:px-6"
@@ -116,51 +129,103 @@ function ReportContent({ report }: { report: Awaited<ReturnType<typeof getReport
       <div className="mx-auto max-w-7xl space-y-4">
         <ReportHeader report={report} />
 
-        <HeroSection
-          report={report}
-          carName={carName}
-          heroImage={heroImage}
-          heroSrcSet={heroSrcSet}
-          characteristics={characteristics}
-        />
+        {/* View tabs */}
+        <div
+          className="panel p-1 grid grid-cols-3 gap-1"
+          role="tablist"
+          aria-label="Уровни просмотра отчёта"
+        >
+          {tabs.map((t) => {
+            const active = view === t.key;
+            return (
+              <button
+                key={t.key}
+                type="button"
+                role="tab"
+                aria-selected={active}
+                onClick={() => setView(t.key)}
+                className="flex flex-col items-center justify-center gap-0.5 px-3 py-2.5 rounded-lg text-sm font-semibold transition-all"
+                style={{
+                  background: active ? "var(--foreground)" : "transparent",
+                  color: active ? "var(--background)" : "var(--muted-foreground)",
+                }}
+              >
+                <span>{t.label}</span>
+                <span
+                  className="text-[10px] font-normal opacity-70"
+                  style={{ color: "inherit" }}
+                >
+                  {t.hint}
+                </span>
+              </button>
+            );
+          })}
+        </div>
 
-        <section className="grid lg:grid-cols-2 gap-4">
-          <SchemaTabs
-            bodyElements={report.inspectionStep.bodyElements ?? []}
-            interiorElements={report.inspectionStep.interiorElements ?? []}
-            frameElements={report.inspectionStep.bodyReinforcementElements ?? []}
-            wheelsElements={report.inspectionStep.wheelsAndBrakesElements ?? []}
-            glassElements={report.inspectionStep.glassElements ?? []}
-            lightingElements={report.inspectionStep.lightningElements ?? []}
-            onElementClick={openElement}
-          />
-          <TechnicalStatePanel
-            sections={sections}
-            inspection={report.inspectionStep}
-          />
-        </section>
+        {view === "summary" && (
+          <>
+            <SummaryHero
+              report={report}
+              carName={carName}
+              heroImage={heroImage}
+              heroSrcSet={heroSrcSet}
+              score={score}
+              onSeeDetails={() => setView("diagnostics")}
+            />
+            <ExpertConclusion result={report.resultStep} />
+          </>
+        )}
 
-        <InspectionHistoryTimeline />
+        {view === "diagnostics" && (
+          <>
+            <HeroSection
+              report={report}
+              carName={carName}
+              heroImage={heroImage}
+              heroSrcSet={heroSrcSet}
+              characteristics={characteristics}
+            />
+            <section className="grid lg:grid-cols-2 gap-4">
+              <SchemaTabs
+                bodyElements={report.inspectionStep.bodyElements ?? []}
+                interiorElements={report.inspectionStep.interiorElements ?? []}
+                frameElements={report.inspectionStep.bodyReinforcementElements ?? []}
+                wheelsElements={report.inspectionStep.wheelsAndBrakesElements ?? []}
+                glassElements={report.inspectionStep.glassElements ?? []}
+                lightingElements={report.inspectionStep.lightningElements ?? []}
+                onElementClick={openElement}
+              />
+              <TechnicalStatePanel
+                sections={sections}
+                inspection={report.inspectionStep}
+              />
+            </section>
 
-        <MediaGallery
-          items={gallery}
-          onOpen={setActiveIdx}
-          renderTile={(item) => <GalleryTileBody item={item} />}
-        />
+            <MediaGallery
+              items={gallery}
+              onOpen={setActiveIdx}
+              renderTile={(item) => <GalleryTileBody item={item} />}
+            />
+          </>
+        )}
 
-        <AdditionalMaterials items={additional} onOpen={setActiveIdx} />
-
-        <section className="grid md:grid-cols-2 gap-4">
-          <DocumentsCard docs={report.documentReconciliationStep} />
-          <TestDriveCard report={report} />
-        </section>
-
-        <ExpertConclusion result={report.resultStep} />
+        {view === "full" && (
+          <>
+            <InspectionHistoryTimeline />
+            <section className="grid md:grid-cols-2 gap-4">
+              <DocumentsCard docs={report.documentReconciliationStep} />
+              <TestDriveCard report={report} />
+            </section>
+            <AdditionalMaterials items={additional} onOpen={setActiveIdx} />
+            <ExpertConclusion result={report.resultStep} />
+          </>
+        )}
 
         <footer className="text-center mono text-[11px] text-muted-foreground py-4">
           Сгенерировано на основе данных carreports.ru · {report.reportNumber}
         </footer>
       </div>
+
 
       <ElementViewer
         elements={allElements}
