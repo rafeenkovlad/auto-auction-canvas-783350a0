@@ -38,14 +38,6 @@ export function ReportHeaderCard({
     }
     return rows;
   }, [characteristics]);
-    const map = new Map(characteristics.map(([k, v]) => [k, v]));
-    const rows: Array<{ label: string; value: string }> = [];
-    for (const k of wanted) {
-      const v = map.get(k);
-      if (v != null && v !== "") rows.push({ label: k, value: String(v) });
-    }
-    return rows;
-  }, [characteristics]);
 
   const inspectionDate = fmtDate(report.carStep.dateInspection ?? report.reportDate);
   const city = report.carStep.cityInspection ?? "—";
