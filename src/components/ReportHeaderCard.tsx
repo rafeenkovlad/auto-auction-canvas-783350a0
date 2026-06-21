@@ -90,25 +90,6 @@ export function ReportHeaderCard({
         )}
       </div>
 
-      {/* === Column 2: Что важно знать === */}
-      <div className="min-w-0 flex flex-col gap-2 lg:border-l lg:border-border lg:pl-5">
-        <div className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground font-semibold mb-1">
-          Что важно знать
-        </div>
-        <ul className="flex flex-col gap-2">
-          {findings.map((f) => {
-            const { Icon, color } = findingIcon(f.status);
-            return (
-              <li key={f.label} className="flex items-start gap-2 text-sm">
-                <Icon size={16} strokeWidth={2.5} style={{ color }} className="mt-0.5 shrink-0" />
-                <span className={f.status === "ok" ? "text-foreground" : "ink font-medium"}>
-                  {f.label}
-                </span>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
 
       {/* === Column 3: Meta === */}
       <div className="min-w-0 flex flex-col gap-2.5 lg:border-l lg:border-border lg:pl-5">
