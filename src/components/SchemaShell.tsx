@@ -69,7 +69,8 @@ export function SchemaShell({
             e.note ||
             e.seriousDamageTags.length > 0 ||
             e.noSeriousDamageTags.length > 0 ||
-            e.file,
+            e.paintworkThicknessFrom != null ||
+            e.paintworkThicknessTo != null,
         )
         .sort((a, b) => rank(getElementStatus(b)) - rank(getElementStatus(a))),
     [elements],
