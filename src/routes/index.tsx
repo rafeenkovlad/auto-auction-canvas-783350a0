@@ -9,7 +9,7 @@ import { InspectionHistoryTimeline } from "@/components/InspectionHistoryTimelin
 import { GalleryTileBody } from "@/components/GalleryTile";
 import { ReportHeader } from "@/components/ReportHeader";
 import { ReportHeaderCard } from "@/components/ReportHeaderCard";
-import { PhotoCategories } from "@/components/PhotoCategories";
+
 import { DocumentsCard } from "@/components/DocumentsCard";
 import { TestDriveCard } from "@/components/TestDriveCard";
 import { AdditionalMaterials } from "@/components/AdditionalMaterials";
@@ -135,7 +135,6 @@ function ReportContent({ report }: { report: Awaited<ReturnType<typeof getReport
           onElementClick={openElement}
         />
 
-        <PhotoCategories allElements={allElements} onOpen={setActiveIdx} />
 
         <section className="grid md:grid-cols-2 gap-4">
           <TestDriveCard report={report} />
