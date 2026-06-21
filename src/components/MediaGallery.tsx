@@ -1,5 +1,6 @@
-import { useMemo } from "react";
-import { Car, Armchair, Wrench, Disc3, AppWindow, Lightbulb, Shield, Hash, FileText, Images } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Car, Armchair, Wrench, Disc3, AppWindow, Lightbulb, Shield, Hash, FileText, Images, ChevronLeft } from "lucide-react";
+import { GalleryTileBody } from "@/components/GalleryTile";
 import type { LucideIcon } from "lucide-react";
 import type { FileRef } from "@/lib/report.api";
 
