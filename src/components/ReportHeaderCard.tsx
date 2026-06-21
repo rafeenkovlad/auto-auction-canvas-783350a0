@@ -12,78 +12,14 @@ interface Props {
 }
 
 
-type Finding = { label: string; status: "ok" | "minor" | "serious" };
-
-function buildFindings(report: CarReport, elements: EnrichedElement[]): Finding[] {
-  const has = (key: string, st: "serious" | "minor") =>
-    elements.some((e) => e._sectionKey === key && e._status === st);
-  const out: Finding[] = [];
-
-  const docs = report.documentReconciliationStep;
-  const vinOk = !report.carStep.unreadableVin && docs.vinOnBodyMatchWithPtsOrSts !== false;
-  out.push({ label: "VIN и документы проверены", status: vinOk ? "ok" : "serious" });
-
-  const frameSerious = has("bodyReinforcementElements", "serious");
-  const frameMinor = has("bodyReinforcementElements", "minor");
-  out.push({
-    label: "Геометрия кузова в норме",
-    status: frameSerious ? "serious" : frameMinor ? "minor" : "ok",
-  });
-
-  const bodySerious = has("bodyElements", "serious");
-  const bodyMinor = has("bodyElements", "minor");
-  out.push({
-    label: bodySerious
-      ? "Обнаружены повреждения кузова"
-      : bodyMinor
-        ? "Есть незначительные замечания по кузову"
-        : "Кузов без структурных повреждений",
-    status: bodySerious ? "serious" : bodyMinor ? "minor" : "ok",
-  });
-
-  const diagSerious = has("computerDiagnosticsElements", "serious");
-  const diagMinor = has("computerDiagnosticsElements", "minor");
-  out.push({
-    label: diagSerious ? "Ошибки в диагностике" : "Ошибок по диагностике нет",
-    status: diagSerious ? "serious" : diagMinor ? "minor" : "ok",
-  });
-
-  const td = report.testDriveStep;
-  const tdProblem =
-    td.testDriveIsIncluded &&
-    [
-      td.testDriveEngineIsWorkingProperly,
-      td.testDriveTransmissionIsWorkingProperly,
-      td.testDriveSteeringWheelIsWorkingProperly,
-      td.testDriveSuspensionInDriveIsWorkingProperly,
-      td.testDriveBrakesInDriveIsWorkingProperly,
-    ].some((v) => v === false);
-  out.push({
-    label: tdProblem ? "Есть замечания на тест-драйве" : "Тест-драйв пройден",
-    status: tdProblem ? "minor" : "ok",
-  });
-
-  return out;
-}
-
-function findingIcon(s: Finding["status"]) {
-  if (s === "ok") return { Icon: Check, color: "var(--grade-good)" };
-  if (s === "minor") return { Icon: AlertTriangle, color: "var(--grade-warn)" };
-  return { Icon: AlertOctagon, color: "var(--grade-bad)" };
-}
-
 export function ReportHeaderCard({
   report,
   carName,
   heroImage,
   heroSrcSet,
   characteristics,
-  allElements,
 }: Props) {
-  const findings = useMemo(
-    () => buildFindings(report, allElements),
-    [report, allElements],
-  );
+
 
   const chips = useMemo(() => {
     const wanted = ["Рестайлинг", "Двигатель", "КПП", "Привод", "Объём"];
