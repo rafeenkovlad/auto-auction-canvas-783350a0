@@ -1,5 +1,18 @@
 import { useMemo, useState } from "react";
-import { Images, Car, Armchair, Wrench, AlertTriangle, Video } from "lucide-react";
+import {
+  Images,
+  Car,
+  Armchair,
+  Wrench,
+  AlertTriangle,
+  Video,
+  Disc3,
+  AppWindow,
+  Lightbulb,
+  Shield,
+  Hash,
+  FileText,
+} from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { FileRef } from "@/lib/report.api";
 
@@ -21,21 +34,8 @@ const TAB_DEFS: Array<{
   match: (i: GalleryItem) => boolean;
 }> = [
   { key: "all", label: "Все", icon: Images, match: () => true },
-  {
-    key: "exterior",
-    label: "Экстерьер",
-    icon: Car,
-    match: (i) =>
-      i.sectionKey === "bodyElements" ||
-      i.sectionKey === "glassElements" ||
-      i.sectionKey === "lightningElements",
-  },
-  {
-    key: "interior",
-    label: "Интерьер",
-    icon: Armchair,
-    match: (i) => i.sectionKey === "interiorElements",
-  },
+  { key: "body", label: "Кузов", icon: Car, match: (i) => i.sectionKey === "bodyElements" },
+  { key: "interior", label: "Салон", icon: Armchair, match: (i) => i.sectionKey === "interiorElements" },
   {
     key: "engine",
     label: "Двигатель",
@@ -44,6 +44,12 @@ const TAB_DEFS: Array<{
       i.sectionKey === "underHoodElements" ||
       i.sectionKey === "computerDiagnosticsElements",
   },
+  { key: "wheels", label: "Колёса и тормоза", icon: Disc3, match: (i) => i.sectionKey === "wheelsAndBrakesElements" },
+  { key: "glass", label: "Стёкла", icon: AppWindow, match: (i) => i.sectionKey === "glassElements" },
+  { key: "lighting", label: "Освещение", icon: Lightbulb, match: (i) => i.sectionKey === "lightningElements" },
+  { key: "frame", label: "Силовые", icon: Shield, match: (i) => i.sectionKey === "bodyReinforcementElements" },
+  { key: "vin", label: "VIN и маркировки", icon: Hash, match: (i) => i.sectionKey === "characteristics" || i.sectionKey === "car" },
+  { key: "documents", label: "Документы", icon: FileText, match: (i) => i.sectionKey === "documents" || i.sectionKey === "legal" },
   { key: "damage", label: "Повреждения", icon: AlertTriangle, match: (i) => i.isDamage },
   { key: "video", label: "Видео", icon: Video, match: (i) => i.isVideo },
 ];
