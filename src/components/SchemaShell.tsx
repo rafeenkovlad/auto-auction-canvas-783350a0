@@ -210,11 +210,24 @@ export function SchemaShell({
                                 )}
                               </div>
                             ) : null}
-                            {el.note && (
+                            {el.note ? (
                               <div className="text-[11px] leading-[1.35] text-muted-foreground whitespace-pre-wrap break-words">
                                 {el.note}
                               </div>
-                            )}
+                            ) : allTags.length === 0 ? (
+                              <div
+                                className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full border"
+                                style={{
+                                  background:
+                                    "color-mix(in oklch, var(--grade-good) 10%, transparent)",
+                                  borderColor:
+                                    "color-mix(in oklch, var(--grade-good) 35%, transparent)",
+                                  color: "var(--muted-foreground)",
+                                }}
+                              >
+                                Без замечаний
+                              </div>
+                            ) : null}
                             {allTags.length > 0 && (
                               <div className="mt-1 flex flex-wrap gap-1">
                                 {allTags.map((t) => (
