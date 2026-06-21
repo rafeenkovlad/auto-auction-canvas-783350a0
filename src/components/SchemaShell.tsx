@@ -180,7 +180,7 @@ export function SchemaShell({
                         {(el.note || allTags.length > 0 || el.file) && (
                           <div className="ml-4 mt-1 overflow-hidden">
                             {el.file && (isImageFile(el.file) || isVideoFile(el.file)) ? (
-                              <div className="relative w-14 h-14 rounded-md overflow-hidden border border-border bg-muted float-left mr-2 mb-2 shadow-sm">
+                              <div className="relative w-14 h-14 rounded-md overflow-hidden border border-border bg-muted float-left mr-2 mb-0 shadow-sm">
                                 {isImageFile(el.file) ? (
                                   <img
                                     src={el.file.url}
@@ -205,7 +205,7 @@ export function SchemaShell({
                               </div>
                             ) : null}
                             {el.note && (
-                              <div className="text-[11px] text-muted-foreground whitespace-pre-wrap break-words">
+                              <div className="text-[11px] leading-[1.35] text-muted-foreground whitespace-pre-wrap break-words">
                                 {el.note}
                               </div>
                             )}
