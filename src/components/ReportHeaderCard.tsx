@@ -41,13 +41,26 @@ export function ReportHeaderCard({
   return (
     <section className="panel p-4 sm:p-5 md:p-6 grid gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
       {/* === Column 1: Car === */}
-      <div className="min-w-0 flex flex-col gap-3">
-        <h1 className="text-xl md:text-2xl font-bold ink leading-tight">
+      <div className="min-w-0">
+        <h1 className="text-xl md:text-2xl font-bold ink leading-tight mb-3">
           {carName}
         </h1>
 
+        {heroImage && (
+          <div className="float-left mr-4 mb-3 w-[160px] sm:w-[200px] md:w-[240px] aspect-[16/10] rounded-lg overflow-hidden border border-border bg-muted shrink-0">
+            <img
+              src={heroImage}
+              srcSet={heroSrcSet ?? undefined}
+              sizes="240px"
+              alt={carName}
+              loading="eager"
+              className="w-full h-full object-cover"
+            />
+          </div>
+        )}
+
         {chips.length > 0 && (
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap gap-1.5 mb-3">
             {chips.map((c) => (
               <span
                 key={c.label}
@@ -60,31 +73,19 @@ export function ReportHeaderCard({
           </div>
         )}
 
-        {heroImage && (
-          <div className="relative aspect-[16/9] rounded-lg overflow-hidden border border-border bg-muted">
-            <img
-              src={heroImage}
-              srcSet={heroSrcSet ?? undefined}
-              sizes="(min-width: 1024px) 520px, 100vw"
-              alt={carName}
-              loading="eager"
-              className="w-full h-full object-cover"
-            />
-          </div>
-        )}
-
-
         {report.carStep.uriListing && (
           <a
             href={report.carStep.uriListing}
             target="_blank"
             rel="noreferrer"
-            className="self-start inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+            className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
           >
             <span>Перейти к объявлению</span>
             <span aria-hidden>↗</span>
           </a>
         )}
+
+        <div className="clear-both" />
       </div>
 
 
