@@ -6,7 +6,7 @@ import { ElementViewer } from "@/components/ElementViewer";
 import { SchemaTabs } from "@/components/SchemaTabs";
 import { MediaGallery } from "@/components/MediaGallery";
 import { InspectionHistoryTimeline } from "@/components/InspectionHistoryTimeline";
-import { GalleryTileBody } from "@/components/GalleryTile";
+
 import { ReportHeader } from "@/components/ReportHeader";
 import { ReportHeaderCard } from "@/components/ReportHeaderCard";
 
@@ -143,11 +143,8 @@ function ReportContent({ report }: { report: Awaited<ReturnType<typeof getReport
 
         <InspectionHistoryTimeline />
 
-        <MediaGallery
-          items={gallery}
-          onOpen={setActiveIdx}
-          renderTile={(item) => <GalleryTileBody item={item} />}
-        />
+        <MediaGallery items={gallery} onOpen={setActiveIdx} />
+
 
         <AdditionalMaterials items={additional} onOpen={setActiveIdx} />
 
