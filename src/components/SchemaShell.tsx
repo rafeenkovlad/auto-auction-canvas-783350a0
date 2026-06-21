@@ -128,7 +128,7 @@ export function SchemaShell({
           )}
         </div>
 
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3 h-full min-h-0">
           <div className="flex flex-col gap-1.5">
             {LEGEND.map((l) => (
               <div key={l.key} className="flex items-center gap-2 text-xs">
@@ -146,7 +146,7 @@ export function SchemaShell({
               <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-2">
                 Заметки
               </div>
-              <div className="flex flex-col gap-2 max-h-[320px] overflow-auto">
+              <div className="flex flex-col gap-2 flex-1 min-h-0 overflow-auto">
                 {damaged.map((el) => {
                   const st = getElementStatus(el);
                   const zoneKey = zoneKeyForElement(el);
