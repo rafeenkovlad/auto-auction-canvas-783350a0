@@ -143,11 +143,8 @@ function ReportContent({ report }: { report: Awaited<ReturnType<typeof getReport
 
         <InspectionHistoryTimeline />
 
-        <MediaGallery
-          items={gallery}
-          onOpen={setActiveIdx}
-          renderTile={(item) => <GalleryTileBody item={item} />}
-        />
+        <MediaGallery items={gallery} onOpen={setActiveIdx} />
+
 
         <AdditionalMaterials items={additional} onOpen={setActiveIdx} />
 
