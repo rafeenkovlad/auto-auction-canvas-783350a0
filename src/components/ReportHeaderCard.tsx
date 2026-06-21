@@ -54,7 +54,7 @@ export function ReportHeaderCard({
       {/* === Column 1: Car === */}
       <div className="min-w-0">
         {heroImage && (
-          <div className="float-left mr-4 mb-2 w-[140px] sm:w-[170px] md:w-[200px] aspect-[4/3] rounded-lg overflow-hidden border border-border bg-muted shrink-0">
+          <div className="float-left mr-3 mb-2 w-[110px] sm:w-[160px] md:w-[200px] aspect-[4/3] rounded-lg overflow-hidden border border-border bg-muted shrink-0">
             <img
               src={heroImage}
               srcSet={heroSrcSet ?? undefined}
