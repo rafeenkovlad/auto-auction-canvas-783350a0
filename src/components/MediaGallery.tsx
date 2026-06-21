@@ -104,7 +104,7 @@ export function MediaGallery({
             <button
               key={g.key}
               type="button"
-              onClick={() => onOpen(g.firstIdx)}
+              onClick={() => onOpenGroup(g.indices)}
               className="group relative aspect-[4/3] rounded-lg border border-border bg-card overflow-hidden text-left hover:border-accent hover:shadow-sm transition-all"
               title={`${g.label} · ${g.count}`}
             >
