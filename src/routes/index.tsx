@@ -133,21 +133,25 @@ function ReportContent({ report }: { report: Awaited<ReturnType<typeof getReport
           characteristics={characteristics}
         />
 
-        <SchemaTabs
-          bodyElements={report.inspectionStep.bodyElements ?? []}
-          interiorElements={report.inspectionStep.interiorElements ?? []}
-          frameElements={report.inspectionStep.bodyReinforcementElements ?? []}
-          wheelsElements={report.inspectionStep.wheelsAndBrakesElements ?? []}
-          glassElements={report.inspectionStep.glassElements ?? []}
-          lightingElements={report.inspectionStep.lightningElements ?? []}
-          onElementClick={openElement}
-        />
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+          <SchemaTabs
+            bodyElements={report.inspectionStep.bodyElements ?? []}
+            interiorElements={report.inspectionStep.interiorElements ?? []}
+            frameElements={report.inspectionStep.bodyReinforcementElements ?? []}
+            wheelsElements={report.inspectionStep.wheelsAndBrakesElements ?? []}
+            glassElements={report.inspectionStep.glassElements ?? []}
+            lightingElements={report.inspectionStep.lightningElements ?? []}
+            onElementClick={openElement}
+          />
+          <InspectionHistoryTimeline />
+        </div>
 
         <TechnicalCondition
           report={report}
           allElements={allElements}
           onElementClick={openElement}
         />
+
 
 
 
