@@ -1,8 +1,7 @@
 import { useMemo } from "react";
 import type { CarReport } from "@/lib/report.api";
-import type { EnrichedElement } from "@/lib/report.utils";
 import { fmtDate, fmtMileage } from "@/lib/report.utils";
-import { Calendar, MapPin, Gauge, Hash, FileText, Check, AlertTriangle, AlertOctagon } from "lucide-react";
+import { Calendar, MapPin, Gauge, Hash, FileText } from "lucide-react";
 
 interface Props {
   report: CarReport;
@@ -10,8 +9,8 @@ interface Props {
   heroImage: string | null;
   heroSrcSet: string | null;
   characteristics: Array<[string, string | number]>;
-  allElements: EnrichedElement[];
 }
+
 
 type Finding = { label: string; status: "ok" | "minor" | "serious" };
 
