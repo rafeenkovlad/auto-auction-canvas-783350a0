@@ -134,7 +134,7 @@ function ReportContent({ report }: { report: Awaited<ReturnType<typeof getReport
         />
 
         {(() => {
-          const historyEntries: undefined = undefined; // wire real history here when available
+          const historyEntries: never[] | undefined = undefined; // wire real history here when available
           const schema = (
             <SchemaTabs
               bodyElements={report.inspectionStep.bodyElements ?? []}
