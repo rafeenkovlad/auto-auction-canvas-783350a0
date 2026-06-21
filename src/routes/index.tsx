@@ -162,7 +162,7 @@ function ReportContent({ report }: { report: Awaited<ReturnType<typeof getReport
         <ExpertConclusion result={report.resultStep} />
 
         <footer className="text-center mono text-[11px] text-muted-foreground py-4">
-          Сгенерировано на основе данных carreports.ru · {report.reportNumber}
+          VIN DIEZEL · Независимая экспертиза автомобиля · {report.reportNumber}
         </footer>
       </div>
 
