@@ -210,9 +210,11 @@ export function SchemaShell({
                                 )}
                               </div>
                             ) : null}
-                            <div className="text-[11px] leading-[1.35] text-muted-foreground whitespace-pre-wrap break-words">
-                              {el.note || "Без замечаний"}
-                            </div>
+                            {el.note && (
+                              <div className="text-[11px] leading-[1.35] text-muted-foreground whitespace-pre-wrap break-words">
+                                {el.note}
+                              </div>
+                            )}
                             {allTags.length > 0 && (
                               <div className="mt-1 flex flex-wrap gap-1">
                                 {allTags.map((t) => (
