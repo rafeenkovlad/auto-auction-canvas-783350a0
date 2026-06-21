@@ -22,7 +22,7 @@ export function ReportHeaderCard({
 
 
   const chips = useMemo(() => {
-    const wanted = ["Рестайлинг", "Двигатель", "КПП", "Привод", "Объём"];
+    const wanted = ["Двигатель", "КПП", "Привод", "Объём"];
     const map = new Map(characteristics.map(([k, v]) => [k, v]));
     const result: Array<{ label: string; value: string }> = [];
     for (const k of wanted) {
