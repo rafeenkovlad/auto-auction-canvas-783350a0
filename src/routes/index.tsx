@@ -133,18 +133,29 @@ function ReportContent({ report }: { report: Awaited<ReturnType<typeof getReport
           characteristics={characteristics}
         />
 
-        <div className="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-          <SchemaTabs
-            bodyElements={report.inspectionStep.bodyElements ?? []}
-            interiorElements={report.inspectionStep.interiorElements ?? []}
-            frameElements={report.inspectionStep.bodyReinforcementElements ?? []}
-            wheelsElements={report.inspectionStep.wheelsAndBrakesElements ?? []}
-            glassElements={report.inspectionStep.glassElements ?? []}
-            lightingElements={report.inspectionStep.lightningElements ?? []}
-            onElementClick={openElement}
-          />
-          <InspectionHistoryTimeline />
-        </div>
+        {(() => {
+          const historyEntries: undefined = undefined; // wire real history here when available
+          const schema = (
+            <SchemaTabs
+              bodyElements={report.inspectionStep.bodyElements ?? []}
+              interiorElements={report.inspectionStep.interiorElements ?? []}
+              frameElements={report.inspectionStep.bodyReinforcementElements ?? []}
+              wheelsElements={report.inspectionStep.wheelsAndBrakesElements ?? []}
+              glassElements={report.inspectionStep.glassElements ?? []}
+              lightingElements={report.inspectionStep.lightningElements ?? []}
+              onElementClick={openElement}
+            />
+          );
+          return historyEntries ? (
+            <div className="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+              {schema}
+              <InspectionHistoryTimeline entries={historyEntries} />
+            </div>
+          ) : (
+            schema
+          );
+        })()}
+
 
         <TechnicalCondition
           report={report}
