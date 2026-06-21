@@ -14,7 +14,6 @@ import { DocumentsCard } from "@/components/DocumentsCard";
 import { TestDriveCard } from "@/components/TestDriveCard";
 import { AdditionalMaterials } from "@/components/AdditionalMaterials";
 import { ExpertConclusion } from "@/components/ExpertConclusion";
-import { SummaryCard } from "@/components/SummaryCard";
 import { statusMeta } from "@/lib/report.utils";
 import { useReportData } from "@/hooks/useReportData";
 import { preloadSchemaImages } from "@/lib/schema-preload";
@@ -125,9 +124,7 @@ function ReportContent({ report }: { report: Awaited<ReturnType<typeof getReport
           characteristics={characteristics}
         />
 
-        <SummaryCard report={report} allElements={allElements} />
-
-        <section id="report-details" className="grid lg:grid-cols-2 gap-4">
+        <section className="grid lg:grid-cols-2 gap-4">
           <SchemaTabs
             bodyElements={report.inspectionStep.bodyElements ?? []}
             interiorElements={report.inspectionStep.interiorElements ?? []}
@@ -158,7 +155,7 @@ function ReportContent({ report }: { report: Awaited<ReturnType<typeof getReport
           <TestDriveCard report={report} />
         </section>
 
-        <ExpertConclusion result={report.resultStep} report={report} />
+        <ExpertConclusion result={report.resultStep} />
 
         <footer className="text-center mono text-[11px] text-muted-foreground py-4">
           Сгенерировано на основе данных carreports.ru · {report.reportNumber}
