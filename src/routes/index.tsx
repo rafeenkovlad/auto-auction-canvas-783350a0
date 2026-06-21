@@ -158,7 +158,7 @@ function ReportContent({ report }: { report: Awaited<ReturnType<typeof getReport
           <TestDriveCard report={report} />
         </section>
 
-        <ExpertConclusion result={report.resultStep} />
+        <ExpertConclusion result={report.resultStep} report={report} />
 
         <footer className="text-center mono text-[11px] text-muted-foreground py-4">
           Сгенерировано на основе данных carreports.ru · {report.reportNumber}
