@@ -5,6 +5,7 @@ import { getReport, type InspectionElement } from "@/lib/report.api";
 import { ElementViewer } from "@/components/ElementViewer";
 import { SchemaTabs } from "@/components/SchemaTabs";
 import { MediaGallery } from "@/components/MediaGallery";
+import { TechnicalCondition } from "@/components/TechnicalCondition";
 import { InspectionHistoryTimeline } from "@/components/InspectionHistoryTimeline";
 
 import { ReportHeader } from "@/components/ReportHeader";
@@ -130,7 +131,6 @@ function ReportContent({ report }: { report: Awaited<ReturnType<typeof getReport
           heroImage={heroImage}
           heroSrcSet={heroSrcSet}
           characteristics={characteristics}
-          allElements={allElements}
         />
 
         <SchemaTabs
@@ -142,6 +142,13 @@ function ReportContent({ report }: { report: Awaited<ReturnType<typeof getReport
           lightingElements={report.inspectionStep.lightningElements ?? []}
           onElementClick={openElement}
         />
+
+        <TechnicalCondition
+          report={report}
+          allElements={allElements}
+          onElementClick={openElement}
+        />
+
 
 
         <section className="grid md:grid-cols-2 gap-4">

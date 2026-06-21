@@ -1,8 +1,7 @@
 import { useMemo } from "react";
 import type { CarReport } from "@/lib/report.api";
-import type { EnrichedElement } from "@/lib/report.utils";
 import { fmtDate, fmtMileage } from "@/lib/report.utils";
-import { Calendar, MapPin, Gauge, Hash, FileText, Check, AlertTriangle, AlertOctagon } from "lucide-react";
+import { Calendar, MapPin, Gauge, Hash, FileText } from "lucide-react";
 
 interface Props {
   report: CarReport;
@@ -10,68 +9,8 @@ interface Props {
   heroImage: string | null;
   heroSrcSet: string | null;
   characteristics: Array<[string, string | number]>;
-  allElements: EnrichedElement[];
 }
 
-type Finding = { label: string; status: "ok" | "minor" | "serious" };
-
-function buildFindings(report: CarReport, elements: EnrichedElement[]): Finding[] {
-  const has = (key: string, st: "serious" | "minor") =>
-    elements.some((e) => e._sectionKey === key && e._status === st);
-  const out: Finding[] = [];
-
-  const docs = report.documentReconciliationStep;
-  const vinOk = !report.carStep.unreadableVin && docs.vinOnBodyMatchWithPtsOrSts !== false;
-  out.push({ label: "VIN и документы проверены", status: vinOk ? "ok" : "serious" });
-
-  const frameSerious = has("bodyReinforcementElements", "serious");
-  const frameMinor = has("bodyReinforcementElements", "minor");
-  out.push({
-    label: "Геометрия кузова в норме",
-    status: frameSerious ? "serious" : frameMinor ? "minor" : "ok",
-  });
-
-  const bodySerious = has("bodyElements", "serious");
-  const bodyMinor = has("bodyElements", "minor");
-  out.push({
-    label: bodySerious
-      ? "Обнаружены повреждения кузова"
-      : bodyMinor
-        ? "Есть незначительные замечания по кузову"
-        : "Кузов без структурных повреждений",
-    status: bodySerious ? "serious" : bodyMinor ? "minor" : "ok",
-  });
-
-  const diagSerious = has("computerDiagnosticsElements", "serious");
-  const diagMinor = has("computerDiagnosticsElements", "minor");
-  out.push({
-    label: diagSerious ? "Ошибки в диагностике" : "Ошибок по диагностике нет",
-    status: diagSerious ? "serious" : diagMinor ? "minor" : "ok",
-  });
-
-  const td = report.testDriveStep;
-  const tdProblem =
-    td.testDriveIsIncluded &&
-    [
-      td.testDriveEngineIsWorkingProperly,
-      td.testDriveTransmissionIsWorkingProperly,
-      td.testDriveSteeringWheelIsWorkingProperly,
-      td.testDriveSuspensionInDriveIsWorkingProperly,
-      td.testDriveBrakesInDriveIsWorkingProperly,
-    ].some((v) => v === false);
-  out.push({
-    label: tdProblem ? "Есть замечания на тест-драйве" : "Тест-драйв пройден",
-    status: tdProblem ? "minor" : "ok",
-  });
-
-  return out;
-}
-
-function findingIcon(s: Finding["status"]) {
-  if (s === "ok") return { Icon: Check, color: "var(--grade-good)" };
-  if (s === "minor") return { Icon: AlertTriangle, color: "var(--grade-warn)" };
-  return { Icon: AlertOctagon, color: "var(--grade-bad)" };
-}
 
 export function ReportHeaderCard({
   report,
@@ -79,12 +18,8 @@ export function ReportHeaderCard({
   heroImage,
   heroSrcSet,
   characteristics,
-  allElements,
 }: Props) {
-  const findings = useMemo(
-    () => buildFindings(report, allElements),
-    [report, allElements],
-  );
+
 
   const chips = useMemo(() => {
     const wanted = ["Рестайлинг", "Двигатель", "КПП", "Привод", "Объём"];
@@ -104,7 +39,7 @@ export function ReportHeaderCard({
   const vinShort = report.vin || "—";
 
   return (
-    <section className="panel p-4 sm:p-5 md:p-6 grid gap-5 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,0.9fr)]">
+    <section className="panel p-4 sm:p-5 md:p-6 grid gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
       {/* === Column 1: Car === */}
       <div className="min-w-0 flex flex-col gap-3">
         <h1 className="text-xl md:text-2xl font-bold ink leading-tight">
@@ -155,25 +90,6 @@ export function ReportHeaderCard({
         )}
       </div>
 
-      {/* === Column 2: Что важно знать === */}
-      <div className="min-w-0 flex flex-col gap-2 lg:border-l lg:border-border lg:pl-5">
-        <div className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground font-semibold mb-1">
-          Что важно знать
-        </div>
-        <ul className="flex flex-col gap-2">
-          {findings.map((f) => {
-            const { Icon, color } = findingIcon(f.status);
-            return (
-              <li key={f.label} className="flex items-start gap-2 text-sm">
-                <Icon size={16} strokeWidth={2.5} style={{ color }} className="mt-0.5 shrink-0" />
-                <span className={f.status === "ok" ? "text-foreground" : "ink font-medium"}>
-                  {f.label}
-                </span>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
 
       {/* === Column 3: Meta === */}
       <div className="min-w-0 flex flex-col gap-2.5 lg:border-l lg:border-border lg:pl-5">
