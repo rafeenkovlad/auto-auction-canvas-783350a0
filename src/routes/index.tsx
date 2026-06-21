@@ -86,15 +86,27 @@ function AuctionSheetPage() {
 
 function ReportContent({ report }: { report: Awaited<ReturnType<typeof getReport>> }) {
   const ref = report.carReference ?? report.characteristicsStep?.carReference;
+  const yearStart = ref?.restyling?.yearStart
+    ? new Date(ref.restyling.yearStart).getFullYear()
+    : null;
+  const yearEnd = ref?.restyling?.yearEnd
+    ? new Date(ref.restyling.yearEnd).getFullYear()
+    : null;
+  const yearsStr = yearStart ? `${yearStart}–${yearEnd ?? "н.в."}` : null;
+  const brandModel = [
+    ref?.brand?.nameRus ?? ref?.brand?.name,
+    ref?.model?.nameRus ?? ref?.model?.name,
+  ]
+    .filter(Boolean)
+    .join(" ");
+  const details = [
+    ref?.generation?.name != null ? `${ref.generation.name} поколение` : null,
+    ref?.restyling?.name ? `рестайлинг ${ref.restyling.name}` : null,
+    yearsStr,
+  ].filter(Boolean);
   const carName =
-    [
-      ref?.brand?.nameRus ?? ref?.brand?.name,
-      ref?.model?.nameRus ?? ref?.model?.name,
-      ref?.generation?.name != null ? `${ref.generation.name} поколение` : null,
-      ref?.restyling?.name ? `рестайлинг ${ref.restyling.name}` : null,
-    ]
-      .filter(Boolean)
-      .join(" ") || report.reportName.replace(/^.*·\s*/, "");
+    [brandModel, details.join(", ")].filter(Boolean).join(" • ") ||
+    report.reportName.replace(/^.*·\s*/, "");
 
   const [activeIdx, setActiveIdx] = useState<number | null>(null);
   const {
