@@ -180,7 +180,7 @@ export function SchemaShell({
                         {(el.note || allTags.length > 0 || el.file) && (
                           <div className="ml-4 mt-1 overflow-hidden">
                             {el.file && (isImageFile(el.file) || isVideoFile(el.file)) ? (
-                              <div className="relative w-14 h-14 rounded-md overflow-hidden border border-border bg-muted float-right ml-2 mb-1 shadow-sm">
+                              <div className="relative w-14 h-14 rounded-md overflow-hidden border border-border bg-muted float-left mr-2 mb-1 shadow-sm">
                                 {isImageFile(el.file) ? (
                                   <img
                                     src={el.file.url}
