@@ -39,7 +39,7 @@ export function ReportHeaderCard({
   const vinShort = report.vin || "—";
 
   return (
-    <section className="panel p-4 sm:p-5 md:p-6 grid gap-5 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,0.9fr)]">
+    <section className="panel p-4 sm:p-5 md:p-6 grid gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
       {/* === Column 1: Car === */}
       <div className="min-w-0 flex flex-col gap-3">
         <h1 className="text-xl md:text-2xl font-bold ink leading-tight">
