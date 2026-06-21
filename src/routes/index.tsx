@@ -14,6 +14,7 @@ import { DocumentsCard } from "@/components/DocumentsCard";
 import { TestDriveCard } from "@/components/TestDriveCard";
 import { AdditionalMaterials } from "@/components/AdditionalMaterials";
 import { ExpertConclusion } from "@/components/ExpertConclusion";
+import { SummaryCard } from "@/components/SummaryCard";
 import { statusMeta } from "@/lib/report.utils";
 import { useReportData } from "@/hooks/useReportData";
 import { preloadSchemaImages } from "@/lib/schema-preload";
@@ -124,7 +125,9 @@ function ReportContent({ report }: { report: Awaited<ReturnType<typeof getReport
           characteristics={characteristics}
         />
 
-        <section className="grid lg:grid-cols-2 gap-4">
+        <SummaryCard report={report} allElements={allElements} />
+
+        <section id="report-details" className="grid lg:grid-cols-2 gap-4">
           <SchemaTabs
             bodyElements={report.inspectionStep.bodyElements ?? []}
             interiorElements={report.inspectionStep.interiorElements ?? []}
