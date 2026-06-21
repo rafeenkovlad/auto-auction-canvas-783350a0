@@ -117,12 +117,13 @@ function ReportContent({ report }: { report: Awaited<ReturnType<typeof getReport
       <div className="mx-auto max-w-7xl space-y-4">
         <ReportHeader report={report} />
 
-        <HeroSection
+        <ReportHeaderCard
           report={report}
           carName={carName}
           heroImage={heroImage}
           heroSrcSet={heroSrcSet}
           characteristics={characteristics}
+          allElements={allElements}
         />
 
         <section className="grid lg:grid-cols-2 gap-4">
@@ -140,6 +141,8 @@ function ReportContent({ report }: { report: Awaited<ReturnType<typeof getReport
             inspection={report.inspectionStep}
           />
         </section>
+
+        <PhotoCategories allElements={allElements} onOpen={setActiveIdx} />
 
         <InspectionHistoryTimeline />
 
