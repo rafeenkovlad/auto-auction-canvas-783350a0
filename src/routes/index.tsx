@@ -87,6 +87,7 @@ function ReportContent({ report }: { report: Awaited<ReturnType<typeof getReport
   const carName = report.reportName.replace(/^.*·\s*/, "");
 
   const [activeIdx, setActiveIdx] = useState<number | null>(null);
+  const [viewerSubset, setViewerSubset] = useState<number[] | null>(null);
   const {
     sections,
     allElements,
@@ -100,10 +101,33 @@ function ReportContent({ report }: { report: Awaited<ReturnType<typeof getReport
   const openElement = useCallback(
     (el: InspectionElement) => {
       const idx = allElements.findIndex((e) => e.id === el.id);
-      if (idx >= 0) setActiveIdx(idx);
+      if (idx >= 0) {
+        setViewerSubset(null);
+        setActiveIdx(idx);
+      }
     },
     [allElements],
   );
+
+  const openGroup = useCallback((indices: number[]) => {
+    if (indices.length === 0) return;
+    setViewerSubset(indices);
+    setActiveIdx(0);
+  }, []);
+
+  const openAdditional = useCallback((idx: number) => {
+    setViewerSubset(null);
+    setActiveIdx(idx);
+  }, []);
+
+  const viewerElements = viewerSubset
+    ? viewerSubset.map((i) => allElements[i]).filter(Boolean)
+    : allElements;
+
+  const closeViewer = useCallback(() => {
+    setActiveIdx(null);
+    setViewerSubset(null);
+  }, []);
 
   return (
     <main
