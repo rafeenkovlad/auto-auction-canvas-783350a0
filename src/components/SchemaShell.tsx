@@ -183,51 +183,13 @@ export function SchemaShell({
                             </span>
                           )}
                         </div>
-                        {(el.note || allTags.length > 0 || el.file) && (
-                          <div className="ml-4 mt-1 overflow-hidden">
-                            {el.file && (isImageFile(el.file) || isVideoFile(el.file)) ? (
-                              <div className="relative w-14 h-14 rounded-md overflow-hidden border border-border bg-muted float-left mr-2 mb-0 shadow-sm">
-                                {isImageFile(el.file) ? (
-                                  <img
-                                    src={el.file.url}
-                                    alt=""
-                                    loading="lazy"
-                                    className="w-full h-full object-cover"
-                                  />
-                                ) : (
-                                  <>
-                                    <video
-                                      src={el.file.url}
-                                      muted
-                                      playsInline
-                                      preload="metadata"
-                                      className="w-full h-full object-cover"
-                                    />
-                                    <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                                      <Play className="w-4 h-4 text-white" fill="white" />
-                                    </div>
-                                  </>
-                                )}
-                              </div>
-                            ) : null}
-                            {el.note ? (
+                        {(el.note || allTags.length > 0) && (
+                          <div className="ml-4 mt-1">
+                            {el.note && (
                               <div className="text-[11px] leading-[1.35] text-muted-foreground whitespace-pre-wrap break-words">
                                 {el.note}
                               </div>
-                            ) : allTags.length === 0 ? (
-                              <div
-                                className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full border"
-                                style={{
-                                  background:
-                                    "color-mix(in oklch, var(--grade-good) 10%, transparent)",
-                                  borderColor:
-                                    "color-mix(in oklch, var(--grade-good) 35%, transparent)",
-                                  color: "var(--muted-foreground)",
-                                }}
-                              >
-                                Без замечаний
-                              </div>
-                            ) : null}
+                            )}
                             {allTags.length > 0 && (
                               <div className="mt-1 flex flex-wrap gap-1">
                                 {allTags.map((t) => (
