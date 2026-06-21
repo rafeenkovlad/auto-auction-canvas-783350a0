@@ -128,7 +128,7 @@ export function SchemaShell({
           )}
         </div>
 
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3 h-full min-h-0">
           <div className="flex flex-col gap-1.5">
             {LEGEND.map((l) => (
               <div key={l.key} className="flex items-center gap-2 text-xs">
