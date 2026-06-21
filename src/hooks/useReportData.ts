@@ -131,16 +131,20 @@ function buildHero(report: CarReport) {
   const photos =
     (report.carReference ?? report.characteristicsStep?.carReference)?.photos ??
     [];
+  // Use only small/medium variants — large ones look oversized and blurry
+  // when scaled down into the hero slot.
+  const allowed = new Set(["s", "m"]);
   const srcSetEntries: string[] = [];
   for (const p of photos) {
+    if (!allowed.has(p.size)) continue;
     const base = SIZE_WIDTHS[p.size] ?? 300;
     if (p.urlX1) srcSetEntries.push(`${p.urlX1} ${base}w`);
     if (p.urlX2) srcSetEntries.push(`${p.urlX2} ${base * 2}w`);
   }
   const heroSrcSet = srcSetEntries.join(", ") || null;
   const pickPhoto =
-    photos.find((p) => p.size === "m") ??
     photos.find((p) => p.size === "s") ??
+    photos.find((p) => p.size === "m") ??
     photos[0];
   const heroImage =
     pickPhoto?.urlX2 ??
