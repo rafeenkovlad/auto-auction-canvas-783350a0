@@ -108,7 +108,7 @@ export function SchemaTabs({
               role="tab"
               aria-selected={active}
               onClick={() => setTab(t.key)}
-              className="relative flex flex-col items-center justify-center gap-1 px-2 py-2.5 rounded-lg text-[11px] font-medium transition-all"
+              className="relative flex flex-col items-center justify-center gap-1.5 px-2 py-2.5 sm:py-3 lg:flex-row lg:gap-2 lg:py-3.5 lg:text-sm rounded-lg text-[11px] font-medium transition-all"
               style={{
                 background: active ? "var(--card)" : "transparent",
                 color: active ? "var(--foreground)" : "var(--muted-foreground)",
@@ -122,9 +122,10 @@ export function SchemaTabs({
                 style={{ background: dotColor }}
                 aria-hidden
               />
-              <Icon size={16} strokeWidth={1.75} aria-hidden />
+              <Icon className="w-4 h-4 lg:w-[18px] lg:h-[18px]" strokeWidth={1.75} aria-hidden />
               <span>{t.label}</span>
             </button>
+
           );
         })}
       </div>
