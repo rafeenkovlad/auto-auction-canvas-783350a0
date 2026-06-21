@@ -29,12 +29,15 @@ export function ReportHeaderCard({
       "Поколение",
       "Рестайлинг",
       "Кузов (frame)",
-      "Двигатель",
-      "Объём",
-      "КПП",
-      "Привод",
-      "Цвет",
     ];
+    const map = new Map(characteristics.map(([k, v]) => [k, v]));
+    const rows: Array<{ label: string; value: string }> = [];
+    for (const k of wanted) {
+      const v = map.get(k);
+      if (v != null && v !== "") rows.push({ label: k, value: String(v) });
+    }
+    return rows;
+  }, [characteristics]);
     const map = new Map(characteristics.map(([k, v]) => [k, v]));
     const rows: Array<{ label: string; value: string }> = [];
     for (const k of wanted) {
