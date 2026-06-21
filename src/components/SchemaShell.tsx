@@ -162,32 +162,7 @@ export function SchemaShell({
                       onClick={() => onElementClick?.(el)}
                       className="text-left text-xs hover:bg-muted/60 rounded p-1.5 -mx-1.5 transition-colors"
                     >
-                      <div className="overflow-hidden">
-                        {el.file && (isImageFile(el.file) || isVideoFile(el.file)) ? (
-                          <div className="relative w-14 h-14 rounded-md overflow-hidden border border-border bg-muted float-left mr-2.5 mb-1 shadow-sm">
-                            {isImageFile(el.file) ? (
-                              <img
-                                src={el.file.url}
-                                alt=""
-                                loading="lazy"
-                                className="w-full h-full object-cover"
-                              />
-                            ) : (
-                              <>
-                                <video
-                                  src={el.file.url}
-                                  muted
-                                  playsInline
-                                  preload="metadata"
-                                  className="w-full h-full object-cover"
-                                />
-                                <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                                  <Play className="w-4 h-4 text-white" fill="white" />
-                                </div>
-                              </>
-                            )}
-                          </div>
-                        ) : null}
+                      <div>
                         <div className="flex items-center gap-2">
                           <span
                             className="w-2 h-2 rounded-full flex-shrink-0"
@@ -202,32 +177,61 @@ export function SchemaShell({
                             </span>
                           )}
                         </div>
-                        {el.note && (
-                          <div className="text-[11px] text-muted-foreground mt-1 whitespace-pre-wrap break-words">
-                            {el.note}
-                          </div>
-                        )}
-                        {allTags.length > 0 && (
-                          <div className="mt-1 flex flex-wrap gap-1">
-                            {allTags.map((t) => (
-                              <span
-                                key={t.id}
-                                className="text-[10px] px-1.5 py-0.5 rounded-full border"
-                                style={{
-                                  background:
-                                    t.type === "serious"
-                                      ? "color-mix(in oklch, var(--grade-bad) 12%, transparent)"
-                                      : "color-mix(in oklch, var(--grade-warn) 14%, transparent)",
-                                  borderColor:
-                                    t.type === "serious"
-                                      ? "color-mix(in oklch, var(--grade-bad) 35%, transparent)"
-                                      : "color-mix(in oklch, var(--grade-warn) 40%, transparent)",
-                                  color: "var(--foreground)",
-                                }}
-                              >
-                                {t.name}
-                              </span>
-                            ))}
+                        {(el.note || allTags.length > 0 || el.file) && (
+                          <div className="ml-4 mt-1 overflow-hidden">
+                            {el.file && (isImageFile(el.file) || isVideoFile(el.file)) ? (
+                              <div className="relative w-14 h-14 rounded-md overflow-hidden border border-border bg-muted float-left mr-2.5 mb-1 shadow-sm">
+                                {isImageFile(el.file) ? (
+                                  <img
+                                    src={el.file.url}
+                                    alt=""
+                                    loading="lazy"
+                                    className="w-full h-full object-cover"
+                                  />
+                                ) : (
+                                  <>
+                                    <video
+                                      src={el.file.url}
+                                      muted
+                                      playsInline
+                                      preload="metadata"
+                                      className="w-full h-full object-cover"
+                                    />
+                                    <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                                      <Play className="w-4 h-4 text-white" fill="white" />
+                                    </div>
+                                  </>
+                                )}
+                              </div>
+                            ) : null}
+                            {el.note && (
+                              <div className="text-[11px] text-muted-foreground whitespace-pre-wrap break-words">
+                                {el.note}
+                              </div>
+                            )}
+                            {allTags.length > 0 && (
+                              <div className="mt-1 flex flex-wrap gap-1">
+                                {allTags.map((t) => (
+                                  <span
+                                    key={t.id}
+                                    className="text-[10px] px-1.5 py-0.5 rounded-full border"
+                                    style={{
+                                      background:
+                                        t.type === "serious"
+                                          ? "color-mix(in oklch, var(--grade-bad) 12%, transparent)"
+                                          : "color-mix(in oklch, var(--grade-warn) 14%, transparent)",
+                                      borderColor:
+                                        t.type === "serious"
+                                          ? "color-mix(in oklch, var(--grade-bad) 35%, transparent)"
+                                          : "color-mix(in oklch, var(--grade-warn) 40%, transparent)",
+                                      color: "var(--foreground)",
+                                    }}
+                                  >
+                                    {t.name}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
                           </div>
                         )}
                       </div>
