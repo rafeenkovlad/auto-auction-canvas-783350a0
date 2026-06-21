@@ -130,7 +130,6 @@ function ReportContent({ report }: { report: Awaited<ReturnType<typeof getReport
           heroImage={heroImage}
           heroSrcSet={heroSrcSet}
           characteristics={characteristics}
-          allElements={allElements}
         />
 
         <SchemaTabs
@@ -142,6 +141,13 @@ function ReportContent({ report }: { report: Awaited<ReturnType<typeof getReport
           lightingElements={report.inspectionStep.lightningElements ?? []}
           onElementClick={openElement}
         />
+
+        <TechnicalCondition
+          report={report}
+          allElements={allElements}
+          onElementClick={openElement}
+        />
+
 
 
         <section className="grid md:grid-cols-2 gap-4">
