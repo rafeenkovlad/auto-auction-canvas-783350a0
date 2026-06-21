@@ -49,11 +49,11 @@ export function ReportHeaderCard({
       {/* === Column 1: Car === */}
       <div className="min-w-0">
         {heroImage && (
-          <div className="float-left mr-3 mb-2 w-[110px] sm:w-[160px] md:w-[200px] aspect-[4/3] rounded-lg overflow-hidden border border-border bg-muted shrink-0">
+          <div className="w-full aspect-[4/3] rounded-xl overflow-hidden border border-border bg-muted mb-4">
             <img
               src={heroImage}
               srcSet={heroSrcSet ?? undefined}
-              sizes="200px"
+              sizes="(max-width: 1024px) 100vw, 800px"
               alt={carName}
               loading="eager"
               className="w-full h-full object-cover"
@@ -61,38 +61,24 @@ export function ReportHeaderCard({
           </div>
         )}
 
-        <h1 className="text-lg md:text-xl font-bold ink leading-tight mb-2">
+        <h1 className="text-xl md:text-2xl font-bold ink leading-tight mb-4">
           {carName}
         </h1>
 
         {specs.length > 0 && (
-          <dl className="text-[12.5px] leading-snug space-y-1">
+          <div className="flex flex-col">
             {specs.map((s) => (
-              <div key={s.label} className="flex items-baseline gap-1.5 min-w-0">
-                <dt className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium shrink-0">
+              <div key={s.label} className="flex items-center justify-between gap-3 border-b border-dashed border-border py-2.5 last:border-b-0">
+                <span className="text-[11px] uppercase tracking-wider text-muted-foreground shrink-0">
                   {s.label}
-                </dt>
-                <dd className="ink font-semibold min-w-0 truncate" title={s.value}>
+                </span>
+                <span className="text-sm font-semibold ink text-right min-w-0 truncate" title={s.value}>
                   {s.value}
-                </dd>
+                </span>
               </div>
             ))}
-          </dl>
+          </div>
         )}
-
-        {report.carStep.uriListing && (
-          <a
-            href={report.carStep.uriListing}
-            target="_blank"
-            rel="noreferrer"
-            className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <span>Перейти к объявлению</span>
-            <span aria-hidden>↗</span>
-          </a>
-        )}
-
-        <div className="clear-both" />
       </div>
 
 
