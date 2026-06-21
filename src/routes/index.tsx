@@ -149,7 +149,7 @@ function ReportContent({ report }: { report: Awaited<ReturnType<typeof getReport
           return historyEntries ? (
             <div className="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
               {schema}
-              <InspectionHistoryTimeline entries={historyEntries} />
+              <InspectionHistoryTimeline entries={historyEntries as never} />
             </div>
           ) : (
             schema
