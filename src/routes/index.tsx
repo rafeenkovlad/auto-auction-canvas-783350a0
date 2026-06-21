@@ -85,7 +85,16 @@ function AuctionSheetPage() {
 }
 
 function ReportContent({ report }: { report: Awaited<ReturnType<typeof getReport>> }) {
-  const carName = report.reportName.replace(/^.*·\s*/, "");
+  const ref = report.carReference ?? report.characteristicsStep?.carReference;
+  const carName =
+    [
+      ref?.brand?.nameRus ?? ref?.brand?.name,
+      ref?.model?.nameRus ?? ref?.model?.name,
+      ref?.generation?.name != null ? `${ref.generation.name} поколение` : null,
+      ref?.restyling?.name ? `рестайлинг ${ref.restyling.name}` : null,
+    ]
+      .filter(Boolean)
+      .join(" ") || report.reportName.replace(/^.*·\s*/, "");
 
   const [activeIdx, setActiveIdx] = useState<number | null>(null);
   const {
