@@ -10,8 +10,6 @@ import { GalleryTileBody } from "@/components/GalleryTile";
 import { ReportHeader } from "@/components/ReportHeader";
 import { ReportHeaderCard } from "@/components/ReportHeaderCard";
 import { PhotoCategories } from "@/components/PhotoCategories";
-import { TechnicalStatePanel } from "@/components/TechnicalStatePanel";
-import { TechStateCompact } from "@/components/TechStateCompact";
 import { DocumentsCard } from "@/components/DocumentsCard";
 import { TestDriveCard } from "@/components/TestDriveCard";
 import { AdditionalMaterials } from "@/components/AdditionalMaterials";
