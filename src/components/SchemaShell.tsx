@@ -64,7 +64,13 @@ export function SchemaShell({
   const damaged = useMemo(
     () =>
       elements
-        .filter((e) => getElementStatus(e) !== "ok")
+        .filter(
+          (e) =>
+            e.note ||
+            e.seriousDamageTags.length > 0 ||
+            e.noSeriousDamageTags.length > 0 ||
+            e.file,
+        )
         .sort((a, b) => rank(getElementStatus(b)) - rank(getElementStatus(a))),
     [elements],
   );
@@ -137,7 +143,7 @@ export function SchemaShell({
           {damaged.length > 0 && (
             <div className="border-t border-border pt-3 mt-1">
               <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-2">
-                Замечания
+                Заметки
               </div>
               <div className="flex flex-col gap-2 max-h-[320px] overflow-auto">
                 {damaged.map((el) => {
