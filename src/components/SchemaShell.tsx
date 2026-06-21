@@ -162,9 +162,9 @@ export function SchemaShell({
                       onClick={() => onElementClick?.(el)}
                       className="text-left text-xs hover:bg-muted/60 rounded p-1.5 -mx-1.5 transition-colors"
                     >
-                      <div className="flex items-start gap-2">
+                      <div className="overflow-hidden">
                         {el.file && (isImageFile(el.file) || isVideoFile(el.file)) ? (
-                          <div className="relative w-12 h-12 rounded overflow-hidden flex-shrink-0 border border-border bg-muted">
+                          <div className="relative w-14 h-14 rounded-md overflow-hidden border border-border bg-muted float-left mr-2.5 mb-1 shadow-sm">
                             {isImageFile(el.file) ? (
                               <img
                                 src={el.file.url}
@@ -187,52 +187,49 @@ export function SchemaShell({
                               </>
                             )}
                           </div>
-                        ) : (
+                        ) : null}
+                        <div className="flex items-center gap-2">
                           <span
-                            className="w-2 h-2 mt-1.5 rounded-full flex-shrink-0"
+                            className="w-2 h-2 rounded-full flex-shrink-0"
                             style={{ background: statusStroke(st) }}
                           />
-                        )}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium ink truncate">
-                              {zoneLabelForElement(el)}
+                          <span className="font-medium ink truncate">
+                            {zoneLabelForElement(el)}
+                          </span>
+                          {paint && (
+                            <span className="ml-auto mono text-[10px] px-1.5 py-0.5 rounded border border-border text-muted-foreground flex-shrink-0">
+                              ЛКП {paint}
                             </span>
-                            {paint && (
-                              <span className="ml-auto mono text-[10px] px-1.5 py-0.5 rounded border border-border text-muted-foreground flex-shrink-0">
-                                ЛКП {paint}
-                              </span>
-                            )}
-                          </div>
-                          {el.note && (
-                            <div className="text-[11px] text-muted-foreground mt-1 whitespace-pre-wrap break-words">
-                              {el.note}
-                            </div>
-                          )}
-                          {allTags.length > 0 && (
-                            <div className="mt-1 flex flex-wrap gap-1">
-                              {allTags.map((t) => (
-                                <span
-                                  key={t.id}
-                                  className="text-[10px] px-1.5 py-0.5 rounded-full border"
-                                  style={{
-                                    background:
-                                      t.type === "serious"
-                                        ? "color-mix(in oklch, var(--grade-bad) 12%, transparent)"
-                                        : "color-mix(in oklch, var(--grade-warn) 14%, transparent)",
-                                    borderColor:
-                                      t.type === "serious"
-                                        ? "color-mix(in oklch, var(--grade-bad) 35%, transparent)"
-                                        : "color-mix(in oklch, var(--grade-warn) 40%, transparent)",
-                                    color: "var(--foreground)",
-                                  }}
-                                >
-                                  {t.name}
-                                </span>
-                              ))}
-                            </div>
                           )}
                         </div>
+                        {el.note && (
+                          <div className="text-[11px] text-muted-foreground mt-1 whitespace-pre-wrap break-words">
+                            {el.note}
+                          </div>
+                        )}
+                        {allTags.length > 0 && (
+                          <div className="mt-1 flex flex-wrap gap-1">
+                            {allTags.map((t) => (
+                              <span
+                                key={t.id}
+                                className="text-[10px] px-1.5 py-0.5 rounded-full border"
+                                style={{
+                                  background:
+                                    t.type === "serious"
+                                      ? "color-mix(in oklch, var(--grade-bad) 12%, transparent)"
+                                      : "color-mix(in oklch, var(--grade-warn) 14%, transparent)",
+                                  borderColor:
+                                    t.type === "serious"
+                                      ? "color-mix(in oklch, var(--grade-bad) 35%, transparent)"
+                                      : "color-mix(in oklch, var(--grade-warn) 40%, transparent)",
+                                  color: "var(--foreground)",
+                                }}
+                              >
+                                {t.name}
+                              </span>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </button>
 
