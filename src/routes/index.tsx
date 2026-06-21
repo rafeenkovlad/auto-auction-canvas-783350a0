@@ -11,6 +11,7 @@ import { ReportHeader } from "@/components/ReportHeader";
 import { ReportHeaderCard } from "@/components/ReportHeaderCard";
 import { PhotoCategories } from "@/components/PhotoCategories";
 import { TechnicalStatePanel } from "@/components/TechnicalStatePanel";
+import { TechStateCompact } from "@/components/TechStateCompact";
 import { DocumentsCard } from "@/components/DocumentsCard";
 import { TestDriveCard } from "@/components/TestDriveCard";
 import { AdditionalMaterials } from "@/components/AdditionalMaterials";
@@ -126,7 +127,7 @@ function ReportContent({ report }: { report: Awaited<ReturnType<typeof getReport
           allElements={allElements}
         />
 
-        <section className="grid lg:grid-cols-2 gap-4">
+        <section className="grid lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] gap-4">
           <SchemaTabs
             bodyElements={report.inspectionStep.bodyElements ?? []}
             interiorElements={report.inspectionStep.interiorElements ?? []}
@@ -136,13 +137,20 @@ function ReportContent({ report }: { report: Awaited<ReturnType<typeof getReport
             lightingElements={report.inspectionStep.lightningElements ?? []}
             onElementClick={openElement}
           />
-          <TechnicalStatePanel
-            sections={sections}
-            inspection={report.inspectionStep}
-          />
+          <TechStateCompact sections={sections} />
         </section>
 
         <PhotoCategories allElements={allElements} onOpen={setActiveIdx} />
+
+        <section className="grid md:grid-cols-2 gap-4">
+          <TestDriveCard report={report} />
+          <DocumentsCard docs={report.documentReconciliationStep} />
+        </section>
+
+        <TechnicalStatePanel
+          sections={sections}
+          inspection={report.inspectionStep}
+        />
 
         <InspectionHistoryTimeline />
 
@@ -153,11 +161,6 @@ function ReportContent({ report }: { report: Awaited<ReturnType<typeof getReport
         />
 
         <AdditionalMaterials items={additional} onOpen={setActiveIdx} />
-
-        <section className="grid md:grid-cols-2 gap-4">
-          <DocumentsCard docs={report.documentReconciliationStep} />
-          <TestDriveCard report={report} />
-        </section>
 
         <ExpertConclusion result={report.resultStep} />
 
