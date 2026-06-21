@@ -5,6 +5,7 @@ import { getReport, type InspectionElement } from "@/lib/report.api";
 import { ElementViewer } from "@/components/ElementViewer";
 import { SchemaTabs } from "@/components/SchemaTabs";
 import { MediaGallery } from "@/components/MediaGallery";
+import { TechnicalCondition } from "@/components/TechnicalCondition";
 import { InspectionHistoryTimeline } from "@/components/InspectionHistoryTimeline";
 
 import { ReportHeader } from "@/components/ReportHeader";
