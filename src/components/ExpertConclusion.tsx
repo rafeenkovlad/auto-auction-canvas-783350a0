@@ -1,46 +1,96 @@
 import type { CarReport } from "@/lib/report.api";
+import { fmtDate } from "@/lib/report.utils";
 
 export function ExpertConclusion({
   result,
+  report,
 }: {
   result: CarReport["resultStep"];
+  report?: CarReport;
 }) {
   if (!result.summaryInspectionNote && !result.resultSpecialistNote) return null;
 
+  const intro =
+    result.summaryInspectionNote &&
+    result.summaryInspectionNote !== result.resultSpecialistNote
+      ? result.summaryInspectionNote
+      : null;
+  const body = result.resultSpecialistNote;
+
   return (
-    <section className="panel p-5 md:p-6">
-      <div className="flex items-start gap-4">
-        <span
-          className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0"
-          style={{
-            background: "color-mix(in oklab, var(--grade-good) 25%, white)",
-          }}
-        >
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="var(--grade-good)"
-            strokeWidth="2"
-            className="w-6 h-6"
+    <section
+      className="panel p-6 md:p-10 relative overflow-hidden"
+      style={{
+        background:
+          "linear-gradient(180deg, color-mix(in oklab, var(--grade-good) 6%, var(--card)) 0%, var(--card) 60%)",
+      }}
+    >
+      {/* Decorative quote mark */}
+      <span
+        aria-hidden
+        className="absolute top-2 right-4 md:right-8 select-none pointer-events-none font-serif leading-none"
+        style={{
+          fontSize: "180px",
+          color: "color-mix(in oklab, var(--grade-good) 15%, transparent)",
+        }}
+      >
+        “
+      </span>
+
+      <div className="relative">
+        <div className="flex items-center gap-2 mb-4">
+          <span
+            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold uppercase tracking-wider text-white"
+            style={{ background: "var(--grade-good)" }}
           >
-            <path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z" />
-            <path d="M9 12l2 2 4-4" />
-          </svg>
-        </span>
-        <div className="min-w-0">
-          <h3 className="text-base font-bold ink mb-1">Заключение специалиста</h3>
-          {result.summaryInspectionNote &&
-            result.summaryInspectionNote !== result.resultSpecialistNote && (
-              <p className="text-sm leading-relaxed whitespace-pre-line text-muted-foreground mb-2">
-                {result.summaryInspectionNote}
-              </p>
-            )}
-          {result.resultSpecialistNote && (
-            <p className="text-sm leading-relaxed whitespace-pre-line ink">
-              {result.resultSpecialistNote}
-            </p>
-          )}
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3 h-3">
+              <path d="M5 12l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            Заключение специалиста
+          </span>
         </div>
+
+        {intro && (
+          <p className="text-base md:text-lg font-medium leading-relaxed ink mb-4 whitespace-pre-line">
+            {intro}
+          </p>
+        )}
+
+        {body && (
+          <p
+            className={`leading-relaxed whitespace-pre-line ${
+              intro ? "text-sm text-muted-foreground" : "text-base md:text-lg ink font-medium"
+            }`}
+          >
+            {body}
+          </p>
+        )}
+
+        {report && (
+          <div className="mt-6 pt-4 border-t border-border flex flex-wrap items-center gap-x-5 gap-y-2 text-[11px] text-muted-foreground mono">
+            <span>
+              Отчёт{" "}
+              <span className="ink font-semibold">{report.reportNumber}</span>
+            </span>
+            <span>·</span>
+            <span>
+              Дата осмотра{" "}
+              <span className="ink font-semibold">
+                {fmtDate(report.carStep.dateInspection ?? report.reportDate)}
+              </span>
+            </span>
+            {report.carStep.cityInspection && (
+              <>
+                <span>·</span>
+                <span>
+                  <span className="ink font-semibold">
+                    {report.carStep.cityInspection}
+                  </span>
+                </span>
+              </>
+            )}
+          </div>
+        )}
       </div>
     </section>
   );
