@@ -1,4 +1,4 @@
-import { useState } from "react";
+
 import { Check, AlertTriangle, AlertOctagon } from "lucide-react";
 
 type Severity = "ok" | "minor" | "serious";
@@ -95,96 +95,75 @@ function severityVisual(s: Severity) {
 
 export function InspectionHistoryTimeline({
   entries,
-  initialLimit = 4,
 }: {
   /** Pass real history entries. When omitted, demo mock data is shown. */
   entries?: HistoryEntry[];
-  initialLimit?: number;
 } = {}) {
-  const [expanded, setExpanded] = useState(false);
   const isDemo = !entries;
   const source = entries ?? MOCK_HISTORY;
   if (source.length === 0) return null;
-  const visible = expanded ? source : source.slice(0, initialLimit);
 
   return (
-    <section className="panel p-5 md:p-6">
+    <section className="panel p-5 md:p-6 flex flex-col min-h-0">
       <div className="flex items-center justify-between gap-3 mb-5">
         <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
           История замечаний
         </h3>
         {isDemo && (
           <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
-            Демо · по предыдущим отчётам
+            Демо
           </span>
         )}
       </div>
 
+      <div className="max-h-[520px] overflow-y-auto pr-2 -mr-2">
+        <ol className="relative flex flex-col gap-5">
+          {/* vertical rail */}
+          <span
+            aria-hidden
+            className="absolute left-[15px] top-2 bottom-2 w-px"
+            style={{ background: "var(--border)" }}
+          />
 
-      <ol className="relative flex flex-col gap-5">
-        {/* vertical rail */}
-        <span
-          aria-hidden
-          className="absolute left-[15px] top-2 bottom-2 w-px"
-          style={{ background: "var(--border)" }}
-        />
+          {source.map((e) => {
+            const v = severityVisual(e.severity);
+            const Icon = v.Icon;
+            return (
+              <li key={e.id} className="relative pl-10 flex items-start gap-3">
+                <span
+                  className="absolute left-0 top-0.5 w-8 h-8 rounded-full flex items-center justify-center border-2"
+                  style={{
+                    background: v.bg,
+                    borderColor: v.color,
+                    color: v.color,
+                  }}
+                >
+                  <Icon size={14} strokeWidth={2.5} />
+                </span>
 
-        {visible.map((e) => {
-          const v = severityVisual(e.severity);
-          const Icon = v.Icon;
-          return (
-            <li key={e.id} className="relative pl-10 flex items-start gap-3">
-              <span
-                className="absolute left-0 top-0.5 w-8 h-8 rounded-full flex items-center justify-center border-2"
-                style={{
-                  background: v.bg,
-                  borderColor: v.color,
-                  color: v.color,
-                }}
-              >
-                <Icon size={14} strokeWidth={2.5} />
-              </span>
-
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 text-[11px] text-muted-foreground mono">
-                  <span>{e.date}</span>
-                  <span>·</span>
-                  <span>{e.time}</span>
-                  {e.reportNumber && (
-                    <>
-                      <span>·</span>
-                      <span>{e.reportNumber}</span>
-                    </>
-                  )}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 text-[11px] text-muted-foreground mono">
+                    <span>{e.date}</span>
+                    <span>·</span>
+                    <span>{e.time}</span>
+                    {e.reportNumber && (
+                      <>
+                        <span>·</span>
+                        <span>{e.reportNumber}</span>
+                      </>
+                    )}
+                  </div>
+                  <div className="text-sm font-semibold ink mt-0.5">{e.title}</div>
+                  <p className="text-xs text-muted-foreground leading-snug mt-1">
+                    {e.note}
+                  </p>
                 </div>
-                <div className="text-sm font-semibold ink mt-0.5">{e.title}</div>
-                <p className="text-xs text-muted-foreground leading-snug mt-1">
-                  {e.note}
-                </p>
-              </div>
-
-              <span
-                className="flex-shrink-0 w-16 h-16 rounded-lg border border-border bg-muted flex items-center justify-center text-[10px] text-muted-foreground"
-                aria-hidden
-              >
-                фото
-              </span>
-            </li>
-          );
-        })}
-      </ol>
-
-      {source.length > initialLimit && (
-        <div className="flex justify-center mt-5">
-          <button
-            type="button"
-            onClick={() => setExpanded((v) => !v)}
-            className="px-4 py-2 rounded-lg border border-border bg-card text-sm font-medium hover:border-accent transition-colors"
-          >
-            {expanded ? "Свернуть" : "Показать всю историю"}
-          </button>
-        </div>
-      )}
+              </li>
+            );
+          })}
+        </ol>
+      </div>
     </section>
   );
 }
+
