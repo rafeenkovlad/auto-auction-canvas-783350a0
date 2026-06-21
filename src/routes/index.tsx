@@ -160,7 +160,8 @@ function ReportContent({ report }: { report: Awaited<ReturnType<typeof getReport
           <DocumentsCard docs={report.documentReconciliationStep} />
         </section>
 
-        <InspectionHistoryTimeline />
+
+
 
         <MediaGallery items={gallery} onOpen={openAdditional} />
 
