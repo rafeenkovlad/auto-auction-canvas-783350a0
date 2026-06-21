@@ -149,6 +149,8 @@ function ReportContent({ report }: { report: Awaited<ReturnType<typeof getReport
           lightingElements={report.inspectionStep.lightningElements ?? []}
           onElementClick={openElement}
         />
+        </div>
+
 
 
 
