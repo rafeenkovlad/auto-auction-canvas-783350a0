@@ -79,7 +79,7 @@ export interface CarReport {
     listingFile: FileRef | null;
     files: FileRef[];
   };
-  characteristicsStep?: {
+  author?: ReportHistoryEntry["author"];
     modelGenerationRestylingFrameId?: number | null;
     modelCarId?: number | null;
     carImageUrl?: string | null;
