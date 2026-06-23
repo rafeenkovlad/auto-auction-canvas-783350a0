@@ -56,15 +56,13 @@ function fmtPaintRange(from: number | null, to: number | null): string | null {
   return `${from ?? to}`;
 }
 
-export function TechnicalCondition({ report, allElements, onElementClick }: Props) {
-  const findings = useMemo(
-    () => buildFindings(report, allElements),
-    [report, allElements],
-  );
-
+export function TechnicalCondition({ report, onElementClick }: Props) {
   const cards = useMemo(() => {
-    return EXTRA_SECTION_KEYS.map((key) => {
-      const els = (report.inspectionStep[key] as InspectionElement[] | undefined) ?? [];
+    return SECTION_KEYS.map((key) => {
+      const els =
+        (report.inspectionStep[key as keyof typeof report.inspectionStep] as
+          | InspectionElement[]
+          | undefined) ?? [];
       const summary = summarizeSection(els);
       return {
         key,
@@ -73,7 +71,7 @@ export function TechnicalCondition({ report, allElements, onElementClick }: Prop
         elements: els,
         ...summary,
       };
-    });
+    }).filter((c) => c.status !== "empty");
   }, [report]);
 
   const bodyPaint = fmtPaintRange(
