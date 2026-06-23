@@ -146,7 +146,12 @@ function ReportContent({ report }: { report: Awaited<ReturnType<typeof getReport
     >
       <div className="mx-auto max-w-7xl space-y-4">
         <ReportHeader report={report} />
-        <ReportHistoryTimeline history={report.history} currentReportNumber={report.reportNumber} />
+        <ReportHistoryTimeline
+          history={report.history}
+          currentReportNumber={report.reportNumber}
+          currentDateInspection={report.carStep.dateInspection ?? report.reportDate}
+          currentMileage={report.carStep.mileage}
+        />
 
         <ReportHeaderCard
           report={report}
