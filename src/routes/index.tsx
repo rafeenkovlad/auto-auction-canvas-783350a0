@@ -151,6 +151,7 @@ function ReportContent({ report }: { report: Awaited<ReturnType<typeof getReport
           currentReportNumber={report.reportNumber}
           currentDateInspection={report.carStep.dateInspection ?? report.reportDate}
           currentMileage={report.carStep.mileage}
+          currentAuthor={report.author}
         />
 
         <ReportHeaderCard
