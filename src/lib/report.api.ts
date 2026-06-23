@@ -65,6 +65,7 @@ export interface CarReport {
   reportDate: string;
   vin: string;
   createdAt: string;
+  author?: ReportHistoryEntry["author"];
   carReference?: CarReference | null;
   carStep: {
     vin: string;

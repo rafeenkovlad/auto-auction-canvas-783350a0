@@ -20,11 +20,13 @@ export function ReportHistoryTimeline({
   currentReportNumber,
   currentDateInspection,
   currentMileage,
+  currentAuthor,
 }: {
   history?: ReportHistoryEntry[];
   currentReportNumber: string;
   currentDateInspection?: string | null;
   currentMileage?: number | null;
+  currentAuthor?: ReportHistoryEntry["author"] | null;
 }) {
   const [selectedId, setSelectedId] = useState<string>(currentReportNumber);
 
@@ -38,6 +40,7 @@ export function ReportHistoryTimeline({
         reportNumber: currentReportNumber,
         dateInspection: currentDateInspection ?? null,
         mileage: currentMileage ?? null,
+        author: currentAuthor ?? null,
       },
     },
     ...history.map((h) => ({
