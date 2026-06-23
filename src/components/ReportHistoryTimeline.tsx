@@ -190,15 +190,13 @@ export function ReportHistoryTimeline({
                       <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider mono">
                         <span
                           className={
-                            it.isCurrent
-                              ? "font-semibold"
-                              : "text-muted-foreground"
+                            it.isCurrent ? "font-semibold" : "text-muted-foreground"
                           }
                           style={
                             it.isCurrent ? { color: "var(--accent)" } : undefined
                           }
                         >
-                          {it.isCurrent ? "Текущий" : date ?? "—"}
+                          {it.isCurrent ? `Текущий${date ? ` · ${date}` : ""}` : (date ?? "—")}
                         </span>
                         {isSelected && (
                           <span className="ml-auto inline-flex items-center gap-0.5 text-[9px] text-muted-foreground">
@@ -209,10 +207,9 @@ export function ReportHistoryTimeline({
                       <div className="text-xs font-semibold ink mono mt-0.5 truncate">
                         {it.reportNumber}
                       </div>
-                      {!it.isCurrent && (
+                      {meta && (
                         <div className="text-[10px] text-muted-foreground mt-0.5 truncate">
-                          {mileage}
-                          {authorName ? ` · ${authorName}` : ""}
+                          {meta}
                         </div>
                       )}
                     </div>
