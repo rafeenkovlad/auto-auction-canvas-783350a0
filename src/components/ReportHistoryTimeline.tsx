@@ -119,16 +119,13 @@ export function ReportHistoryTimeline({
           <ol className="relative flex items-stretch gap-3 min-w-max">
             {items.map((it) => {
               const isSelected = it.reportNumber === selectedId;
-              const date = it.isCurrent
-                ? null
-                : fmtDate(it.entry?.dateInspection ?? null);
-              const mileage = it.isCurrent
-                ? null
-                : fmtMileage(it.entry?.mileage ?? null);
+              const date = fmtDate(it.entry?.dateInspection ?? null);
+              const mileage = fmtMileage(it.entry?.mileage ?? null);
               const author = it.entry?.author;
               const authorName = author
                 ? [author.firstName, author.lastName].filter(Boolean).join(" ")
                 : null;
+              const meta = [mileage, authorName].filter(Boolean).join(" · ");
 
               return (
                 <li
