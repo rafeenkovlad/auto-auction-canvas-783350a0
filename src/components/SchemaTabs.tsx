@@ -42,10 +42,6 @@ export function SchemaTabs({
   onElementClick?: (el: InspectionElement) => void;
 }) {
   const [tab, setTab] = useState<TabKey>("body");
-  const [extended, setExtended] = useState(false);
-  const [selectedReportId, setSelectedReportId] = useState<string>(MOCK_REPORT_HISTORY[0].id);
-  const selectedReport = MOCK_REPORT_HISTORY.find((r) => r.id === selectedReportId) ?? MOCK_REPORT_HISTORY[0];
-  const isArchived = selectedReportId !== MOCK_REPORT_HISTORY[0].id;
 
   const elementsByTab = useMemo<Record<TabKey, InspectionElement[]>>(
     () => ({
@@ -81,101 +77,9 @@ export function SchemaTabs({
 
   return (
     <div className="panel px-5 md:px-6 py-3 md:py-4 flex flex-col gap-3">
-      <div className="flex items-center justify-between gap-3 flex-wrap">
-        <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-          Схема осмотра
-        </h3>
-        <button
-          type="button"
-          onClick={() => setExtended((v) => !v)}
-          aria-pressed={extended}
-          className="inline-flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1.5 rounded-md border transition-colors"
-          style={{
-            background: extended ? "var(--card)" : "transparent",
-            borderColor: "var(--border)",
-            color: extended ? "var(--foreground)" : "var(--muted-foreground)",
-          }}
-        >
-          <History size={13} strokeWidth={2} />
-          Расширенный режим
-        </button>
-      </div>
-
-      {extended && (
-        <div className="rounded-xl border border-border bg-muted/30 p-3 flex flex-col gap-2">
-          <div className="flex items-center justify-between gap-3">
-            <div className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">
-              История отчётов
-            </div>
-            {isArchived && (
-              <button
-                type="button"
-                onClick={() => setSelectedReportId(MOCK_REPORT_HISTORY[0].id)}
-                className="text-[11px] text-muted-foreground hover:text-foreground underline underline-offset-2"
-              >
-                К текущему
-              </button>
-            )}
-          </div>
-          <div className="flex gap-2 overflow-x-auto -mx-1 px-1 pb-1">
-            {MOCK_REPORT_HISTORY.map((r, i) => {
-              const active = r.id === selectedReportId;
-              const isCurrent = i === 0;
-              const dot =
-                r.status === "serious"
-                  ? "var(--grade-bad)"
-                  : r.status === "minor"
-                    ? "var(--grade-warn)"
-                    : "var(--grade-good)";
-              return (
-                <button
-                  key={r.id}
-                  type="button"
-                  onClick={() => setSelectedReportId(r.id)}
-                  className="flex-shrink-0 text-left rounded-lg border px-3 py-2 min-w-[150px] transition-all"
-                  style={{
-                    background: active ? "var(--card)" : "transparent",
-                    borderColor: active ? "var(--foreground)" : "var(--border)",
-                    boxShadow: active ? "0 1px 2px rgba(0,0,0,0.06)" : undefined,
-                  }}
-                >
-                  <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground mono">
-                    <span className="w-1.5 h-1.5 rounded-full" style={{ background: dot }} />
-                    <span>{r.date}</span>
-                    <span>·</span>
-                    <span>{r.time}</span>
-                    {isCurrent && (
-                      <span className="ml-auto text-[9px] uppercase tracking-wider px-1 py-0.5 rounded bg-foreground/10 text-foreground">
-                        текущий
-                      </span>
-                    )}
-                  </div>
-                  <div className="text-xs font-semibold ink mt-1 mono">{r.reportNumber}</div>
-                  <div className="text-[10px] text-muted-foreground mt-0.5 truncate">
-                    {r.mileage} · {r.inspector}
-                  </div>
-                  {active && (
-                    <div className="flex items-center gap-1 text-[10px] text-muted-foreground mt-1">
-                      <Check size={10} strokeWidth={2.5} /> Выбран
-                    </div>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-          {isArchived && (
-            <div
-              className="text-[11px] px-2.5 py-1.5 rounded-md"
-              style={{
-                background: "color-mix(in oklab, var(--grade-warn) 14%, transparent)",
-                color: "var(--foreground)",
-              }}
-            >
-              Просмотр архивного отчёта от {selectedReport.date}. Данные могут отличаться от текущего состояния автомобиля.
-            </div>
-          )}
-        </div>
-      )}
+      <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+        Схема осмотра
+      </h3>
 
       <div
         className="grid grid-cols-3 sm:grid-cols-6 gap-1 p-1 rounded-xl"
