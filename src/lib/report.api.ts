@@ -138,4 +138,13 @@ export interface CarReport {
     resultSpecialistNote: string | null;
     files: FileRef[];
   };
+  history?: ReportHistoryEntry[];
+}
+
+export interface ReportHistoryEntry {
+  reportNumber: string;
+  dateInspection: string | null;
+  mileage: number | null;
+  author?: { id: number; firstName?: string | null; lastName?: string | null } | null;
+  shareUrl?: string | null;
 }

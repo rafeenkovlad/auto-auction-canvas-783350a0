@@ -10,6 +10,7 @@ import { InspectionHistoryTimeline } from "@/components/InspectionHistoryTimelin
 
 import { ReportHeader } from "@/components/ReportHeader";
 import { ReportHeaderCard } from "@/components/ReportHeaderCard";
+import { ReportHistoryTimeline } from "@/components/ReportHistoryTimeline";
 
 import { DocumentsCard } from "@/components/DocumentsCard";
 import { TestDriveCard } from "@/components/TestDriveCard";
@@ -145,6 +146,7 @@ function ReportContent({ report }: { report: Awaited<ReturnType<typeof getReport
     >
       <div className="mx-auto max-w-7xl space-y-4">
         <ReportHeader report={report} />
+        <ReportHistoryTimeline history={report.history} currentReportNumber={report.reportNumber} />
 
         <ReportHeaderCard
           report={report}
