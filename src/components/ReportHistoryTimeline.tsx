@@ -96,8 +96,9 @@ export function ReportHistoryTimeline({
 
       <div className="relative">
         <div
-          id="history-rail"
-          className="relative overflow-x-auto pb-2 -mx-1 px-1 scroll-smooth"
+          ref={railRef}
+          onWheel={onWheel}
+          className="relative overflow-x-auto pb-2 -mx-1 px-1 scroll-smooth overscroll-x-contain [touch-action:pan-x] [-webkit-overflow-scrolling:touch]"
         >
           {/* horizontal rail */}
           <div
@@ -215,36 +216,6 @@ export function ReportHistoryTimeline({
           </ol>
         </div>
       </div>
-
-      {/* Selection action bar */}
-      {!selected.isCurrent && (
-        <div
-          className="flex items-center gap-3 rounded-lg border border-border px-3 py-2"
-          style={{ background: "color-mix(in oklab, var(--muted) 40%, transparent)" }}
-        >
-          <div className="min-w-0 flex-1">
-            <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
-              Выбран отчёт от {selectedDate}
-            </div>
-            <div className="text-xs font-semibold ink mono truncate">
-              {selected.reportNumber}
-            </div>
-          </div>
-          {selectedHref && (
-            <a
-              href={selectedHref}
-              className="inline-flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1.5 rounded-md transition-colors"
-              style={{
-                background: "var(--foreground)",
-                color: "var(--background)",
-              }}
-            >
-              Открыть
-              <ArrowUpRight size={12} strokeWidth={2.5} />
-            </a>
-          )}
-        </div>
-      )}
     </section>
   );
 }
