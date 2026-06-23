@@ -18,16 +18,28 @@ type Item = {
 export function ReportHistoryTimeline({
   history,
   currentReportNumber,
+  currentDateInspection,
+  currentMileage,
 }: {
   history?: ReportHistoryEntry[];
   currentReportNumber: string;
+  currentDateInspection?: string | null;
+  currentMileage?: number | null;
 }) {
   const [selectedId, setSelectedId] = useState<string>(currentReportNumber);
 
   if (!history || history.length === 0) return null;
 
   const items: Item[] = [
-    { reportNumber: currentReportNumber, isCurrent: true, entry: null },
+    {
+      reportNumber: currentReportNumber,
+      isCurrent: true,
+      entry: {
+        reportNumber: currentReportNumber,
+        dateInspection: currentDateInspection ?? null,
+        mileage: currentMileage ?? null,
+      },
+    },
     ...history.map((h) => ({
       reportNumber: h.reportNumber,
       isCurrent: false,
