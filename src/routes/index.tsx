@@ -10,6 +10,7 @@ import { InspectionHistoryTimeline } from "@/components/InspectionHistoryTimelin
 
 import { ReportHeader } from "@/components/ReportHeader";
 import { ReportHeaderCard } from "@/components/ReportHeaderCard";
+import { ReportHistoryTimeline } from "@/components/ReportHistoryTimeline";
 
 import { DocumentsCard } from "@/components/DocumentsCard";
 import { TestDriveCard } from "@/components/TestDriveCard";
