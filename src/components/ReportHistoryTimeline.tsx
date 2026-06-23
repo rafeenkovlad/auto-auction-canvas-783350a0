@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { ReportHistoryEntry } from "@/lib/report.api";
 import { fmtDate, fmtMileage } from "@/lib/report.utils";
-import { History, ArrowUpRight, Check, ChevronLeft, ChevronRight } from "lucide-react";
+import { History, ArrowUpRight, Check } from "lucide-react";
 
 function extractToken(shareUrl?: string | null): string | null {
   if (!shareUrl) return null;
@@ -45,9 +45,18 @@ export function ReportHistoryTimeline({
     ? null
     : fmtDate(selected.entry?.dateInspection ?? null);
 
-  const scroll = (dir: -1 | 1) => {
-    const el = document.getElementById("history-rail");
-    if (el) el.scrollBy({ left: dir * 280, behavior: "smooth" });
+  const railRef = useRef<HTMLDivElement | null>(null);
+
+  // Translate vertical wheel into horizontal scroll on the rail.
+  const onWheel: React.WheelEventHandler<HTMLDivElement> = (e) => {
+    const el = railRef.current;
+    if (!el) return;
+    if (e.deltaY === 0) return;
+    // Only intercept when there's room to scroll horizontally.
+    const maxScroll = el.scrollWidth - el.clientWidth;
+    if (maxScroll <= 0) return;
+    el.scrollLeft += e.deltaY;
+    e.preventDefault();
   };
 
   return (
@@ -59,30 +68,37 @@ export function ReportHistoryTimeline({
         </h3>
         <span className="text-[11px] text-muted-foreground">· {items.length}</span>
 
-        <div className="ml-auto flex items-center gap-1">
-          <button
-            type="button"
-            onClick={() => scroll(-1)}
-            aria-label="Назад"
-            className="w-6 h-6 rounded-md border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors flex items-center justify-center"
-          >
-            <ChevronLeft size={14} />
-          </button>
-          <button
-            type="button"
-            onClick={() => scroll(1)}
-            aria-label="Вперёд"
-            className="w-6 h-6 rounded-md border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors flex items-center justify-center"
-          >
-            <ChevronRight size={14} />
-          </button>
+        <div className="ml-auto flex items-center gap-2 min-w-0">
+          {!selected.isCurrent && (
+            <span className="text-[11px] text-muted-foreground truncate hidden sm:inline">
+              {selected.reportNumber} · {selectedDate}
+            </span>
+          )}
+          {selectedHref ? (
+            <a
+              href={selectedHref}
+              className="inline-flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1.5 rounded-md transition-opacity hover:opacity-90"
+              style={{
+                background: "var(--foreground)",
+                color: "var(--background)",
+              }}
+            >
+              Открыть
+              <ArrowUpRight size={12} strokeWidth={2.5} />
+            </a>
+          ) : (
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-medium px-3 py-1.5 rounded-md border border-border text-muted-foreground">
+              Текущий отчёт
+            </span>
+          )}
         </div>
       </div>
 
       <div className="relative">
         <div
-          id="history-rail"
-          className="relative overflow-x-auto pb-2 -mx-1 px-1 scroll-smooth"
+          ref={railRef}
+          onWheel={onWheel}
+          className="relative overflow-x-auto pb-2 -mx-1 px-1 scroll-smooth overscroll-x-contain [touch-action:pan-x] [-webkit-overflow-scrolling:touch]"
         >
           {/* horizontal rail */}
           <div
@@ -200,36 +216,6 @@ export function ReportHistoryTimeline({
           </ol>
         </div>
       </div>
-
-      {/* Selection action bar */}
-      {!selected.isCurrent && (
-        <div
-          className="flex items-center gap-3 rounded-lg border border-border px-3 py-2"
-          style={{ background: "color-mix(in oklab, var(--muted) 40%, transparent)" }}
-        >
-          <div className="min-w-0 flex-1">
-            <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
-              Выбран отчёт от {selectedDate}
-            </div>
-            <div className="text-xs font-semibold ink mono truncate">
-              {selected.reportNumber}
-            </div>
-          </div>
-          {selectedHref && (
-            <a
-              href={selectedHref}
-              className="inline-flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1.5 rounded-md transition-colors"
-              style={{
-                background: "var(--foreground)",
-                color: "var(--background)",
-              }}
-            >
-              Открыть
-              <ArrowUpRight size={12} strokeWidth={2.5} />
-            </a>
-          )}
-        </div>
-      )}
     </section>
   );
 }
