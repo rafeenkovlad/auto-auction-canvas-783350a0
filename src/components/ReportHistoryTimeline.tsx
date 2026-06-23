@@ -70,26 +70,24 @@ export function ReportHistoryTimeline({
 
         <div className="ml-auto flex items-center gap-2 min-w-0">
           {!selected.isCurrent && (
-            <span className="text-[11px] text-muted-foreground truncate hidden sm:inline">
-              {selected.reportNumber} · {selectedDate}
-            </span>
-          )}
-          {selectedHref ? (
-            <a
-              href={selectedHref}
-              className="inline-flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1.5 rounded-md transition-opacity hover:opacity-90"
-              style={{
-                background: "var(--foreground)",
-                color: "var(--background)",
-              }}
-            >
-              Открыть
-              <ArrowUpRight size={12} strokeWidth={2.5} />
-            </a>
-          ) : (
-            <span className="inline-flex items-center gap-1.5 text-[11px] font-medium px-3 py-1.5 rounded-md border border-border text-muted-foreground">
-              Текущий отчёт
-            </span>
+            <>
+              <span className="text-[11px] text-muted-foreground truncate hidden sm:inline">
+                {selected.reportNumber} · {selectedDate}
+              </span>
+              {selectedHref && (
+                <a
+                  href={selectedHref}
+                  className="inline-flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1.5 rounded-md transition-opacity hover:opacity-90"
+                  style={{
+                    background: "var(--foreground)",
+                    color: "var(--background)",
+                  }}
+                >
+                  Открыть
+                  <ArrowUpRight size={12} strokeWidth={2.5} />
+                </a>
+              )}
+            </>
           )}
         </div>
       </div>
