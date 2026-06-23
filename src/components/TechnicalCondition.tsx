@@ -91,27 +91,15 @@ export function TechnicalCondition({ report, allElements, onElementClick }: Prop
         Техническое состояние
       </h3>
 
-      {/* Что важно знать */}
-      <div className="flex flex-col gap-2">
-        <div className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground font-semibold">
-          Что важно знать
+      {/* Общее ЛКП */}
+      {(bodyPaint || framePaint) && (
+        <div className="grid sm:grid-cols-2 gap-3">
+          {bodyPaint && <PaintRow label="ЛКП кузова" value={bodyPaint} />}
+          {framePaint && <PaintRow label="ЛКП силовых" value={framePaint} />}
         </div>
-        <ul className="grid sm:grid-cols-2 gap-x-5 gap-y-2">
-          {findings.map((f) => {
-            const { Icon, color } = findingIcon(f.status);
-            return (
-              <li key={f.label} className="flex items-start gap-2 text-sm">
-                <Icon size={16} strokeWidth={2.5} style={{ color }} className="mt-0.5 shrink-0" />
-                <span className={f.status === "ok" ? "text-foreground" : "ink font-medium"}>
-                  {f.label}
-                </span>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
+      )}
 
-      {/* Дополнительные разделы осмотра */}
+      {/* Разделы осмотра */}
       {cards.length > 0 && (
         <div className="grid sm:grid-cols-2 gap-3">
           {cards.map((c) => (
@@ -130,14 +118,6 @@ export function TechnicalCondition({ report, allElements, onElementClick }: Prop
               }
             />
           ))}
-        </div>
-      )}
-
-      {/* Общее ЛКП */}
-      {(bodyPaint || framePaint) && (
-        <div className="grid sm:grid-cols-2 gap-3 border-t border-border pt-4">
-          {bodyPaint && <PaintRow label="ЛКП кузова" value={bodyPaint} />}
-          {framePaint && <PaintRow label="ЛКП силовых" value={framePaint} />}
         </div>
       )}
     </section>
