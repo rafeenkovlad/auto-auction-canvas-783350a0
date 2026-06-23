@@ -45,9 +45,18 @@ export function ReportHistoryTimeline({
     ? null
     : fmtDate(selected.entry?.dateInspection ?? null);
 
-  const scroll = (dir: -1 | 1) => {
-    const el = document.getElementById("history-rail");
-    if (el) el.scrollBy({ left: dir * 280, behavior: "smooth" });
+  const railRef = useRef<HTMLDivElement | null>(null);
+
+  // Translate vertical wheel into horizontal scroll on the rail.
+  const onWheel: React.WheelEventHandler<HTMLDivElement> = (e) => {
+    const el = railRef.current;
+    if (!el) return;
+    if (e.deltaY === 0) return;
+    // Only intercept when there's room to scroll horizontally.
+    const maxScroll = el.scrollWidth - el.clientWidth;
+    if (maxScroll <= 0) return;
+    el.scrollLeft += e.deltaY;
+    e.preventDefault();
   };
 
   return (
@@ -59,23 +68,29 @@ export function ReportHistoryTimeline({
         </h3>
         <span className="text-[11px] text-muted-foreground">· {items.length}</span>
 
-        <div className="ml-auto flex items-center gap-1">
-          <button
-            type="button"
-            onClick={() => scroll(-1)}
-            aria-label="Назад"
-            className="w-6 h-6 rounded-md border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors flex items-center justify-center"
-          >
-            <ChevronLeft size={14} />
-          </button>
-          <button
-            type="button"
-            onClick={() => scroll(1)}
-            aria-label="Вперёд"
-            className="w-6 h-6 rounded-md border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors flex items-center justify-center"
-          >
-            <ChevronRight size={14} />
-          </button>
+        <div className="ml-auto flex items-center gap-2 min-w-0">
+          {!selected.isCurrent && (
+            <span className="text-[11px] text-muted-foreground truncate hidden sm:inline">
+              {selected.reportNumber} · {selectedDate}
+            </span>
+          )}
+          {selectedHref ? (
+            <a
+              href={selectedHref}
+              className="inline-flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1.5 rounded-md transition-opacity hover:opacity-90"
+              style={{
+                background: "var(--foreground)",
+                color: "var(--background)",
+              }}
+            >
+              Открыть
+              <ArrowUpRight size={12} strokeWidth={2.5} />
+            </a>
+          ) : (
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-medium px-3 py-1.5 rounded-md border border-border text-muted-foreground">
+              Текущий отчёт
+            </span>
+          )}
         </div>
       </div>
 
