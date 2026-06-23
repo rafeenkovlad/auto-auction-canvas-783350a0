@@ -65,6 +65,7 @@ export interface CarReport {
   reportDate: string;
   vin: string;
   createdAt: string;
+  author?: ReportHistoryEntry["author"];
   carReference?: CarReference | null;
   carStep: {
     vin: string;
@@ -79,7 +80,7 @@ export interface CarReport {
     listingFile: FileRef | null;
     files: FileRef[];
   };
-  author?: ReportHistoryEntry["author"];
+  characteristicsStep?: {
     modelGenerationRestylingFrameId?: number | null;
     modelCarId?: number | null;
     carImageUrl?: string | null;
