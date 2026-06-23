@@ -18,16 +18,28 @@ type Item = {
 export function ReportHistoryTimeline({
   history,
   currentReportNumber,
+  currentDateInspection,
+  currentMileage,
 }: {
   history?: ReportHistoryEntry[];
   currentReportNumber: string;
+  currentDateInspection?: string | null;
+  currentMileage?: number | null;
 }) {
   const [selectedId, setSelectedId] = useState<string>(currentReportNumber);
 
   if (!history || history.length === 0) return null;
 
   const items: Item[] = [
-    { reportNumber: currentReportNumber, isCurrent: true, entry: null },
+    {
+      reportNumber: currentReportNumber,
+      isCurrent: true,
+      entry: {
+        reportNumber: currentReportNumber,
+        dateInspection: currentDateInspection ?? null,
+        mileage: currentMileage ?? null,
+      },
+    },
     ...history.map((h) => ({
       reportNumber: h.reportNumber,
       isCurrent: false,
@@ -107,16 +119,13 @@ export function ReportHistoryTimeline({
           <ol className="relative flex items-stretch gap-3 min-w-max">
             {items.map((it) => {
               const isSelected = it.reportNumber === selectedId;
-              const date = it.isCurrent
-                ? null
-                : fmtDate(it.entry?.dateInspection ?? null);
-              const mileage = it.isCurrent
-                ? null
-                : fmtMileage(it.entry?.mileage ?? null);
+              const date = fmtDate(it.entry?.dateInspection ?? null);
+              const mileage = fmtMileage(it.entry?.mileage ?? null);
               const author = it.entry?.author;
               const authorName = author
                 ? [author.firstName, author.lastName].filter(Boolean).join(" ")
                 : null;
+              const meta = [mileage, authorName].filter(Boolean).join(" · ");
 
               return (
                 <li
@@ -181,15 +190,13 @@ export function ReportHistoryTimeline({
                       <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider mono">
                         <span
                           className={
-                            it.isCurrent
-                              ? "font-semibold"
-                              : "text-muted-foreground"
+                            it.isCurrent ? "font-semibold" : "text-muted-foreground"
                           }
                           style={
                             it.isCurrent ? { color: "var(--accent)" } : undefined
                           }
                         >
-                          {it.isCurrent ? "Текущий" : date ?? "—"}
+                          {it.isCurrent ? `Текущий${date ? ` · ${date}` : ""}` : (date ?? "—")}
                         </span>
                         {isSelected && (
                           <span className="ml-auto inline-flex items-center gap-0.5 text-[9px] text-muted-foreground">
@@ -200,10 +207,9 @@ export function ReportHistoryTimeline({
                       <div className="text-xs font-semibold ink mono mt-0.5 truncate">
                         {it.reportNumber}
                       </div>
-                      {!it.isCurrent && (
+                      {meta && (
                         <div className="text-[10px] text-muted-foreground mt-0.5 truncate">
-                          {mileage}
-                          {authorName ? ` · ${authorName}` : ""}
+                          {meta}
                         </div>
                       )}
                     </div>
