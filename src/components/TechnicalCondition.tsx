@@ -2,13 +2,13 @@ import { useMemo } from "react";
 import type { CarReport, InspectionElement } from "@/lib/report.api";
 import type { EnrichedElement, Status } from "@/lib/report.utils";
 import { getElementStatus } from "@/lib/report.utils";
-import { SECTION_ICONS, SECTION_LABELS, ELEMENT_LABEL } from "@/lib/report.constants";
 import {
-  Check,
-  AlertTriangle,
-  AlertOctagon,
-  Gauge,
-} from "lucide-react";
+  SECTION_ICONS,
+  SECTION_KEYS,
+  SECTION_LABELS,
+  ELEMENT_LABEL,
+} from "@/lib/report.constants";
+import { Gauge } from "lucide-react";
 
 interface Props {
   report: CarReport;
@@ -16,70 +16,6 @@ interface Props {
   onElementClick?: (el: InspectionElement) => void;
 }
 
-type Finding = { label: string; status: Status };
-
-const EXTRA_SECTION_KEYS = [
-  "underHoodElements",
-  "computerDiagnosticsElements",
-] as const;
-
-function buildFindings(report: CarReport, elements: EnrichedElement[]): Finding[] {
-  const has = (key: string, st: Status) =>
-    elements.some((e) => e._sectionKey === key && e._status === st);
-  const out: Finding[] = [];
-
-  const docs = report.documentReconciliationStep;
-  const vinOk = !report.carStep.unreadableVin && docs.vinOnBodyMatchWithPtsOrSts !== false;
-  out.push({ label: "VIN и документы проверены", status: vinOk ? "ok" : "serious" });
-
-  const frameSerious = has("bodyReinforcementElements", "serious");
-  const frameMinor = has("bodyReinforcementElements", "minor");
-  out.push({
-    label: "Геометрия кузова в норме",
-    status: frameSerious ? "serious" : frameMinor ? "minor" : "ok",
-  });
-
-  const bodySerious = has("bodyElements", "serious");
-  const bodyMinor = has("bodyElements", "minor");
-  out.push({
-    label: bodySerious
-      ? "Обнаружены повреждения кузова"
-      : bodyMinor
-        ? "Есть незначительные замечания по кузову"
-        : "Кузов без структурных повреждений",
-    status: bodySerious ? "serious" : bodyMinor ? "minor" : "ok",
-  });
-
-  const diagSerious = has("computerDiagnosticsElements", "serious");
-  const diagMinor = has("computerDiagnosticsElements", "minor");
-  out.push({
-    label: diagSerious ? "Ошибки в диагностике" : "Ошибок по диагностике нет",
-    status: diagSerious ? "serious" : diagMinor ? "minor" : "ok",
-  });
-
-  const td = report.testDriveStep;
-  const tdProblem =
-    td.testDriveIsIncluded &&
-    [
-      td.testDriveEngineIsWorkingProperly,
-      td.testDriveTransmissionIsWorkingProperly,
-      td.testDriveSteeringWheelIsWorkingProperly,
-      td.testDriveSuspensionInDriveIsWorkingProperly,
-      td.testDriveBrakesInDriveIsWorkingProperly,
-    ].some((v) => v === false);
-  out.push({
-    label: tdProblem ? "Есть замечания на тест-драйве" : "Тест-драйв пройден",
-    status: tdProblem ? "minor" : "ok",
-  });
-
-  return out;
-}
-
-function findingIcon(s: Status) {
-  if (s === "ok") return { Icon: Check, color: "var(--grade-good)" };
-  if (s === "minor") return { Icon: AlertTriangle, color: "var(--grade-warn)" };
-  return { Icon: AlertOctagon, color: "var(--grade-bad)" };
-}
 
 function summarizeSection(elements: InspectionElement[]): {
   status: Status | "empty";
