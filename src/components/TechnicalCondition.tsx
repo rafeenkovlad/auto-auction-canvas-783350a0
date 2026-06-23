@@ -2,13 +2,13 @@ import { useMemo } from "react";
 import type { CarReport, InspectionElement } from "@/lib/report.api";
 import type { EnrichedElement, Status } from "@/lib/report.utils";
 import { getElementStatus } from "@/lib/report.utils";
-import { SECTION_ICONS, SECTION_LABELS, ELEMENT_LABEL } from "@/lib/report.constants";
 import {
-  Check,
-  AlertTriangle,
-  AlertOctagon,
-  Gauge,
-} from "lucide-react";
+  SECTION_ICONS,
+  SECTION_KEYS,
+  SECTION_LABELS,
+  ELEMENT_LABEL,
+} from "@/lib/report.constants";
+import { Gauge } from "lucide-react";
 
 interface Props {
   report: CarReport;
@@ -16,70 +16,6 @@ interface Props {
   onElementClick?: (el: InspectionElement) => void;
 }
 
-type Finding = { label: string; status: Status };
-
-const EXTRA_SECTION_KEYS = [
-  "underHoodElements",
-  "computerDiagnosticsElements",
-] as const;
-
-function buildFindings(report: CarReport, elements: EnrichedElement[]): Finding[] {
-  const has = (key: string, st: Status) =>
-    elements.some((e) => e._sectionKey === key && e._status === st);
-  const out: Finding[] = [];
-
-  const docs = report.documentReconciliationStep;
-  const vinOk = !report.carStep.unreadableVin && docs.vinOnBodyMatchWithPtsOrSts !== false;
-  out.push({ label: "VIN и документы проверены", status: vinOk ? "ok" : "serious" });
-
-  const frameSerious = has("bodyReinforcementElements", "serious");
-  const frameMinor = has("bodyReinforcementElements", "minor");
-  out.push({
-    label: "Геометрия кузова в норме",
-    status: frameSerious ? "serious" : frameMinor ? "minor" : "ok",
-  });
-
-  const bodySerious = has("bodyElements", "serious");
-  const bodyMinor = has("bodyElements", "minor");
-  out.push({
-    label: bodySerious
-      ? "Обнаружены повреждения кузова"
-      : bodyMinor
-        ? "Есть незначительные замечания по кузову"
-        : "Кузов без структурных повреждений",
-    status: bodySerious ? "serious" : bodyMinor ? "minor" : "ok",
-  });
-
-  const diagSerious = has("computerDiagnosticsElements", "serious");
-  const diagMinor = has("computerDiagnosticsElements", "minor");
-  out.push({
-    label: diagSerious ? "Ошибки в диагностике" : "Ошибок по диагностике нет",
-    status: diagSerious ? "serious" : diagMinor ? "minor" : "ok",
-  });
-
-  const td = report.testDriveStep;
-  const tdProblem =
-    td.testDriveIsIncluded &&
-    [
-      td.testDriveEngineIsWorkingProperly,
-      td.testDriveTransmissionIsWorkingProperly,
-      td.testDriveSteeringWheelIsWorkingProperly,
-      td.testDriveSuspensionInDriveIsWorkingProperly,
-      td.testDriveBrakesInDriveIsWorkingProperly,
-    ].some((v) => v === false);
-  out.push({
-    label: tdProblem ? "Есть замечания на тест-драйве" : "Тест-драйв пройден",
-    status: tdProblem ? "minor" : "ok",
-  });
-
-  return out;
-}
-
-function findingIcon(s: Status) {
-  if (s === "ok") return { Icon: Check, color: "var(--grade-good)" };
-  if (s === "minor") return { Icon: AlertTriangle, color: "var(--grade-warn)" };
-  return { Icon: AlertOctagon, color: "var(--grade-bad)" };
-}
 
 function summarizeSection(elements: InspectionElement[]): {
   status: Status | "empty";
@@ -120,15 +56,13 @@ function fmtPaintRange(from: number | null, to: number | null): string | null {
   return `${from ?? to}`;
 }
 
-export function TechnicalCondition({ report, allElements, onElementClick }: Props) {
-  const findings = useMemo(
-    () => buildFindings(report, allElements),
-    [report, allElements],
-  );
-
+export function TechnicalCondition({ report, onElementClick }: Props) {
   const cards = useMemo(() => {
-    return EXTRA_SECTION_KEYS.map((key) => {
-      const els = (report.inspectionStep[key] as InspectionElement[] | undefined) ?? [];
+    return SECTION_KEYS.map((key) => {
+      const els =
+        (report.inspectionStep[key as keyof typeof report.inspectionStep] as
+          | InspectionElement[]
+          | undefined) ?? [];
       const summary = summarizeSection(els);
       return {
         key,
@@ -137,7 +71,7 @@ export function TechnicalCondition({ report, allElements, onElementClick }: Prop
         elements: els,
         ...summary,
       };
-    });
+    }).filter((c) => c.status !== "empty");
   }, [report]);
 
   const bodyPaint = fmtPaintRange(
@@ -155,27 +89,15 @@ export function TechnicalCondition({ report, allElements, onElementClick }: Prop
         Техническое состояние
       </h3>
 
-      {/* Что важно знать */}
-      <div className="flex flex-col gap-2">
-        <div className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground font-semibold">
-          Что важно знать
+      {/* Общее ЛКП */}
+      {(bodyPaint || framePaint) && (
+        <div className="grid sm:grid-cols-2 gap-3">
+          {bodyPaint && <PaintRow label="ЛКП кузова" value={bodyPaint} />}
+          {framePaint && <PaintRow label="ЛКП силовых" value={framePaint} />}
         </div>
-        <ul className="grid sm:grid-cols-2 gap-x-5 gap-y-2">
-          {findings.map((f) => {
-            const { Icon, color } = findingIcon(f.status);
-            return (
-              <li key={f.label} className="flex items-start gap-2 text-sm">
-                <Icon size={16} strokeWidth={2.5} style={{ color }} className="mt-0.5 shrink-0" />
-                <span className={f.status === "ok" ? "text-foreground" : "ink font-medium"}>
-                  {f.label}
-                </span>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
+      )}
 
-      {/* Дополнительные разделы осмотра */}
+      {/* Разделы осмотра */}
       {cards.length > 0 && (
         <div className="grid sm:grid-cols-2 gap-3">
           {cards.map((c) => (
@@ -194,14 +116,6 @@ export function TechnicalCondition({ report, allElements, onElementClick }: Prop
               }
             />
           ))}
-        </div>
-      )}
-
-      {/* Общее ЛКП */}
-      {(bodyPaint || framePaint) && (
-        <div className="grid sm:grid-cols-2 gap-3 border-t border-border pt-4">
-          {bodyPaint && <PaintRow label="ЛКП кузова" value={bodyPaint} />}
-          {framePaint && <PaintRow label="ЛКП силовых" value={framePaint} />}
         </div>
       )}
     </section>
