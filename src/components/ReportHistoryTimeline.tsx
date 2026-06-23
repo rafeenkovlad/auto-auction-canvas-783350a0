@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { ReportHistoryEntry } from "@/lib/report.api";
 import { fmtDate, fmtMileage } from "@/lib/report.utils";
-import { History, ArrowUpRight, Check, ChevronLeft, ChevronRight } from "lucide-react";
+import { History, ArrowUpRight, Check } from "lucide-react";
 
 function extractToken(shareUrl?: string | null): string | null {
   if (!shareUrl) return null;
