@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Car, Armchair, Wrench, Disc3, AppWindow, Lightbulb, Shield, Hash, FileText, Images, ChevronLeft } from "lucide-react";
 import { GalleryTileBody } from "@/components/GalleryTile";
 import type { LucideIcon } from "lucide-react";
