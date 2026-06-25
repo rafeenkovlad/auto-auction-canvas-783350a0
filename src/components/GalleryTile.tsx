@@ -1,8 +1,23 @@
 import type { GalleryItem } from "@/components/MediaGallery";
 import { isImageFile } from "@/lib/report.utils";
 import { SECTION_LABELS, STEP_LABELS } from "@/lib/report.constants";
-import { useHlsVideo } from "@/hooks/useHlsVideo";
 
+/**
+ * Thumbnail body used inside `MediaGallery` and `AdditionalMaterials`.
+ *
+ * Performance notes:
+ *  - Backend currently returns only the original full-resolution URL
+ *    (often 3000+ px wide). Until an image CDN / resize endpoint is
+ *    available we still download the original, but we mark the <img>
+ *    so the browser can:
+ *      * defer it (`loading="lazy"`, `fetchpriority="low"`)
+ *      * decode off the main thread (`decoding="async"`)
+ *      * skip layout/paint while offscreen (`content-visibility: auto`)
+ *  - Video tiles no longer mount an HLS player just to show a poster:
+ *    a single <video preload="metadata"> for native MP4 still grabs a
+ *    frame, and HLS tiles render a neutral placeholder with a play icon.
+ *    The full HLS player is only created inside the lightbox on click.
+ */
 export function GalleryTileBody({ item }: { item: GalleryItem }) {
   const file = item.file;
   const url = file.url;
@@ -11,12 +26,29 @@ export function GalleryTileBody({ item }: { item: GalleryItem }) {
   const isImage = isImageFile(file);
   return (
     <>
-      <div className="relative aspect-[4/3] bg-muted overflow-hidden">
+      <div
+        className="relative aspect-[4/3] bg-muted overflow-hidden"
+        style={{
+          contentVisibility: "auto",
+          containIntrinsicSize: "300px 225px",
+        }}
+      >
         {isImage ? (
-          <img src={url} alt={item.caption} loading="lazy" className="w-full h-full object-cover" />
+          <img
+            src={url}
+            alt={item.caption}
+            loading="lazy"
+            decoding="async"
+            // @ts-expect-error fetchpriority is valid HTML but not yet in React's typings on older versions
+            fetchpriority="low"
+            width={400}
+            height={300}
+            sizes="(min-width: 1280px) 220px, (min-width: 640px) 33vw, 50vw"
+            className="w-full h-full object-cover"
+          />
         ) : item.isVideo ? (
           <>
-            <VideoThumb url={url} isHls={isHls} />
+            <VideoThumb url={url} isHls={isHls} caption={item.caption} />
             <span className="pointer-events-none absolute inset-0 flex items-center justify-center">
               <span className="w-9 h-9 rounded-full bg-black/55 backdrop-blur-sm flex items-center justify-center">
                 <svg width="12" height="12" viewBox="0 0 10 10" fill="white">
@@ -67,16 +99,33 @@ export function GalleryTileBody({ item }: { item: GalleryItem }) {
   );
 }
 
-function VideoThumb({ url, isHls }: { url: string; isHls: boolean }) {
-  const ref = useHlsVideo(url, isHls);
+function VideoThumb({ url, isHls, caption }: { url: string; isHls: boolean; caption: string }) {
+  // HLS thumbnails are the most expensive thing on this page — each one
+  // would otherwise spin up hls.js and fetch the manifest + first segment
+  // just to show a poster. Render a neutral placeholder instead and let
+  // the lightbox handle real playback.
+  if (isHls) {
+    return (
+      <div
+        aria-label={caption}
+        className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-muted to-muted/60 text-muted-foreground"
+      >
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4">
+          <rect x="2" y="4" width="20" height="16" rx="2" />
+          <path d="M10 9l5 3-5 3z" fill="currentColor" stroke="none" />
+        </svg>
+      </div>
+    );
+  }
+  // Native MP4/WebM: a metadata preload is cheap and gives a real poster.
   return (
     <video
-      ref={ref}
+      src={url.includes("#") ? url : `${url}#t=0.1`}
       muted
       playsInline
       preload="metadata"
-      crossOrigin="anonymous"
       disableRemotePlayback
+      aria-label={caption}
       className="w-full h-full object-cover bg-muted"
     />
   );

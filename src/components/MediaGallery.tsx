@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Car, Armchair, Wrench, Disc3, AppWindow, Lightbulb, Shield, Hash, FileText, Images, ChevronLeft } from "lucide-react";
 import { GalleryTileBody } from "@/components/GalleryTile";
 import type { LucideIcon } from "lucide-react";
@@ -87,12 +87,42 @@ export function MediaGallery({
     return result;
   }, [items]);
 
+  // Lazy-mount: render a same-height placeholder until the section is
+  // close to the viewport, so cover images / tile decoding don't start
+  // during initial page load.
+  const sectionRef = useRef<HTMLElement | null>(null);
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    if (visible) return;
+    const node = sectionRef.current;
+    if (!node) return;
+    if (typeof IntersectionObserver === "undefined") {
+      setVisible(true);
+      return;
+    }
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            setVisible(true);
+            io.disconnect();
+            break;
+          }
+        }
+      },
+      { rootMargin: "600px 0px" },
+    );
+    io.observe(node);
+    return () => io.disconnect();
+  }, [visible]);
+
   if (items.length === 0) return null;
 
   const active = activeKey ? groups.find((g) => g.key === activeKey) ?? null : null;
 
   return (
-    <section className="panel p-4 sm:p-5 md:p-6 flex flex-col gap-3 sm:gap-4">
+    <section ref={sectionRef} className="panel p-4 sm:p-5 md:p-6 flex flex-col gap-3 sm:gap-4">
+
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <h3 className="text-xs sm:text-sm font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
           {active ? (
@@ -113,7 +143,13 @@ export function MediaGallery({
         </h3>
       </div>
 
-      {active ? (
+      {!visible ? (
+        <div
+          aria-hidden
+          className="rounded-lg bg-muted/40 animate-pulse"
+          style={{ minHeight: 320 }}
+        />
+      ) : active ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3">
           {active.items.map((item) => (
             <button
@@ -143,6 +179,12 @@ export function MediaGallery({
                     src={g.cover}
                     alt={g.label}
                     loading="lazy"
+                    decoding="async"
+                    /* @ts-expect-error fetchpriority valid attr */
+                    fetchpriority="low"
+                    width={400}
+                    height={300}
+                    sizes="(min-width: 1280px) 220px, (min-width: 640px) 33vw, 50vw"
                     className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                   />
                 ) : null}
