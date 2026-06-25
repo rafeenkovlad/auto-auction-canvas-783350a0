@@ -31,7 +31,7 @@ export function GalleryTileBody({ item }: { item: GalleryItem }) {
   return (
     <>
       <div
-        className="relative aspect-[4/3] bg-muted overflow-hidden"
+        className="relative aspect-[4/3] bg-muted overflow-hidden shrink-0"
         style={{
           contentVisibility: "auto",
           containIntrinsicSize: "300px 225px",
