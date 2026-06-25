@@ -161,14 +161,10 @@ function InfoPanel({
   el,
   m,
   hasDetails,
-  collapsed,
-  onToggle,
 }: {
   el: ViewerElement;
   m: StatusMeta;
   hasDetails: boolean;
-  collapsed: boolean;
-  onToggle: () => void;
 }) {
   const tags = [
     ...el.seriousDamageTags.map((t) => ({ ...t, severe: true })),
@@ -178,70 +174,51 @@ function InfoPanel({
   void hasDetails;
 
   return (
-    <div
-      className="absolute inset-x-0 bottom-0 z-20 transition-transform duration-300 ease-out"
-      style={{
-        transform: collapsed ? "translateY(calc(100% - 44px))" : "translateY(0)",
-      }}
-    >
-      <div className="bg-gradient-to-t from-black via-black/90 to-transparent pt-6">
-        {/* Toggle handle */}
-        <button
-          type="button"
-          onClick={onToggle}
-          className="w-full flex flex-col items-center gap-1 pt-1 pb-2 select-none"
-          aria-label={collapsed ? "Показать детали" : "Скрыть детали"}
-        >
-          <span className="block h-1 w-10 rounded-full bg-white/40" />
-          <span className="text-[10px] uppercase tracking-wider text-white/60">
-            {collapsed ? "Показать детали" : "Скрыть"}
-          </span>
-        </button>
-        <div className="px-4 pb-[max(env(safe-area-inset-bottom),12px)] max-w-3xl mx-auto">
-          {/* Header row */}
-          <div className="flex items-center gap-2 mb-1">
+    <div className="absolute inset-x-0 bottom-0 z-20 pointer-events-none">
+      <div className="bg-gradient-to-t from-black/85 via-black/55 to-transparent pt-10 pb-[max(env(safe-area-inset-bottom),10px)]">
+        <div className="px-4 max-w-3xl mx-auto pointer-events-auto">
+          {/* Meta line: status dot · category */}
+          <div className="flex items-center gap-2 text-[11px] text-white/70">
             <span
-              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold"
-              style={{ background: m.bg, color: m.fg }}
-            >
-              <span>{m.icon}</span>
-              {m.label}
-            </span>
-            <span className="text-[10px] uppercase tracking-wider text-white/50 truncate">
-              {el._category}
-            </span>
+              className="inline-block w-1.5 h-1.5 rounded-full shrink-0"
+              style={{ background: m.fg }}
+              aria-label={m.label}
+            />
+            <span className="truncate">{el._category}</span>
+            <span className="text-white/30">·</span>
+            <span className="truncate">{m.label}</span>
           </div>
-          <h2 className="text-base md:text-lg font-semibold leading-tight truncate">
+
+          {/* Title */}
+          <h2 className="mt-0.5 text-sm md:text-base font-medium leading-snug truncate">
             {el._displayName}
           </h2>
 
-          {/* Compact inline meta */}
+          {/* Inline ЛКП */}
           {(el.paintworkThicknessFrom != null ||
             el.paintworkThicknessTo != null) && (
-            <div className="mt-1.5 text-xs text-white/70">
-              ЛКП:{" "}
-              <span className="mono text-white">
-                {el.paintworkThicknessFrom ?? "—"}–
-                {el.paintworkThicknessTo ?? "—"} мкм
-              </span>
+            <div className="mt-1 mono text-[11px] text-white/70 tabular-nums">
+              ЛКП {el.paintworkThicknessFrom ?? "—"}–
+              {el.paintworkThicknessTo ?? "—"} мкм
             </div>
           )}
 
           {/* Tags */}
           {tags.length > 0 && (
-            <div className="mt-2 flex flex-wrap gap-1.5">
+            <div className="mt-1.5 flex flex-wrap gap-1">
               {tags.map((t) => (
                 <span
                   key={t.id}
-                  className="inline-block px-2 py-0.5 rounded-full text-[11px] border"
-                  style={{
-                    borderColor: t.severe
-                      ? "var(--grade-bad)"
-                      : "var(--grade-warn)",
-                    color: t.severe ? "var(--grade-bad)" : "var(--grade-warn)",
-                    background: "rgba(255,255,255,0.04)",
-                  }}
+                  className="inline-flex items-center gap-1 text-[10px] text-white/80"
                 >
+                  <span
+                    className="w-1 h-1 rounded-full"
+                    style={{
+                      background: t.severe
+                        ? "var(--grade-bad)"
+                        : "var(--grade-warn)",
+                    }}
+                  />
                   {t.name}
                 </span>
               ))}
