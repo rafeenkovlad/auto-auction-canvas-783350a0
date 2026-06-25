@@ -142,8 +142,22 @@ export function ElementViewer({
         </button>
       )}
 
-      {/* Bottom info panel */}
-      <InfoPanel el={el} m={m} hasDetails={hasDetails} />
+      {/* Audio notes (rare) — kept here because they need a player */}
+      {el.audioNotes && el.audioNotes.length > 0 ? (
+        <div className="absolute inset-x-0 bottom-0 z-20 p-3 pb-[max(env(safe-area-inset-bottom),12px)] space-y-1.5 bg-gradient-to-t from-black/80 to-transparent pointer-events-none">
+          <div className="max-w-3xl mx-auto pointer-events-auto space-y-1.5">
+            {el.audioNotes.map((a) => (
+              <audio
+                key={a.id}
+                src={a.url}
+                controls
+                preload="metadata"
+                className="w-full h-8"
+              />
+            ))}
+          </div>
+        </div>
+      ) : null}
     </div>,
     document.body,
   );
