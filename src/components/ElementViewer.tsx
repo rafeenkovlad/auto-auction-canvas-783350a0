@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { FileRef, InspectionElement } from "@/lib/report.api";
 import type { Status, StatusMeta } from "@/lib/report.utils";
+import { thumbUrl } from "@/lib/image";
 
 export type ViewerElement = InspectionElement & {
   _status: Status;
