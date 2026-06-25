@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { FileRef, InspectionElement } from "@/lib/report.api";
 import type { Status, StatusMeta } from "@/lib/report.utils";
+import { thumbUrl } from "@/lib/image";
 
 export type ViewerElement = InspectionElement & {
   _status: Status;
@@ -461,6 +462,28 @@ function ZoomImage({ src, alt }: { src: string; alt: string }) {
     reset();
   }, [src, reset]);
 
+  // Progressive load: show ~1200w webp preview from the proxy immediately,
+  // upgrade to the original (full resolution) once it finishes decoding.
+  // For sources that aren't proxyable, `previewSrc` will fall back to `src`
+  // and there's effectively no swap.
+  const previewSrc = useMemo(() => thumbUrl(src, 1200) ?? src, [src]);
+  const [currentSrc, setCurrentSrc] = useState(previewSrc);
+  useEffect(() => {
+    setCurrentSrc(previewSrc);
+    if (previewSrc === src) return;
+    const full = new Image();
+    full.decoding = "async";
+    let cancelled = false;
+    full.onload = () => {
+      if (!cancelled) setCurrentSrc(src);
+    };
+    full.src = src;
+    return () => {
+      cancelled = true;
+      full.onload = null;
+    };
+  }, [previewSrc, src]);
+
   const zoomed = scale > 1.01;
 
   return (
@@ -469,7 +492,7 @@ function ZoomImage({ src, alt }: { src: string; alt: string }) {
       onWheel={onWheel}
     >
       <img
-        src={src}
+        src={currentSrc}
         alt={alt}
         draggable={false}
         onDoubleClick={onDoubleClick}
