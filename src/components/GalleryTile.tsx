@@ -121,20 +121,20 @@ export function GalleryTileBody({ item }: { item: GalleryItem }) {
           </div>
         )}
         {item.damageTags && item.damageTags.length > 0 && (
-          <div className="flex flex-wrap gap-x-1.5 gap-y-0.5">
+          <div className="flex gap-x-1.5 overflow-hidden whitespace-nowrap">
             {item.damageTags.map((t) => (
               <span
                 key={t.id}
-                className="inline-flex items-center gap-1 text-[10px] text-muted-foreground"
+                className="inline-flex items-center gap-1 text-[10px] text-muted-foreground min-w-0"
                 title={t.name}
               >
                 <span
-                  className="w-1 h-1 rounded-full"
+                  className="w-1 h-1 rounded-full shrink-0"
                   style={{
                     background: t.severe ? "var(--grade-bad)" : "var(--grade-warn)",
                   }}
                 />
-                <span className="truncate max-w-[110px]">{t.name}</span>
+                <span className="truncate">{t.name}</span>
               </span>
             ))}
           </div>
