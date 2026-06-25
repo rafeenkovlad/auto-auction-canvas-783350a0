@@ -54,10 +54,7 @@ export const Route = createFileRoute("/")({
 
 function AuctionSheetPage() {
   const { token } = Route.useSearch();
-  useEffect(() => {
-    // Warm cache for all schema backgrounds as soon as the page mounts.
-    preloadSchemaImages();
-  }, []);
+
   const reportResult = useQuery({
     ...reportQuery(token),
     enabled: Boolean(token),
