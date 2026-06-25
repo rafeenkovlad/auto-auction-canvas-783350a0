@@ -177,7 +177,8 @@ export function MediaGallery({
               >
                 {g.cover ? (
                   <img
-                    src={g.cover}
+                    src={thumbUrl(g.cover, 400) ?? g.cover}
+                    srcSet={thumbSrcSet(g.cover, 400) ?? undefined}
                     alt={g.label}
                     loading="lazy"
                     decoding="async"
