@@ -161,13 +161,13 @@ export function MediaGallery({
           style={{ minHeight: 320 }}
         />
       ) : active ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3 items-start">
           {active.items.map((item) => (
             <button
               key={item.idx}
               type="button"
               onClick={() => onOpen(item.idx)}
-              className="group rounded-lg border border-border bg-card overflow-hidden text-left hover:border-accent hover:shadow-sm transition-all"
+              className="group rounded-lg border border-border bg-card overflow-hidden text-left hover:border-accent hover:shadow-sm transition-all flex flex-col"
             >
               <GalleryTileBody item={item} />
             </button>
