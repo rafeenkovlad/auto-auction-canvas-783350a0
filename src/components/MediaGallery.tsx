@@ -14,6 +14,10 @@ export type GalleryItem = {
   isDamage: boolean;
   tag?: { name: string; severe: boolean } | null;
   timestamp?: string | null;
+  status?: "ok" | "minor" | "serious";
+  paintworkFrom?: number | null;
+  paintworkTo?: number | null;
+  damageTags?: Array<{ id: number; name: string; severe: boolean }>;
 };
 
 const SECTION_GROUPS: Array<{
