@@ -73,25 +73,30 @@ export function GalleryTileBody({ item }: { item: GalleryItem }) {
             </svg>
           </div>
         )}
-        {item.tag ? (
-          <span
-            className="absolute top-1.5 left-1.5 inline-flex items-center gap-1 max-w-[calc(100%-12px)] truncate px-1.5 py-0.5 rounded-md text-[10px] font-medium border"
-            style={{
-              background: item.tag.severe
-                ? "color-mix(in oklab, var(--grade-bad) 12%, white)"
-                : "color-mix(in oklab, var(--grade-warn) 18%, white)",
-              borderColor: item.tag.severe ? "var(--grade-bad)" : "var(--grade-warn)",
-              color: "var(--foreground)",
-            }}
-            title={item.tag.name}
-          >
-            <span
-              className="w-1.5 h-1.5 rounded-full shrink-0"
-              style={{ background: item.tag.severe ? "var(--grade-bad)" : "var(--grade-warn)" }}
-              aria-hidden
-            />
-            <span className="truncate">{item.tag.name}</span>
-          </span>
+        {item.damageTags && item.damageTags.length > 0 ? (
+          <div className="absolute top-1.5 left-1.5 right-1.5 flex flex-wrap gap-1 max-h-[calc(100%-12px)] overflow-hidden">
+            {item.damageTags.map((t) => (
+              <span
+                key={t.id}
+                className="inline-flex items-center gap-1 max-w-full truncate px-1.5 py-0.5 rounded-md text-[10px] font-medium border backdrop-blur-sm"
+                style={{
+                  background: t.severe
+                    ? "color-mix(in oklab, var(--grade-bad) 18%, white)"
+                    : "color-mix(in oklab, var(--grade-warn) 22%, white)",
+                  borderColor: t.severe ? "var(--grade-bad)" : "var(--grade-warn)",
+                  color: "var(--foreground)",
+                }}
+                title={t.name}
+              >
+                <span
+                  className="w-1.5 h-1.5 rounded-full shrink-0"
+                  style={{ background: t.severe ? "var(--grade-bad)" : "var(--grade-warn)" }}
+                  aria-hidden
+                />
+                <span className="truncate">{t.name}</span>
+              </span>
+            ))}
+          </div>
         ) : null}
       </div>
       <div className="px-2 py-1.5 border-t border-border bg-card space-y-1">
@@ -118,25 +123,6 @@ export function GalleryTileBody({ item }: { item: GalleryItem }) {
         {(item.paintworkFrom != null || item.paintworkTo != null) && (
           <div className="mono text-[10px] text-muted-foreground tabular-nums">
             ЛКП {item.paintworkFrom ?? "—"}–{item.paintworkTo ?? "—"} мкм
-          </div>
-        )}
-        {item.damageTags && item.damageTags.length > 0 && (
-          <div className="flex gap-x-1.5 overflow-hidden whitespace-nowrap">
-            {item.damageTags.map((t) => (
-              <span
-                key={t.id}
-                className="inline-flex items-center gap-1 text-[10px] text-muted-foreground min-w-0"
-                title={t.name}
-              >
-                <span
-                  className="w-1 h-1 rounded-full shrink-0"
-                  style={{
-                    background: t.severe ? "var(--grade-bad)" : "var(--grade-warn)",
-                  }}
-                />
-                <span className="truncate">{t.name}</span>
-              </span>
-            ))}
           </div>
         )}
       </div>
