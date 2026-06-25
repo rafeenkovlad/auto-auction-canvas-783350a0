@@ -36,7 +36,8 @@ export function GalleryTileBody({ item }: { item: GalleryItem }) {
       >
         {isImage ? (
           <img
-            src={url}
+            src={thumbUrl(url, 400) ?? url}
+            srcSet={thumbSrcSet(url, 400) ?? undefined}
             alt={item.caption}
             loading="lazy"
             decoding="async"
