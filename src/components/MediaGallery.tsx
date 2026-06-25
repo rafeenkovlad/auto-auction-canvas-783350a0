@@ -143,7 +143,13 @@ export function MediaGallery({
         </h3>
       </div>
 
-      {active ? (
+      {!visible ? (
+        <div
+          aria-hidden
+          className="rounded-lg bg-muted/40 animate-pulse"
+          style={{ minHeight: 320 }}
+        />
+      ) : active ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3">
           {active.items.map((item) => (
             <button
