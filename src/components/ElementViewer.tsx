@@ -330,69 +330,148 @@ function MediaStage({ file }: { file: FileRef | null | undefined }) {
 
 function VideoPlayer({ src, hls }: { src: string; hls: boolean }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [buffering, setBuffering] = useState(true);
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
+
+    setBuffering(true);
+    setFailed(false);
 
     const tryPlay = () => {
       const p = video.play();
       if (p && typeof p.catch === "function") p.catch(() => {});
     };
 
-    // Native HLS (Safari/iOS)
+    // Buffering UI: trust the browser's own buffering events.
+    const onWaiting = () => setBuffering(true);
+    const onStalled = () => setBuffering(true);
+    const onPlaying = () => setBuffering(false);
+    const onCanPlay = () => setBuffering(false);
+    const onSeeking = () => setBuffering(true);
+    const onSeeked = () => setBuffering(false);
+    const onError = () => setFailed(true);
+    video.addEventListener("waiting", onWaiting);
+    video.addEventListener("stalled", onStalled);
+    video.addEventListener("playing", onPlaying);
+    video.addEventListener("canplay", onCanPlay);
+    video.addEventListener("seeking", onSeeking);
+    video.addEventListener("seeked", onSeeked);
+    video.addEventListener("error", onError);
+
+    // Native HLS (Safari/iOS) — much smoother than MSE on those platforms.
     if (!hls || video.canPlayType("application/vnd.apple.mpegurl")) {
       video.src = src;
       tryPlay();
-      return;
+      return () => {
+        video.removeEventListener("waiting", onWaiting);
+        video.removeEventListener("stalled", onStalled);
+        video.removeEventListener("playing", onPlaying);
+        video.removeEventListener("canplay", onCanPlay);
+        video.removeEventListener("seeking", onSeeking);
+        video.removeEventListener("seeked", onSeeked);
+        video.removeEventListener("error", onError);
+      };
     }
 
     let destroyed = false;
-    let hlsInstance: { destroy: () => void } | null = null;
+    let hlsInstance: import("hls.js").default | null = null;
 
     import("hls.js").then(({ default: Hls }) => {
       if (destroyed) return;
-      if (Hls.isSupported()) {
-        const instance = new Hls({
-          enableWorker: true,
-          // Start at the lowest quality so playback begins as fast as possible,
-          // then ABR can climb if bandwidth allows.
-          startLevel: -1,
-          // Healthier defaults than the library's stall-prone built-ins.
-          maxBufferLength: 30,
-          maxMaxBufferLength: 60,
-          backBufferLength: 30,
-          // Most inspection clips are short — keep the first fragment cheap.
-          maxBufferSize: 30 * 1000 * 1000,
-        });
-        instance.loadSource(src);
-        instance.attachMedia(video);
-        hlsInstance = instance;
-        tryPlay();
-      } else {
+      if (!Hls.isSupported()) {
         video.src = src;
         tryPlay();
+        return;
       }
+      // Use the screen size to cap quality — there's no reason to download
+      // 4K segments for a 640 px viewport. Backed up by the lowest startLevel
+      // so the first frame appears as fast as possible, then ABR climbs.
+      const instance = new Hls({
+        enableWorker: true,
+        lowLatencyMode: false,
+        progressive: true,
+        startLevel: -1,
+        capLevelToPlayerSize: true,
+        // Buffer tuning: keep ~30 s ahead so the player rides through
+        // short network blips without stalling, but cap memory.
+        maxBufferLength: 30,
+        maxMaxBufferLength: 60,
+        backBufferLength: 30,
+        maxBufferSize: 30 * 1000 * 1000,
+        // Gap/stall recovery — defaults nudge only twice and give up.
+        maxBufferHole: 0.5,
+        nudgeMaxRetry: 10,
+        // ABR — start slightly conservative so the first ramp-up is safe.
+        abrEwmaDefaultEstimate: 1_000_000,
+        abrBandWidthFactor: 0.9,
+        abrBandWidthUpFactor: 0.7,
+        // Network retries for flaky S3 connections.
+        fragLoadingMaxRetry: 6,
+        manifestLoadingMaxRetry: 4,
+        levelLoadingMaxRetry: 4,
+      });
+      // attach first, then load — slightly faster MSE setup.
+      instance.attachMedia(video);
+      instance.loadSource(src);
+
+      instance.on(Hls.Events.ERROR, (_e, data) => {
+        if (!data.fatal) return;
+        switch (data.type) {
+          case Hls.ErrorTypes.NETWORK_ERROR:
+            instance.startLoad();
+            break;
+          case Hls.ErrorTypes.MEDIA_ERROR:
+            instance.recoverMediaError();
+            break;
+          default:
+            setFailed(true);
+            instance.destroy();
+        }
+      });
+      instance.on(Hls.Events.MANIFEST_PARSED, tryPlay);
+      hlsInstance = instance;
     });
 
     return () => {
       destroyed = true;
+      video.removeEventListener("waiting", onWaiting);
+      video.removeEventListener("stalled", onStalled);
+      video.removeEventListener("playing", onPlaying);
+      video.removeEventListener("canplay", onCanPlay);
+      video.removeEventListener("seeking", onSeeking);
+      video.removeEventListener("seeked", onSeeked);
+      video.removeEventListener("error", onError);
       hlsInstance?.destroy();
     };
   }, [src, hls]);
 
   return (
-    <video
-      ref={videoRef}
-      controls
-      autoPlay
-      // Required for autoplay to actually start on Chrome/Safari/iOS.
-      // User can unmute via native controls.
-      muted
-      playsInline
-      preload="auto"
-      className="max-w-full max-h-full"
-    />
+    <>
+      <video
+        ref={videoRef}
+        controls
+        autoPlay
+        // Required for autoplay to actually start on Chrome/Safari/iOS.
+        // User can unmute via native controls.
+        muted
+        playsInline
+        preload="auto"
+        className="max-w-full max-h-full"
+      />
+      {buffering && !failed ? (
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+          <span className="h-10 w-10 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+        </div>
+      ) : null}
+      {failed ? (
+        <div className="absolute inset-0 flex items-center justify-center p-6 text-center text-sm text-white/80">
+          Не удалось загрузить видео.
+        </div>
+      ) : null}
+    </>
   );
 }
 
