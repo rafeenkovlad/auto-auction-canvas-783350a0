@@ -332,6 +332,7 @@ function VideoPlayer({ src, hls }: { src: string; hls: boolean }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [buffering, setBuffering] = useState(true);
   const [failed, setFailed] = useState(false);
+  const [muted, setMuted] = useState(false);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -339,41 +340,67 @@ function VideoPlayer({ src, hls }: { src: string; hls: boolean }) {
 
     setBuffering(true);
     setFailed(false);
+    setMuted(false);
 
+    // Try to start unmuted (with sound). If the browser blocks autoplay
+    // (Chrome/Safari policy: no sound until a user gesture), fall back
+    // to a muted autoplay and surface an "unmute" button.
     const tryPlay = () => {
+      video.muted = false;
       const p = video.play();
-      if (p && typeof p.catch === "function") p.catch(() => {});
+      if (p && typeof p.catch === "function") {
+        p.catch(() => {
+          video.muted = true;
+          setMuted(true);
+          video.play().catch(() => {});
+        });
+      }
     };
 
-    // Buffering UI: trust the browser's own buffering events.
-    const onWaiting = () => setBuffering(true);
-    const onStalled = () => setBuffering(true);
+    // Spinner driven by readyState rather than just `waiting`/`playing`:
+    // some streams fire `waiting` after every fragment append even though
+    // playback continues — and `timeupdate` is the most reliable signal
+    // that frames are actually rendering.
+    const refreshBuffering = () => {
+      // HAVE_FUTURE_DATA (3) means the next frame is ready.
+      setBuffering(video.readyState < 3 && !video.paused);
+    };
     const onPlaying = () => setBuffering(false);
+    const onTimeUpdate = () => setBuffering(false);
+    const onWaiting = refreshBuffering;
+    const onStalled = refreshBuffering;
     const onCanPlay = () => setBuffering(false);
     const onSeeking = () => setBuffering(true);
-    const onSeeked = () => setBuffering(false);
+    const onSeeked = refreshBuffering;
     const onError = () => setFailed(true);
+    const onVolumeChange = () => setMuted(video.muted);
     video.addEventListener("waiting", onWaiting);
     video.addEventListener("stalled", onStalled);
     video.addEventListener("playing", onPlaying);
+    video.addEventListener("timeupdate", onTimeUpdate);
     video.addEventListener("canplay", onCanPlay);
     video.addEventListener("seeking", onSeeking);
     video.addEventListener("seeked", onSeeked);
     video.addEventListener("error", onError);
+    video.addEventListener("volumechange", onVolumeChange);
+
+    const detachListeners = () => {
+      video.removeEventListener("waiting", onWaiting);
+      video.removeEventListener("stalled", onStalled);
+      video.removeEventListener("playing", onPlaying);
+      video.removeEventListener("timeupdate", onTimeUpdate);
+      video.removeEventListener("canplay", onCanPlay);
+      video.removeEventListener("seeking", onSeeking);
+      video.removeEventListener("seeked", onSeeked);
+      video.removeEventListener("error", onError);
+      video.removeEventListener("volumechange", onVolumeChange);
+    };
 
     // Native HLS (Safari/iOS) — much smoother than MSE on those platforms.
     if (!hls || video.canPlayType("application/vnd.apple.mpegurl")) {
       video.src = src;
       tryPlay();
-      return () => {
-        video.removeEventListener("waiting", onWaiting);
-        video.removeEventListener("stalled", onStalled);
-        video.removeEventListener("playing", onPlaying);
-        video.removeEventListener("canplay", onCanPlay);
-        video.removeEventListener("seeking", onSeeking);
-        video.removeEventListener("seeked", onSeeked);
-        video.removeEventListener("error", onError);
-      };
+      return detachListeners;
     }
 
     let destroyed = false;
@@ -386,34 +413,25 @@ function VideoPlayer({ src, hls }: { src: string; hls: boolean }) {
         tryPlay();
         return;
       }
-      // Use the screen size to cap quality — there's no reason to download
-      // 4K segments for a 640 px viewport. Backed up by the lowest startLevel
-      // so the first frame appears as fast as possible, then ABR climbs.
       const instance = new Hls({
         enableWorker: true,
         lowLatencyMode: false,
         progressive: true,
         startLevel: -1,
         capLevelToPlayerSize: true,
-        // Buffer tuning: keep ~30 s ahead so the player rides through
-        // short network blips without stalling, but cap memory.
         maxBufferLength: 30,
         maxMaxBufferLength: 60,
         backBufferLength: 30,
         maxBufferSize: 30 * 1000 * 1000,
-        // Gap/stall recovery — defaults nudge only twice and give up.
         maxBufferHole: 0.5,
         nudgeMaxRetry: 10,
-        // ABR — start slightly conservative so the first ramp-up is safe.
         abrEwmaDefaultEstimate: 1_000_000,
         abrBandWidthFactor: 0.9,
         abrBandWidthUpFactor: 0.7,
-        // Network retries for flaky S3 connections.
         fragLoadingMaxRetry: 6,
         manifestLoadingMaxRetry: 4,
         levelLoadingMaxRetry: 4,
       });
-      // attach first, then load — slightly faster MSE setup.
       instance.attachMedia(video);
       instance.loadSource(src);
 
@@ -437,16 +455,19 @@ function VideoPlayer({ src, hls }: { src: string; hls: boolean }) {
 
     return () => {
       destroyed = true;
-      video.removeEventListener("waiting", onWaiting);
-      video.removeEventListener("stalled", onStalled);
-      video.removeEventListener("playing", onPlaying);
-      video.removeEventListener("canplay", onCanPlay);
-      video.removeEventListener("seeking", onSeeking);
-      video.removeEventListener("seeked", onSeeked);
-      video.removeEventListener("error", onError);
+      detachListeners();
       hlsInstance?.destroy();
     };
   }, [src, hls]);
+
+  const unmute = () => {
+    const v = videoRef.current;
+    if (!v) return;
+    v.muted = false;
+    if (v.volume === 0) v.volume = 1;
+    setMuted(false);
+    v.play().catch(() => {});
+  };
 
   return (
     <>
@@ -454,9 +475,6 @@ function VideoPlayer({ src, hls }: { src: string; hls: boolean }) {
         ref={videoRef}
         controls
         autoPlay
-        // Required for autoplay to actually start on Chrome/Safari/iOS.
-        // User can unmute via native controls.
-        muted
         playsInline
         preload="auto"
         className="max-w-full max-h-full"
@@ -465,6 +483,21 @@ function VideoPlayer({ src, hls }: { src: string; hls: boolean }) {
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
           <span className="h-10 w-10 rounded-full border-2 border-white/30 border-t-white animate-spin" />
         </div>
+      ) : null}
+      {muted && !failed ? (
+        <button
+          type="button"
+          onClick={unmute}
+          className="absolute top-14 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2 bg-white text-black text-xs font-semibold px-3 py-1.5 rounded-full shadow-lg hover:bg-white/90"
+          aria-label="Включить звук"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M11 5L6 9H2v6h4l5 4V5z" />
+            <path d="M15.5 8.5a5 5 0 010 7" />
+            <path d="M19 5a9 9 0 010 14" />
+          </svg>
+          Включить звук
+        </button>
       ) : null}
       {failed ? (
         <div className="absolute inset-0 flex items-center justify-center p-6 text-center text-sm text-white/80">
