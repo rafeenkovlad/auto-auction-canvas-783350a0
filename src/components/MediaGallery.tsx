@@ -179,6 +179,12 @@ export function MediaGallery({
                     src={g.cover}
                     alt={g.label}
                     loading="lazy"
+                    decoding="async"
+                    /* @ts-expect-error fetchpriority valid attr */
+                    fetchpriority="low"
+                    width={400}
+                    height={300}
+                    sizes="(min-width: 1280px) 220px, (min-width: 640px) 33vw, 50vw"
                     className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                   />
                 ) : null}
