@@ -78,7 +78,10 @@ export function MediaGallery({
     }
     const other = items.filter((i) => !used.has(i.idx));
     if (other.length > 0) {
-      const coverItem = other.find((i) => !i.isVideo) ?? other[0];
+      const coverItem =
+        other.find(
+          (i) => !i.isVideo && !/\.(m3u8|mp4|webm|mov)(\?|$)/i.test(i.file.url),
+        ) ?? other[0];
       result.push({
         key: "other",
         label: "Прочее",
