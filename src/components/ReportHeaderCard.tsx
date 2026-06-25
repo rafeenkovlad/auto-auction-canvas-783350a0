@@ -44,6 +44,9 @@ export function ReportHeaderCard({
               sizes="(max-width: 1024px) 100vw, 800px"
               alt={carName}
               loading="eager"
+              decoding="async"
+              /* @ts-expect-error fetchpriority valid attr */
+              fetchpriority="high"
               className="w-full h-full object-cover"
             />
           </div>
