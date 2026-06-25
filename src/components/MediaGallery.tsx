@@ -63,7 +63,10 @@ export function MediaGallery({
       const groupItems = items.filter((i) => !used.has(i.idx) && g.match(i));
       groupItems.forEach((i) => used.add(i.idx));
       if (groupItems.length === 0) continue;
-      const coverItem = groupItems.find((i) => !i.isVideo) ?? groupItems[0];
+      const coverItem =
+        groupItems.find(
+          (i) => !i.isVideo && !/\.(m3u8|mp4|webm|mov)(\?|$)/i.test(i.file.url),
+        ) ?? groupItems[0];
       result.push({
         key: g.key,
         label: g.label,
@@ -75,7 +78,10 @@ export function MediaGallery({
     }
     const other = items.filter((i) => !used.has(i.idx));
     if (other.length > 0) {
-      const coverItem = other.find((i) => !i.isVideo) ?? other[0];
+      const coverItem =
+        other.find(
+          (i) => !i.isVideo && !/\.(m3u8|mp4|webm|mov)(\?|$)/i.test(i.file.url),
+        ) ?? other[0];
       result.push({
         key: "other",
         label: "Прочее",
@@ -175,7 +181,7 @@ export function MediaGallery({
                 className="group relative aspect-[4/3] rounded-lg border border-border bg-card overflow-hidden text-left hover:border-accent hover:shadow-sm transition-all"
                 title={`${g.label} · ${g.count}`}
               >
-                {g.cover ? (
+                {g.cover && !/\.(m3u8|mp4|webm|mov)(\?|$)/i.test(g.cover) ? (
                   <img
                     src={thumbUrl(g.cover, 400) ?? g.cover}
                     srcSet={thumbSrcSet(g.cover, 400) ?? undefined}
@@ -189,7 +195,9 @@ export function MediaGallery({
                     sizes="(min-width: 1280px) 220px, (min-width: 640px) 33vw, 50vw"
                     className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                   />
-                ) : null}
+                ) : (
+                  <div className="absolute inset-0 bg-gradient-to-br from-muted to-muted/60" />
+                )}
                 <span
                   aria-hidden
                   className="absolute inset-0"

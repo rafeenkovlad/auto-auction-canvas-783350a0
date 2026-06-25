@@ -353,7 +353,18 @@ function VideoPlayer({ src, hls }: { src: string; hls: boolean }) {
     import("hls.js").then(({ default: Hls }) => {
       if (destroyed) return;
       if (Hls.isSupported()) {
-        const instance = new Hls({ enableWorker: true });
+        const instance = new Hls({
+          enableWorker: true,
+          // Start at the lowest quality so playback begins as fast as possible,
+          // then ABR can climb if bandwidth allows.
+          startLevel: -1,
+          // Healthier defaults than the library's stall-prone built-ins.
+          maxBufferLength: 30,
+          maxMaxBufferLength: 60,
+          backBufferLength: 30,
+          // Most inspection clips are short — keep the first fragment cheap.
+          maxBufferSize: 30 * 1000 * 1000,
+        });
         instance.loadSource(src);
         instance.attachMedia(video);
         hlsInstance = instance;
@@ -375,7 +386,11 @@ function VideoPlayer({ src, hls }: { src: string; hls: boolean }) {
       ref={videoRef}
       controls
       autoPlay
+      // Required for autoplay to actually start on Chrome/Safari/iOS.
+      // User can unmute via native controls.
+      muted
       playsInline
+      preload="auto"
       className="max-w-full max-h-full"
     />
   );
