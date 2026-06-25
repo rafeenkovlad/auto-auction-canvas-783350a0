@@ -149,14 +149,8 @@ export function ElementViewer({
         </button>
       )}
 
-      {/* Bottom info panel: collapsible */}
-      <InfoPanel
-        el={el}
-        m={m}
-        hasDetails={hasDetails}
-        collapsed={panelCollapsed}
-        onToggle={() => setPanelCollapsed((c) => !c)}
-      />
+      {/* Bottom info panel */}
+      <InfoPanel el={el} m={m} hasDetails={hasDetails} />
     </div>,
     document.body,
   );
