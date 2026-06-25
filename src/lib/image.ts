@@ -13,7 +13,7 @@ const PROXY = "https://wsrv.nl/";
 
 // Hosts we are willing to proxy. wsrv refuses arbitrary upstreams anyway,
 // but we keep an explicit allowlist to avoid sending unrelated URLs.
-const PROXY_HOSTS = ["s3.regru.cloud"];
+const PROXY_HOSTS = ["s3.regru.cloud", "s.auto.drom.ru"];
 
 function shouldProxy(url: string): boolean {
   try {
