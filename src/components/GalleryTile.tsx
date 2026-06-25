@@ -24,7 +24,10 @@ export function GalleryTileBody({ item }: { item: GalleryItem }) {
   const url = file.url;
   const ext = url.split("?")[0].split(".").pop()?.toLowerCase() ?? "";
   const isHls = ext === "m3u8" || url.includes(".m3u8");
-  const isImage = isImageFile(file);
+  // Video flag wins: backend sometimes labels HLS files as `image/*`,
+  // which would otherwise route the .m3u8 URL through the image proxy
+  // and trigger an ERR_BLOCKED_BY_ORB on the tile.
+  const isImage = !item.isVideo && !isHls && isImageFile(file);
   return (
     <>
       <div
