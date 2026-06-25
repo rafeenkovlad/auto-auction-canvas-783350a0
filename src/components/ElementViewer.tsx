@@ -49,16 +49,9 @@ export function ElementViewer({
   if (!open || typeof document === "undefined") return null;
 
   const el = elements[index!];
-  const m = statusMeta(el._status);
+  void statusMeta;
   const canPrev = index! > 0;
   const canNext = index! < elements.length - 1;
-
-  const hasDetails =
-    el.paintworkThicknessFrom != null ||
-    el.paintworkThicknessTo != null ||
-    el.seriousDamageTags.length > 0 ||
-    el.noSeriousDamageTags.length > 0 ||
-    (el.audioNotes && el.audioNotes.length > 0);
 
   // Capture-phase swipe detection so we get events before native video controls / image handlers.
   const onTouchStart = (e: React.TouchEvent) => {
