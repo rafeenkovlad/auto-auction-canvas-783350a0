@@ -1,6 +1,7 @@
 import type { GalleryItem } from "@/components/MediaGallery";
 import { isImageFile } from "@/lib/report.utils";
 import { SECTION_LABELS, STEP_LABELS } from "@/lib/report.constants";
+import { thumbSrcSet, thumbUrl } from "@/lib/image";
 
 /**
  * Thumbnail body used inside `MediaGallery` and `AdditionalMaterials`.
@@ -35,7 +36,8 @@ export function GalleryTileBody({ item }: { item: GalleryItem }) {
       >
         {isImage ? (
           <img
-            src={url}
+            src={thumbUrl(url, 400) ?? url}
+            srcSet={thumbSrcSet(url, 400) ?? undefined}
             alt={item.caption}
             loading="lazy"
             decoding="async"
