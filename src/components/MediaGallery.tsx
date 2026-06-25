@@ -63,7 +63,10 @@ export function MediaGallery({
       const groupItems = items.filter((i) => !used.has(i.idx) && g.match(i));
       groupItems.forEach((i) => used.add(i.idx));
       if (groupItems.length === 0) continue;
-      const coverItem = groupItems.find((i) => !i.isVideo) ?? groupItems[0];
+      const coverItem =
+        groupItems.find(
+          (i) => !i.isVideo && !/\.(m3u8|mp4|webm|mov)(\?|$)/i.test(i.file.url),
+        ) ?? groupItems[0];
       result.push({
         key: g.key,
         label: g.label,
