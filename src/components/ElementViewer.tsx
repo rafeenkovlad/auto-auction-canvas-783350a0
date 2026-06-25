@@ -178,30 +178,17 @@ function MediaStage({ file }: { file: FileRef | null | undefined }) {
   const t = (file.type || "").toLowerCase();
   const url = file.url;
   const ext = url.split("?")[0].split(".").pop()?.toLowerCase() ?? "";
-  const isPdf = t.includes("pdf") || ext === "pdf";
   const isHls = ext === "m3u8" || url.includes(".m3u8");
   const isVideo = t.includes("video") || isHls || ext === "mp4" || ext === "webm" || ext === "mov";
   const isAudio = t.includes("audio") || ext === "mp3" || ext === "wav" || ext === "m4a" || ext === "ogg";
+  const isImage =
+    t.includes("image") ||
+    ["jpg", "jpeg", "png", "webp", "gif", "avif", "bmp", "svg"].includes(ext);
+  const isPdf = t.includes("pdf") || ext === "pdf";
+  const isOffice = [
+    "doc", "docx", "xls", "xlsx", "ppt", "pptx", "odt", "ods", "odp", "rtf", "txt", "csv",
+  ].includes(ext);
 
-  if (isPdf) {
-    return (
-      <div className="absolute inset-0 flex flex-col">
-        <iframe
-          src={url}
-          title={file.filename}
-          className="flex-1 w-full bg-white"
-        />
-        <a
-          href={url}
-          target="_blank"
-          rel="noreferrer"
-          className="absolute bottom-20 right-3 z-10 mono text-[11px] text-white/90 bg-black/50 hover:bg-black/70 backdrop-blur rounded-full px-3 py-1"
-        >
-          Открыть PDF ↗
-        </a>
-      </div>
-    );
-  }
   if (isVideo) {
     return (
       <div className="absolute inset-0 flex items-center justify-center bg-black">
@@ -216,8 +203,49 @@ function MediaStage({ file }: { file: FileRef | null | undefined }) {
       </div>
     );
   }
+  if (isImage) {
+    return <ZoomImage src={url} alt={file.filename} />;
+  }
+  if (isPdf || isOffice) {
+    // S3 often serves these with `Content-Disposition: attachment`, which
+    // makes browsers download instead of rendering inline. Route through
+    // Google's docs viewer so the preview happens server-side.
+    const viewerSrc = isPdf
+      ? url
+      : `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(url)}`;
+    return (
+      <div className="absolute inset-0 flex flex-col bg-white">
+        <iframe
+          src={viewerSrc}
+          title={file.filename}
+          className="flex-1 w-full bg-white"
+        />
+        <a
+          href={url}
+          target="_blank"
+          rel="noreferrer"
+          className="absolute bottom-4 right-3 z-10 mono text-[11px] text-white bg-black/70 hover:bg-black/85 backdrop-blur rounded-full px-3 py-1"
+        >
+          Открыть в новой вкладке ↗
+        </a>
+      </div>
+    );
+  }
 
-  return <ZoomImage src={url} alt={file.filename} />;
+  // Unknown type — show a minimal card with a link.
+  return (
+    <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-6 text-center text-white/80">
+      <div className="text-sm">Предпросмотр недоступен для этого типа файла</div>
+      <a
+        href={url}
+        target="_blank"
+        rel="noreferrer"
+        className="mono text-xs text-white bg-white/15 hover:bg-white/25 backdrop-blur rounded-full px-3 py-1.5"
+      >
+        Открыть «{file.filename}» ↗
+      </a>
+    </div>
+  );
 }
 
 function VideoPlayer({ src, hls }: { src: string; hls: boolean }) {
