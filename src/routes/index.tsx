@@ -18,7 +18,7 @@ import { AdditionalMaterials } from "@/components/AdditionalMaterials";
 import { ExpertConclusion } from "@/components/ExpertConclusion";
 import { statusMeta } from "@/lib/report.utils";
 import { useReportData } from "@/hooks/useReportData";
-import { preloadSchemaImages } from "@/lib/schema-preload";
+
 
 const reportQuery = (token?: string) =>
   queryOptions({
