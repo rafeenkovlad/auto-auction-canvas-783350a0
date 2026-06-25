@@ -3,6 +3,7 @@ import { Car, Armchair, Wrench, Disc3, AppWindow, Lightbulb, Shield, Hash, FileT
 import { GalleryTileBody } from "@/components/GalleryTile";
 import type { LucideIcon } from "lucide-react";
 import type { FileRef } from "@/lib/report.api";
+import { thumbSrcSet, thumbUrl } from "@/lib/image";
 
 export type GalleryItem = {
   file: FileRef;
