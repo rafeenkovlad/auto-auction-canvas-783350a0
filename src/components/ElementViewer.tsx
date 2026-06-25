@@ -28,7 +28,7 @@ export function ElementViewer({
 }: Props) {
   const open = index != null && elements[index] != null;
   const swipeRef = useRef<{ x: number; y: number; t: number; touches: number; handled: boolean } | null>(null);
-  const [panelCollapsed, setPanelCollapsed] = useState(false);
+  
 
   useEffect(() => {
     if (!open) return;
