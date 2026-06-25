@@ -1,6 +1,7 @@
 import type { GalleryItem } from "@/components/MediaGallery";
 import { isImageFile } from "@/lib/report.utils";
 import { SECTION_LABELS, STEP_LABELS } from "@/lib/report.constants";
+import { thumbSrcSet, thumbUrl } from "@/lib/image";
 
 /**
  * Thumbnail body used inside `MediaGallery` and `AdditionalMaterials`.
