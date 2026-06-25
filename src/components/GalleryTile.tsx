@@ -94,11 +94,51 @@ export function GalleryTileBody({ item }: { item: GalleryItem }) {
           </span>
         ) : null}
       </div>
-      <div className="px-2 py-1.5 border-t border-border bg-card">
-        <div className="text-xs font-medium ink truncate">{item.caption}</div>
+      <div className="px-2 py-1.5 border-t border-border bg-card space-y-1">
+        <div className="flex items-center gap-1.5 min-w-0">
+          {item.status ? (
+            <span
+              className="w-1.5 h-1.5 rounded-full shrink-0"
+              style={{
+                background:
+                  item.status === "serious"
+                    ? "var(--grade-bad)"
+                    : item.status === "minor"
+                      ? "var(--grade-warn)"
+                      : "var(--grade-good)",
+              }}
+              aria-hidden
+            />
+          ) : null}
+          <div className="text-xs font-medium ink truncate">{item.caption}</div>
+        </div>
         <div className="text-[10px] text-muted-foreground truncate">
           {SECTION_LABELS[item.sectionKey] ?? STEP_LABELS[item.sectionKey] ?? item.sectionKey}
         </div>
+        {(item.paintworkFrom != null || item.paintworkTo != null) && (
+          <div className="mono text-[10px] text-muted-foreground tabular-nums">
+            ЛКП {item.paintworkFrom ?? "—"}–{item.paintworkTo ?? "—"} мкм
+          </div>
+        )}
+        {item.damageTags && item.damageTags.length > 0 && (
+          <div className="flex flex-wrap gap-x-1.5 gap-y-0.5">
+            {item.damageTags.map((t) => (
+              <span
+                key={t.id}
+                className="inline-flex items-center gap-1 text-[10px] text-muted-foreground"
+                title={t.name}
+              >
+                <span
+                  className="w-1 h-1 rounded-full"
+                  style={{
+                    background: t.severe ? "var(--grade-bad)" : "var(--grade-warn)",
+                  }}
+                />
+                <span className="truncate max-w-[110px]">{t.name}</span>
+              </span>
+            ))}
+          </div>
+        )}
       </div>
     </>
   );

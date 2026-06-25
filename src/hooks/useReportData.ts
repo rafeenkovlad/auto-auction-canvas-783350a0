@@ -62,6 +62,10 @@ function buildSectionsAndGallery(report: CarReport) {
         : minorTag
         ? { name: minorTag.name, severe: false }
         : null;
+      const damageTags = [
+        ...el.seriousDamageTags.map((t) => ({ id: t.id, name: t.name, severe: true })),
+        ...el.noSeriousDamageTags.map((t) => ({ id: t.id, name: t.name, severe: false })),
+      ];
       gallery.push({
         file: el.file,
         idx: i,
@@ -70,6 +74,10 @@ function buildSectionsAndGallery(report: CarReport) {
         isVideo: isVideoFile(el.file),
         isDamage: el._status !== "ok",
         tag,
+        status: el._status,
+        paintworkFrom: el.paintworkThicknessFrom ?? null,
+        paintworkTo: el.paintworkThicknessTo ?? null,
+        damageTags,
       });
     }
   }
