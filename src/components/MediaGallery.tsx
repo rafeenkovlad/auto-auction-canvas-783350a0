@@ -175,7 +175,7 @@ export function MediaGallery({
                 className="group relative aspect-[4/3] rounded-lg border border-border bg-card overflow-hidden text-left hover:border-accent hover:shadow-sm transition-all"
                 title={`${g.label} · ${g.count}`}
               >
-                {g.cover ? (
+                {g.cover && !/\.(m3u8|mp4|webm|mov)(\?|$)/i.test(g.cover) ? (
                   <img
                     src={thumbUrl(g.cover, 400) ?? g.cover}
                     srcSet={thumbSrcSet(g.cover, 400) ?? undefined}
@@ -189,7 +189,9 @@ export function MediaGallery({
                     sizes="(min-width: 1280px) 220px, (min-width: 640px) 33vw, 50vw"
                     className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                   />
-                ) : null}
+                ) : (
+                  <div className="absolute inset-0 bg-gradient-to-br from-muted to-muted/60" />
+                )}
                 <span
                   aria-hidden
                   className="absolute inset-0"
