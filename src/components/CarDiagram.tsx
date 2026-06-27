@@ -1,4 +1,4 @@
-import type { InspectionElement } from "@/lib/report.functions";
+import type { InspectionElement } from "@/lib/report.api";
 
 /* ===== Element → label / zone / side mapping ===== */
 const ELEMENT_META: Record<

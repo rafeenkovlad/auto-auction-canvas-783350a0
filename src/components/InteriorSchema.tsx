@@ -1,84 +1,93 @@
 import { useMemo } from "react";
 import type { InspectionElement } from "@/lib/report.api";
-import { type Zone, fillFor, strokeFor } from "@/components/ZoneSchema";
+import { type Zone, fillFor } from "@/components/ZoneSchema";
 import { getElementStatus } from "@/lib/report.utils";
 import { SchemaShell, type SchemaCanvasApi } from "@/components/SchemaShell";
-import carFront from "@/assets/car-front.webp";
-import carRear from "@/assets/car-rear.webp";
-import carSide from "@/assets/car-side.webp";
+import interiorFront from "@/assets/interior-front.webp";
+import interiorRear from "@/assets/interior-rear.webp";
 
-const IMG_W = 1536;
-const IMG_H = 1024;
+// Per-image natural dimensions
+const FRONT_W = 1365;
+const FRONT_H = 768;
+const REAR_W = 1264;
+const REAR_H = 843;
 
 const FRONT_ZONES: Zone[] = [
   {
-    types: ["windshield", "front_windshield"],
-    label: "Лобовое стекло",
+
+    types: ["dashboard"],
+    label: "Приборная панель (торпедо)",
     shape: {
       kind: "polygon",
-      points: "470,235 1066,235 1110,355 426,355",
+      points: "150,210 1220,210 1220,330 1080,360 285,360 150,330",
     },
+  },
+  {
+    types: ["instrument_cluster"],
+    label: "Панель приборов",
+    shape: { kind: "rect", x: 310, y: 240, w: 240, h: 110, rx: 12 },
+  },
+  {
+    types: ["steering_wheel"],
+    label: "Рулевое колесо",
+    shape: { kind: "ellipse", cx: 415, cy: 365, rx: 145, ry: 120 },
+  },
+  {
+    types: ["buttons_left_of_steering_wheel"],
+    label: "Кнопки слева от руля",
+    shape: { kind: "rect", x: 230, y: 340, w: 75, h: 70, rx: 8 },
+  },
+  {
+    types: ["central_monitor"],
+    label: "Центральный монитор",
+    shape: { kind: "rect", x: 580, y: 275, w: 250, h: 135, rx: 10 },
+  },
+  {
+    types: ["climate_control_unit"],
+    label: "Блок климат-контроля",
+    shape: { kind: "rect", x: 600, y: 415, w: 175, h: 110, rx: 10 },
+  },
+  {
+    types: ["gear_selector_area"],
+    label: "Область селектора передач",
+    shape: { kind: "rect", x: 615, y: 540, w: 160, h: 140, rx: 12 },
+  },
+  {
+    types: ["center_console"],
+    label: "Центральная консоль",
+    shape: { kind: "polygon", points: "555,525 825,525 825,768 555,768" },
+  },
+  {
+    types: ["front_seats"],
+    label: "Передние сиденья",
+    shape: { kind: "rect", x: 140, y: 565, w: 410, h: 203, rx: 16 },
+  },
+  {
+    types: ["front_seats"],
+    label: "Передние сиденья",
+    shape: { kind: "rect", x: 830, y: 565, w: 400, h: 203, rx: 16 },
   },
 ];
 
 const REAR_ZONES: Zone[] = [
   {
-    types: ["rear_window", "rear_windshield", "back_window"],
-    label: "Заднее стекло",
-    shape: {
-      kind: "polygon",
-      points: "445,205 1091,205 1140,355 396,355",
-    },
+    types: ["ceiling"],
+    label: "Потолок",
+    shape: { kind: "rect", x: 100, y: 25, w: 1070, h: 150, rx: 20 },
+  },
+  {
+    types: ["rear_seats"],
+    label: "Задние сиденья",
+    shape: { kind: "rect", x: 230, y: 240, w: 380, h: 430, rx: 18 },
+  },
+  {
+    types: ["trunk_compartment"],
+    label: "Багажное отделение",
+    shape: { kind: "polygon", points: "615,275 1075,300 1075,580 720,580 615,470" },
   },
 ];
 
-// Боковая сторона: автомобиль смотрит влево (перёд слева на изображении)
-const LEFT_SIDE_ZONES: Zone[] = [
-  {
-    types: ["front_left_window", "front_left_glass", "left_front_window"],
-    label: "Переднее левое стекло",
-    shape: {
-      kind: "polygon",
-      points: "560,395 820,378 820,500 560,500",
-    },
-  },
-  {
-    types: ["rear_left_window", "rear_left_glass", "left_rear_window"],
-    label: "Заднее левое стекло",
-    shape: {
-      kind: "polygon",
-      points: "835,378 1120,392 1120,500 835,500",
-    },
-  },
-];
-
-// Правая сторона использует ТО ЖЕ изображение, но визуально зеркалится (scaleX(-1)).
-// Координаты контуров одинаковые — зеркалятся вместе с картинкой.
-const RIGHT_SIDE_ZONES: Zone[] = [
-  {
-    types: ["front_right_window", "front_right_glass", "right_front_window"],
-    label: "Переднее правое стекло",
-    shape: {
-      kind: "polygon",
-      points: "560,395 820,378 820,500 560,500",
-    },
-  },
-  {
-    types: ["rear_right_window", "rear_right_glass", "right_rear_window"],
-    label: "Заднее правое стекло",
-    shape: {
-      kind: "polygon",
-      points: "835,378 1120,392 1120,500 835,500",
-    },
-  },
-];
-
-const ALL_ZONES = [
-  ...FRONT_ZONES,
-  ...REAR_ZONES,
-  ...LEFT_SIDE_ZONES,
-  ...RIGHT_SIDE_ZONES,
-];
+const ALL_ZONES = [...FRONT_ZONES, ...REAR_ZONES];
 
 function labelFor(el: InspectionElement): string {
   for (const z of ALL_ZONES) if (z.types.includes(el.elementType)) return z.label;
@@ -87,21 +96,25 @@ function labelFor(el: InspectionElement): string {
 
 function ImagePanel({
   imageUrl,
+  ariaLabel,
   zones,
+  width,
+  height,
   byType,
   hoverKey,
   setHoverKey,
   onElementClick,
-  mirrored = false,
   viewBox,
 }: {
   imageUrl: string;
+  ariaLabel: string;
   zones: Zone[];
+  width: number;
+  height: number;
   byType: Map<string, InspectionElement>;
   hoverKey: string | null;
   setHoverKey: (k: string | null) => void;
   onElementClick?: (el: InspectionElement) => void;
-  mirrored?: boolean;
   viewBox?: string;
 }) {
   const panelLabel =
@@ -109,34 +122,32 @@ function ImagePanel({
       ? zones.find((z) => z.types.includes(hoverKey))?.label ?? null
       : null;
   return (
-    <div className="flex-1 min-w-0 relative w-full max-w-[260px] sm:max-w-[340px] md:max-w-[400px] lg:max-w-[480px] mx-auto">
-      <div style={mirrored ? { transform: "scaleX(-1)" } : undefined}>
-        <svg
-          viewBox={viewBox ?? `0 0 ${IMG_W} ${IMG_H}`}
-          className="w-full h-auto block"
-          preserveAspectRatio="xMidYMid meet"
-        >
-          <image href={imageUrl} x={0} y={0} width={IMG_W} height={IMG_H} />
-        {zones.map((z) => {
+    <div className="flex-1 min-w-0 relative w-full max-w-[360px] sm:max-w-[400px] md:max-w-[460px] lg:max-w-[520px] mx-auto">
+      <svg
+        viewBox={viewBox ?? `0 0 ${width} ${height}`}
+        className="w-full h-auto block"
+        preserveAspectRatio="xMidYMid meet"
+        role="img"
+        aria-label={ariaLabel}
+      >
+        <image href={imageUrl} x={0} y={0} width={width} height={height} />
+        {zones.map((z, i) => {
           const el = z.types.map((t) => byType.get(t)).find(Boolean);
-          const key = z.types[0];
+          const key = `${z.types[0]}_${i}`;
+          const hoverId = z.types[0];
           const s = el ? getElementStatus(el) : "none";
-          const isHover = hoverKey === key;
           const hasDamage = el && s !== "ok";
           const fill = hasDamage ? fillFor(s) : "transparent";
-          const stroke = "transparent";
-          const sw = 0;
           const handlers = {
-            onMouseEnter: () => setHoverKey(key),
+            onMouseEnter: () => setHoverKey(hoverId),
             onMouseLeave: () => setHoverKey(null),
             onClick: el ? () => onElementClick?.(el) : undefined,
             style: { cursor: el ? "pointer" : "default", transition: "all 140ms ease" },
           };
-
           const common = {
             fill,
-            stroke,
-            strokeWidth: sw,
+            stroke: "transparent",
+            strokeWidth: 0,
             strokeLinejoin: "round" as const,
             vectorEffect: "non-scaling-stroke" as const,
             ...handlers,
@@ -171,8 +182,7 @@ function ImagePanel({
           }
           return null;
         })}
-        </svg>
-      </div>
+      </svg>
       <div className="mt-1.5 h-5 flex items-center justify-center">
         {panelLabel && (
           <span
@@ -187,7 +197,7 @@ function ImagePanel({
   );
 }
 
-export function GlassSchema({
+export function InteriorSchema({
   elements,
   onElementClick,
 }: {
@@ -206,43 +216,30 @@ export function GlassSchema({
       hideHoverLabel
       alwaysRenderCanvas
       canvas={({ hoverKey, setHoverKey }: SchemaCanvasApi) => (
-        <div className="grid grid-cols-2 gap-3">
+        <div className="flex flex-col gap-3 items-stretch">
           <ImagePanel
-            imageUrl={carFront}
-            zones={FRONT_ZONES}
-            byType={byType}
-            hoverKey={hoverKey}
-            setHoverKey={setHoverKey}
-            onElementClick={onElementClick}
-            viewBox={`380 180 760 280`}
-          />
-          <ImagePanel
-            imageUrl={carRear}
+            imageUrl={interiorRear}
+            ariaLabel="Салон — задний ряд"
             zones={REAR_ZONES}
+            width={REAR_W}
+            height={REAR_H}
             byType={byType}
             hoverKey={hoverKey}
             setHoverKey={setHoverKey}
             onElementClick={onElementClick}
-            viewBox={`350 155 840 310`}
+            viewBox={`60 10 1144 670`}
           />
           <ImagePanel
-            imageUrl={carSide}
-            zones={LEFT_SIDE_ZONES}
+            imageUrl={interiorFront}
+            ariaLabel="Салон — передний ряд и торпедо"
+            zones={FRONT_ZONES}
+            width={FRONT_W}
+            height={FRONT_H}
             byType={byType}
             hoverKey={hoverKey}
             setHoverKey={setHoverKey}
             onElementClick={onElementClick}
-            viewBox={`230 230 1080 398`}
-          />
-          <ImagePanel
-            imageUrl={carSide}
-            zones={RIGHT_SIDE_ZONES}
-            byType={byType}
-            hoverKey={hoverKey}
-            setHoverKey={setHoverKey}
-            onElementClick={onElementClick}
-            mirrored
-            viewBox={`230 230 1080 398`}
+            viewBox={`100 180 1170 588`}
           />
         </div>
       )}
@@ -253,7 +250,7 @@ export function GlassSchema({
         return z?.label ?? k;
       }}
       onElementClick={onElementClick}
-      emptyText="Нет данных по стёклам"
+      emptyText="Нет данных по салону"
     />
   );
 }

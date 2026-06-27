@@ -1,5 +1,9 @@
-import { useMemo, useState } from "react";
-import type { FileRef } from "@/lib/report.functions";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Car, Armchair, Wrench, Disc3, AppWindow, Lightbulb, Shield, Hash, FileText, Images, ChevronLeft } from "lucide-react";
+import { GalleryTileBody } from "@/components/GalleryTile";
+import type { LucideIcon } from "lucide-react";
+import type { FileRef } from "@/lib/report.api";
+import { thumbSrcSet, thumbUrl } from "@/lib/image";
 
 export type GalleryItem = {
   file: FileRef;
@@ -8,104 +12,218 @@ export type GalleryItem = {
   sectionKey: string;
   isVideo: boolean;
   isDamage: boolean;
+  tag?: { name: string; severe: boolean } | null;
   timestamp?: string | null;
+  status?: "ok" | "minor" | "serious";
+  paintworkFrom?: number | null;
+  paintworkTo?: number | null;
+  damageTags?: Array<{ id: number; name: string; severe: boolean }>;
 };
 
-const TAB_DEFS: Array<{ key: string; label: string; match: (i: GalleryItem) => boolean }> = [
-  { key: "all", label: "Все", match: () => true },
-  {
-    key: "exterior",
-    label: "Экстерьер",
-    match: (i) =>
-      i.sectionKey === "bodyElements" ||
-      i.sectionKey === "glassElements" ||
-      i.sectionKey === "lightningElements",
-  },
-  { key: "interior", label: "Интерьер", match: (i) => i.sectionKey === "interiorElements" },
+const SECTION_GROUPS: Array<{
+  key: string;
+  label: string;
+  icon: LucideIcon;
+  match: (i: GalleryItem) => boolean;
+}> = [
+  { key: "body", label: "Кузов", icon: Car, match: (i) => i.sectionKey === "bodyElements" },
+  { key: "interior", label: "Салон", icon: Armchair, match: (i) => i.sectionKey === "interiorElements" },
   {
     key: "engine",
     label: "Двигатель",
+    icon: Wrench,
     match: (i) =>
       i.sectionKey === "underHoodElements" ||
       i.sectionKey === "computerDiagnosticsElements",
   },
-  { key: "damage", label: "Повреждения", match: (i) => i.isDamage },
-  { key: "video", label: "Видео", match: (i) => i.isVideo },
+  { key: "wheels", label: "Колёса и тормоза", icon: Disc3, match: (i) => i.sectionKey === "wheelsAndBrakesElements" },
+  { key: "glass", label: "Стёкла", icon: AppWindow, match: (i) => i.sectionKey === "glassElements" },
+  { key: "lighting", label: "Освещение", icon: Lightbulb, match: (i) => i.sectionKey === "lightningElements" },
+  { key: "frame", label: "Силовые элементы", icon: Shield, match: (i) => i.sectionKey === "bodyReinforcementElements" },
+  { key: "vin", label: "VIN и маркировки", icon: Hash, match: (i) => i.sectionKey === "characteristics" || i.sectionKey === "car" },
+  { key: "documents", label: "Документы", icon: FileText, match: (i) => i.sectionKey === "documents" || i.sectionKey === "legal" },
 ];
 
 export function MediaGallery({
   items,
   onOpen,
-  renderTile,
 }: {
   items: GalleryItem[];
   onOpen: (idx: number) => void;
-  renderTile: (item: GalleryItem) => React.ReactNode;
 }) {
-  const [tab, setTab] = useState("all");
+  const [activeKey, setActiveKey] = useState<string | null>(null);
 
-  const counts = useMemo(() => {
-    const c: Record<string, number> = {};
-    for (const def of TAB_DEFS) c[def.key] = items.filter(def.match).length;
-    return c;
+  const groups = useMemo(() => {
+    const used = new Set<number>();
+    const result: Array<{
+      key: string;
+      label: string;
+      icon: LucideIcon;
+      count: number;
+      items: GalleryItem[];
+      cover: string | null;
+    }> = [];
+    for (const g of SECTION_GROUPS) {
+      const groupItems = items.filter((i) => !used.has(i.idx) && g.match(i));
+      groupItems.forEach((i) => used.add(i.idx));
+      if (groupItems.length === 0) continue;
+      const coverItem =
+        groupItems.find(
+          (i) => !i.isVideo && !/\.(m3u8|mp4|webm|mov)(\?|$)/i.test(i.file.url),
+        ) ?? groupItems[0];
+      result.push({
+        key: g.key,
+        label: g.label,
+        icon: g.icon,
+        count: groupItems.length,
+        items: groupItems,
+        cover: coverItem.file.url ?? null,
+      });
+    }
+    const other = items.filter((i) => !used.has(i.idx));
+    if (other.length > 0) {
+      const coverItem =
+        other.find(
+          (i) => !i.isVideo && !/\.(m3u8|mp4|webm|mov)(\?|$)/i.test(i.file.url),
+        ) ?? other[0];
+      result.push({
+        key: "other",
+        label: "Прочее",
+        icon: Images,
+        count: other.length,
+        items: other,
+        cover: coverItem.file.url ?? null,
+      });
+    }
+    return result;
   }, [items]);
 
-  const visible = useMemo(() => {
-    const def = TAB_DEFS.find((d) => d.key === tab) ?? TAB_DEFS[0];
-    return items.filter(def.match);
-  }, [items, tab]);
+  // Lazy-mount: render a same-height placeholder until the section is
+  // close to the viewport, so cover images / tile decoding don't start
+  // during initial page load.
+  const sectionRef = useRef<HTMLElement | null>(null);
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    if (visible) return;
+    const node = sectionRef.current;
+    if (!node) return;
+    if (typeof IntersectionObserver === "undefined") {
+      setVisible(true);
+      return;
+    }
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            setVisible(true);
+            io.disconnect();
+            break;
+          }
+        }
+      },
+      { rootMargin: "600px 0px" },
+    );
+    io.observe(node);
+    return () => io.disconnect();
+  }, [visible]);
 
   if (items.length === 0) return null;
 
+  const active = activeKey ? groups.find((g) => g.key === activeKey) ?? null : null;
+
   return (
-    <div className="panel p-5 md:p-6">
-      <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
-        <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-          Фото и видео с осмотра
+    <section ref={sectionRef} className="panel p-4 sm:p-5 md:p-6 flex flex-col gap-3 sm:gap-4">
+
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <h3 className="text-xs sm:text-sm font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
+          {active ? (
+            <button
+              type="button"
+              onClick={() => setActiveKey(null)}
+              className="inline-flex items-center gap-1 hover:text-foreground transition-colors"
+            >
+              <ChevronLeft size={14} />
+              <span>Фото и видео с осмотра</span>
+            </button>
+          ) : (
+            <span>Фото и видео с осмотра</span>
+          )}
+          <span className="mono text-[11px] normal-case tracking-normal text-muted-foreground/70">
+            ({active ? `${active.label} · ${active.count}` : items.length})
+          </span>
         </h3>
       </div>
-      <div className="flex flex-wrap gap-1.5 mb-4">
-        {TAB_DEFS.map((d) => {
-          const active = tab === d.key;
-          const count = counts[d.key];
-          if (count === 0 && d.key !== "all") return null;
-          return (
-            <button
-              key={d.key}
-              type="button"
-              onClick={() => setTab(d.key)}
-              className="px-3 py-1.5 rounded-md text-xs font-medium border transition-colors"
-              style={{
-                background: active ? "var(--accent)" : "var(--card)",
-                color: active ? "var(--accent-foreground)" : "var(--foreground)",
-                borderColor: active ? "var(--accent)" : "var(--border)",
-              }}
-            >
-              {d.label}
-              <span className="ml-1.5 mono opacity-70">({count})</span>
-            </button>
-          );
-        })}
-      </div>
 
-      {visible.length === 0 ? (
-        <div className="text-center text-muted-foreground py-8 text-sm">
-          Нет файлов в этой категории
-        </div>
-      ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-          {visible.map((item) => (
+      {!visible ? (
+        <div
+          aria-hidden
+          className="rounded-lg bg-muted/40 animate-pulse"
+          style={{ minHeight: 320 }}
+        />
+      ) : active ? (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3 items-start">
+          {active.items.map((item) => (
             <button
-              key={`${item.file.id}-${item.idx}`}
+              key={item.idx}
               type="button"
               onClick={() => onOpen(item.idx)}
-              className="text-left rounded-lg border border-border bg-card hover:border-accent hover:shadow-sm transition-all overflow-hidden flex flex-col"
+              className="group rounded-lg border border-border bg-card overflow-hidden text-left hover:border-accent hover:shadow-sm transition-all flex flex-col"
             >
-              {renderTile(item)}
+              <GalleryTileBody item={item} />
             </button>
           ))}
         </div>
+      ) : (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3">
+          {groups.map((g) => {
+            const Icon = g.icon;
+            return (
+              <button
+                key={g.key}
+                type="button"
+                onClick={() => setActiveKey(g.key)}
+                className="group relative aspect-[4/3] rounded-lg border border-border bg-card overflow-hidden text-left hover:border-accent hover:shadow-sm transition-all"
+                title={`${g.label} · ${g.count}`}
+              >
+                {g.cover && !/\.(m3u8|mp4|webm|mov)(\?|$)/i.test(g.cover) ? (
+                  <img
+                    src={thumbUrl(g.cover, 400) ?? g.cover}
+                    srcSet={thumbSrcSet(g.cover, 400) ?? undefined}
+                    alt={g.label}
+                    loading="lazy"
+                    decoding="async"
+                    /* @ts-expect-error fetchpriority valid attr */
+                    fetchpriority="low"
+                    width={400}
+                    height={300}
+                    sizes="(min-width: 1280px) 220px, (min-width: 640px) 33vw, 50vw"
+                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  />
+                ) : (
+                  <div className="absolute inset-0 bg-gradient-to-br from-muted to-muted/60" />
+                )}
+                <span
+                  aria-hidden
+                  className="absolute inset-0"
+                  style={{
+                    background:
+                      "linear-gradient(180deg, oklch(0.15 0.02 250 / 0.05) 0%, oklch(0.15 0.02 250 / 0.7) 100%)",
+                  }}
+                />
+                <div className="absolute inset-x-0 bottom-0 p-2.5 flex items-center justify-between gap-2 text-white">
+                  <span className="flex items-center gap-1.5 min-w-0">
+                    <Icon size={14} strokeWidth={2} className="shrink-0" />
+                    <span className="text-xs font-semibold truncate">{g.label}</span>
+                  </span>
+                  <span className="mono text-[10px] px-1.5 py-0.5 rounded bg-white/20 backdrop-blur-sm tabular-nums">
+                    {g.count}
+                  </span>
+                </div>
+              </button>
+            );
+          })}
+        </div>
       )}
-    </div>
+    </section>
   );
 }
