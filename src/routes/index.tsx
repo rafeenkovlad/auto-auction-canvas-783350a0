@@ -83,8 +83,9 @@ function AuctionSheetPage() {
         />
       );
     }
-    return <ReportContent report={previewReport} />;
+    return <ReportContent report={previewReport} isPreview />;
   }
+
 
   if (reportResult.isPending) {
     return <ReportStateCard title="Загружаем отчёт" />;
@@ -105,7 +106,7 @@ function AuctionSheetPage() {
 }
 
 
-function ReportContent({ report }: { report: Awaited<ReturnType<typeof getReport>> }) {
+function ReportContent({ report, isPreview = false }: { report: Awaited<ReturnType<typeof getReport>>; isPreview?: boolean }) {
   const ref = report.carReference ?? report.characteristicsStep?.carReference;
   const yearStart = ref?.restyling?.yearStart
     ? new Date(ref.restyling.yearStart).getFullYear()
