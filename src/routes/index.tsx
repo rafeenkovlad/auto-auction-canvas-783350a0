@@ -83,8 +83,9 @@ function AuctionSheetPage() {
         />
       );
     }
-    return <ReportContent report={previewReport} />;
+    return <ReportContent report={previewReport} isPreview />;
   }
+
 
   if (reportResult.isPending) {
     return <ReportStateCard title="Загружаем отчёт" />;
@@ -105,7 +106,7 @@ function AuctionSheetPage() {
 }
 
 
-function ReportContent({ report }: { report: Awaited<ReturnType<typeof getReport>> }) {
+function ReportContent({ report, isPreview = false }: { report: Awaited<ReturnType<typeof getReport>>; isPreview?: boolean }) {
   const ref = report.carReference ?? report.characteristicsStep?.carReference;
   const yearStart = ref?.restyling?.yearStart
     ? new Date(ref.restyling.yearStart).getFullYear()
@@ -165,6 +166,24 @@ function ReportContent({ report }: { report: Awaited<ReturnType<typeof getReport
       aria-hidden={activeIdx != null ? true : undefined}
     >
       <div className="mx-auto max-w-7xl space-y-4">
+        {isPreview && (
+          <div
+            role="alert"
+            className="panel p-3 md:p-4 border-l-4 flex items-start gap-3"
+            style={{ borderLeftColor: "var(--grade-warn)", background: "color-mix(in oklab, var(--grade-warn) 10%, var(--card))" }}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="shrink-0 mt-0.5" style={{ color: "var(--grade-warn)" }}>
+              <path d="M12 9v4M12 17h.01" />
+              <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" />
+            </svg>
+            <div className="text-xs md:text-sm">
+              <div className="font-semibold ink">Предварительный просмотр отчёта</div>
+              <div className="text-muted-foreground mt-0.5">
+                В режиме превью фотографии, видео и другие медиафайлы могут не отображаться. Полный отчёт со всеми материалами будет доступен после публикации.
+              </div>
+            </div>
+          </div>
+        )}
         <ReportHeader report={report} />
         <ReportHistoryTimeline
           history={report.history}
