@@ -179,7 +179,7 @@ function ReportContent({ report, isPreview = false }: { report: Awaited<ReturnTy
             <div className="text-xs md:text-sm">
               <div className="font-semibold ink">Предварительный просмотр отчёта</div>
               <div className="text-muted-foreground mt-0.5">
-                В режиме превью фотографии, видео и другие медиафайлы могут не отображаться. Полный отчёт со всеми материалами будет доступен после публикации.
+                В режиме превью файлы и видео не будут отображены. Полный отчёт со всеми материалами будет доступен после публикации.
               </div>
             </div>
           </div>
