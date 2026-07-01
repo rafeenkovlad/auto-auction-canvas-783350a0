@@ -18,7 +18,14 @@ import { AdditionalMaterials } from "@/components/AdditionalMaterials";
 import { ExpertConclusion } from "@/components/ExpertConclusion";
 import { statusMeta } from "@/lib/report.utils";
 import { useReportData } from "@/hooks/useReportData";
+import {
+  usePreviewReport,
+  PREVIEW_STORAGE_KEY,
+  PREVIEW_MESSAGE_TYPE,
+} from "@/hooks/usePreviewReport";
 
+
+const PREVIEW_TOKEN = "preview";
 
 const reportQuery = (token?: string) =>
   queryOptions({
@@ -54,14 +61,29 @@ export const Route = createFileRoute("/")({
 
 function AuctionSheetPage() {
   const { token } = Route.useSearch();
+  const isPreview = token === PREVIEW_TOKEN;
+
+  const previewReport = usePreviewReport(isPreview);
 
   const reportResult = useQuery({
     ...reportQuery(token),
-    enabled: Boolean(token),
+    enabled: Boolean(token) && !isPreview,
   });
 
   if (!token) {
     return <ReportStateCard title="Не указан токен отчёта" />;
+  }
+
+  if (isPreview) {
+    if (!previewReport) {
+      return (
+        <ReportStateCard
+          title="Предварительный просмотр"
+          message={`Ожидание данных отчёта с устройства. Передайте JSON отчёта через postMessage ("${PREVIEW_MESSAGE_TYPE}") или запишите его в localStorage/sessionStorage по ключу "${PREVIEW_STORAGE_KEY}".`}
+        />
+      );
+    }
+    return <ReportContent report={previewReport} />;
   }
 
   if (reportResult.isPending) {
@@ -81,6 +103,7 @@ function AuctionSheetPage() {
 
   return <ReportContent report={report} />;
 }
+
 
 function ReportContent({ report }: { report: Awaited<ReturnType<typeof getReport>> }) {
   const ref = report.carReference ?? report.characteristicsStep?.carReference;
