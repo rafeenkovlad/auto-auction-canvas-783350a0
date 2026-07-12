@@ -11,7 +11,6 @@ function loadPdfjs() {
       // Use the worker bundled with the same version to avoid version mismatch.
       // Vite handles ?url import; falls back to CDN if unavailable.
       try {
-        // @ts-expect-error - Vite ?url import
         const workerUrl = new URL(
           "pdfjs-dist/build/pdf.worker.min.mjs",
           import.meta.url,
