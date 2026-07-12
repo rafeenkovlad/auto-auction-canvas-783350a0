@@ -120,11 +120,12 @@ function MetaItem({
           {label}
         </div>
         <div
-          className={`text-sm font-semibold ink ${truncate ? "truncate max-w-[180px] xl:max-w-[260px]" : ""}`}
-          title={truncate ? value : undefined}
+          className="text-sm font-semibold ink whitespace-nowrap"
+          title={value}
         >
           {value}
         </div>
+
       </div>
     </div>
   );
