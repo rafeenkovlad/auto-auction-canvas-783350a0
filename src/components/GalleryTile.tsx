@@ -25,7 +25,7 @@ export function GalleryTileBody({ item }: { item: GalleryItem }) {
   const url = file.url;
   const ext = url.split("?")[0].split(".").pop()?.toLowerCase() ?? "";
   const isHls = ext === "m3u8" || url.includes(".m3u8");
-  const isPdf = ext === "pdf" || (file.mimeType ?? "").toLowerCase().includes("pdf");
+  const isPdf = ext === "pdf" || (file.type ?? "").toLowerCase().includes("pdf");
   // Video flag wins: backend sometimes labels HLS files as `image/*`,
   // which would otherwise route the .m3u8 URL through the image proxy
   // and trigger an ERR_BLOCKED_BY_ORB on the tile.
