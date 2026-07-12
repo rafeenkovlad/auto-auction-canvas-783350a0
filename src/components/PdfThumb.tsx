@@ -76,7 +76,6 @@ export function PdfThumb({
         cache.set(url, out);
         if (!cancelled) setDataUrl(out);
         doc.cleanup();
-        doc.destroy();
       } catch (e) {
         if (!cancelled) setFailed(true);
       }
