@@ -16,8 +16,9 @@ async function generatePoster(url: string): Promise<string | null> {
     video.muted = true;
     video.playsInline = true;
     video.preload = "auto";
-    video.crossOrigin = "anonymous";
-    // Off-DOM element; some browsers still need it attached to decode.
+    // Do NOT set crossOrigin: it isn't needed for MSE-fed frames and can
+    // break the native Safari HLS path when the server omits CORS headers.
+    // Off-DOM element; keep it attached so browsers actually decode frames.
     video.style.position = "fixed";
     video.style.left = "-9999px";
     video.style.width = "2px";
@@ -25,7 +26,6 @@ async function generatePoster(url: string): Promise<string | null> {
     document.body.appendChild(video);
 
     let hlsInstance: { destroy: () => void } | null = null;
-
     const cleanup = () => {
       try {
         hlsInstance?.destroy();
@@ -41,78 +41,79 @@ async function generatePoster(url: string): Promise<string | null> {
       video.remove();
     };
 
-    try {
-      if (video.canPlayType("application/vnd.apple.mpegurl")) {
-        video.src = url;
-      } else {
-        const { default: Hls } = await import("hls.js");
-        if (!Hls.isSupported()) {
-          cleanup();
-          return null;
+    return await new Promise<string | null>((resolve) => {
+      let done = false;
+      const finish = (value: string | null) => {
+        if (done) return;
+        done = true;
+        window.clearTimeout(timeout);
+        cleanup();
+        if (value) cache.set(url, value);
+        resolve(value);
+      };
+      const timeout = window.setTimeout(() => finish(null), 15000);
+
+      const tryCapture = () => {
+        const w = video.videoWidth;
+        const h = video.videoHeight;
+        if (!w || !h || video.readyState < 2) return false;
+        try {
+          const maxW = 600;
+          const scale = Math.min(1, maxW / w);
+          const canvas = document.createElement("canvas");
+          canvas.width = Math.round(w * scale);
+          canvas.height = Math.round(h * scale);
+          const ctx = canvas.getContext("2d");
+          if (!ctx) throw new Error("no 2d ctx");
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          finish(canvas.toDataURL("image/jpeg", 0.75));
+          return true;
+        } catch {
+          finish(null);
+          return true;
         }
-        const instance = new Hls({ maxBufferLength: 4, capLevelToPlayerSize: true });
-        instance.loadSource(url);
-        instance.attachMedia(video);
-        hlsInstance = instance;
-      }
+      };
 
-      const dataUrl = await new Promise<string | null>((resolve) => {
-        let done = false;
-        const finish = (value: string | null) => {
-          if (done) return;
-          done = true;
-          resolve(value);
-        };
-        const timeout = window.setTimeout(() => finish(null), 12000);
+      video.addEventListener("seeked", tryCapture);
+      video.addEventListener("loadeddata", () => {
+        if (tryCapture()) return;
+        // Nudge the decoder to produce a frame at ~5% of duration.
+        const t = Math.min(0.5, Math.max(0.05, (video.duration || 1) * 0.05));
+        try {
+          video.currentTime = t;
+        } catch {
+          finish(null);
+        }
+      }, { once: true });
+      video.addEventListener("error", () => finish(null), { once: true });
 
-        const onSeeked = () => {
-          try {
-            const w = video.videoWidth;
-            const h = video.videoHeight;
-            if (!w || !h) {
-              window.clearTimeout(timeout);
+      (async () => {
+        try {
+          if (video.canPlayType("application/vnd.apple.mpegurl")) {
+            video.src = url;
+          } else {
+            const { default: Hls } = await import("hls.js");
+            if (!Hls.isSupported()) {
               finish(null);
               return;
             }
-            const maxW = 600;
-            const scale = Math.min(1, maxW / w);
-            const canvas = document.createElement("canvas");
-            canvas.width = Math.round(w * scale);
-            canvas.height = Math.round(h * scale);
-            const ctx = canvas.getContext("2d");
-            if (!ctx) throw new Error("no 2d ctx");
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            const out = canvas.toDataURL("image/jpeg", 0.75);
-            window.clearTimeout(timeout);
-            finish(out);
-          } catch {
-            window.clearTimeout(timeout);
-            finish(null);
+            const instance = new Hls({ maxBufferLength: 4 });
+            instance.on(Hls.Events.ERROR, (_e, data) => {
+              if (data.fatal) finish(null);
+            });
+            instance.loadSource(url);
+            instance.attachMedia(video);
+            hlsInstance = instance;
           }
-        };
-
-        const onLoaded = () => {
-          const t = Math.min(0.2, Math.max(0.05, (video.duration || 1) * 0.05));
-          try {
-            video.currentTime = t;
-          } catch {
-            finish(null);
-          }
-        };
-
-        video.addEventListener("seeked", onSeeked, { once: true });
-        video.addEventListener("loadeddata", onLoaded, { once: true });
-        video.addEventListener("error", () => finish(null), { once: true });
-      });
-
-      cleanup();
-      if (dataUrl) cache.set(url, dataUrl);
-      return dataUrl;
-    } catch {
-      cleanup();
-      return null;
-    }
+          // Muted video can autoplay; needed to force frame decoding.
+          video.play().catch(() => {});
+        } catch {
+          finish(null);
+        }
+      })();
+    });
   })();
+
 
   inflight.set(url, task);
   try {
