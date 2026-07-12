@@ -60,22 +60,20 @@ async function generatePoster(url: string): Promise<string | null> {
 
       const dataUrl = await new Promise<string | null>((resolve) => {
         let done = false;
-        const finish = (value: string | null) => {
+        const finish = (value: string | null, why: string) => {
           if (done) return;
           done = true;
+          console.log("[HlsThumb] finish", url, why, value ? "ok" : "empty");
           resolve(value);
         };
-        const timeout = window.setTimeout(() => finish(null), 12000);
+        const timeout = window.setTimeout(() => finish(null, "timeout"), 12000);
 
-        const onSeeked = () => {
+        const tryCapture = () => {
           try {
             const w = video.videoWidth;
             const h = video.videoHeight;
-            if (!w || !h) {
-              window.clearTimeout(timeout);
-              finish(null);
-              return;
-            }
+            console.log("[HlsThumb] capture attempt", url, w, h, video.readyState);
+            if (!w || !h || video.readyState < 2) return false;
             const maxW = 600;
             const scale = Math.min(1, maxW / w);
             const canvas = document.createElement("canvas");
@@ -86,34 +84,49 @@ async function generatePoster(url: string): Promise<string | null> {
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
             const out = canvas.toDataURL("image/jpeg", 0.75);
             window.clearTimeout(timeout);
-            finish(out);
-          } catch {
+            finish(out, "seeked");
+            return true;
+          } catch (e) {
+            console.warn("[HlsThumb] capture error", url, e);
             window.clearTimeout(timeout);
-            finish(null);
+            finish(null, "capture-error");
+            return true;
           }
         };
 
+        const onSeeked = () => tryCapture();
+
         const onLoaded = () => {
+          console.log("[HlsThumb] loadeddata", url, "duration=", video.duration);
+          // If we already have a frame, just capture without seeking.
+          if (video.readyState >= 2) {
+            if (tryCapture()) return;
+          }
           const t = Math.min(0.2, Math.max(0.05, (video.duration || 1) * 0.05));
           try {
             video.currentTime = t;
           } catch {
-            finish(null);
+            finish(null, "seek-throw");
           }
         };
 
-        video.addEventListener("seeked", onSeeked, { once: true });
+        video.addEventListener("seeked", onSeeked);
         video.addEventListener("loadeddata", onLoaded, { once: true });
-        video.addEventListener("error", () => finish(null), { once: true });
+        video.addEventListener("error", (e) => {
+          console.warn("[HlsThumb] video error", url, video.error);
+          finish(null, "video-error");
+        }, { once: true });
       });
 
       cleanup();
       if (dataUrl) cache.set(url, dataUrl);
       return dataUrl;
-    } catch {
+    } catch (e) {
+      console.warn("[HlsThumb] outer error", url, e);
       cleanup();
       return null;
     }
+
   })();
 
   inflight.set(url, task);
