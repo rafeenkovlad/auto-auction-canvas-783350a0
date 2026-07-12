@@ -64,7 +64,7 @@ function AuctionSheetPage() {
   }
 
   if (reportResult.isPending) {
-    return <ReportStateCard title="Загружаем отчёт" />;
+    return <ReportStateCard title="Загружаем отчёт" loading />;
   }
 
   if (reportResult.isError) {
@@ -75,6 +75,7 @@ function AuctionSheetPage() {
       />
     );
   }
+
 
   return <ReportContent report={reportResult.data} />;
 }
@@ -221,13 +222,28 @@ function ReportContent({ report }: { report: Awaited<ReturnType<typeof getReport
   );
 }
 
-function ReportStateCard({ title, message }: { title: string; message?: string }) {
+function ReportStateCard({
+  title,
+  message,
+  loading,
+}: {
+  title: string;
+  message?: string;
+  loading?: boolean;
+}) {
   return (
     <main className="min-h-screen flex items-center justify-center p-8">
-      <div className="panel p-8 max-w-lg text-center">
-        <h1 className="text-2xl font-bold ink mb-2">{title}</h1>
+      <div className="panel p-8 max-w-lg w-full text-center flex flex-col items-center gap-3">
+        {loading && (
+          <span
+            aria-hidden
+            className="w-8 h-8 rounded-full border-[3px] border-border border-t-foreground animate-spin"
+          />
+        )}
+        <h1 className="text-2xl font-bold ink">{title}</h1>
         {message && <p className="text-muted-foreground text-sm">{message}</p>}
       </div>
     </main>
   );
 }
+
