@@ -207,13 +207,13 @@ function MediaStage({ file }: { file: FileRef | null | undefined }) {
   if (isImage) {
     return <ZoomImage src={url} alt={file.filename} />;
   }
-  if (isPdf || isOffice) {
-    // S3 often serves these with `Content-Disposition: attachment`, which
-    // makes browsers download instead of rendering inline. Route through
-    // Google's docs viewer so the preview happens server-side.
-    const viewerSrc = isPdf
-      ? url
-      : `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(url)}`;
+  if (isPdf) {
+    return <PdfViewer url={url} filename={file.filename} />;
+  }
+  if (isOffice) {
+    // Office files: route through Google's docs viewer so the preview
+    // happens server-side (S3 often serves these with attachment disposition).
+    const viewerSrc = `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(url)}`;
     return (
       <div className="absolute inset-0 flex flex-col bg-white">
         <iframe
