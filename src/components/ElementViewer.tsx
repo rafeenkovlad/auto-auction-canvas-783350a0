@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import type { FileRef, InspectionElement } from "@/lib/report.api";
 import type { Status, StatusMeta } from "@/lib/report.utils";
 import { thumbUrl } from "@/lib/image";
+import { PdfViewer } from "@/components/PdfViewer";
 
 export type ViewerElement = InspectionElement & {
   _status: Status;
