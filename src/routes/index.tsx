@@ -18,14 +18,6 @@ import { AdditionalMaterials } from "@/components/AdditionalMaterials";
 import { ExpertConclusion } from "@/components/ExpertConclusion";
 import { statusMeta } from "@/lib/report.utils";
 import { useReportData } from "@/hooks/useReportData";
-import {
-  usePreviewReport,
-  PREVIEW_STORAGE_KEY,
-  PREVIEW_MESSAGE_TYPE,
-} from "@/hooks/usePreviewReport";
-
-
-const PREVIEW_TOKEN = "preview";
 
 const reportQuery = (token?: string) =>
   queryOptions({
@@ -61,31 +53,15 @@ export const Route = createFileRoute("/")({
 
 function AuctionSheetPage() {
   const { token } = Route.useSearch();
-  const isPreview = token === PREVIEW_TOKEN;
-
-  const previewReport = usePreviewReport(isPreview);
 
   const reportResult = useQuery({
     ...reportQuery(token),
-    enabled: Boolean(token) && !isPreview,
+    enabled: Boolean(token),
   });
 
   if (!token) {
     return <ReportStateCard title="Не указан токен отчёта" />;
   }
-
-  if (isPreview) {
-    if (!previewReport) {
-      return (
-        <ReportStateCard
-          title="Предварительный просмотр"
-          message={`Ожидание данных отчёта с устройства. Передайте JSON отчёта через postMessage ("${PREVIEW_MESSAGE_TYPE}") или запишите его в localStorage/sessionStorage по ключу "${PREVIEW_STORAGE_KEY}".`}
-        />
-      );
-    }
-    return <ReportContent report={previewReport} isPreview />;
-  }
-
 
   if (reportResult.isPending) {
     return <ReportStateCard title="Загружаем отчёт" />;
@@ -100,13 +76,11 @@ function AuctionSheetPage() {
     );
   }
 
-  const report = reportResult.data;
-
-  return <ReportContent report={report} />;
+  return <ReportContent report={reportResult.data} />;
 }
 
 
-function ReportContent({ report, isPreview = false }: { report: Awaited<ReturnType<typeof getReport>>; isPreview?: boolean }) {
+function ReportContent({ report }: { report: Awaited<ReturnType<typeof getReport>> }) {
   const ref = report.carReference ?? report.characteristicsStep?.carReference;
   const yearStart = ref?.restyling?.yearStart
     ? new Date(ref.restyling.yearStart).getFullYear()
@@ -166,24 +140,6 @@ function ReportContent({ report, isPreview = false }: { report: Awaited<ReturnTy
       aria-hidden={activeIdx != null ? true : undefined}
     >
       <div className="mx-auto max-w-7xl space-y-4">
-        {isPreview && (
-          <div
-            role="alert"
-            className="panel p-3 md:p-4 border-l-4 flex items-start gap-3"
-            style={{ borderLeftColor: "var(--grade-warn)", background: "color-mix(in oklab, var(--grade-warn) 10%, var(--card))" }}
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="shrink-0 mt-0.5" style={{ color: "var(--grade-warn)" }}>
-              <path d="M12 9v4M12 17h.01" />
-              <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" />
-            </svg>
-            <div className="text-xs md:text-sm">
-              <div className="font-semibold ink">Предварительный просмотр отчёта</div>
-              <div className="text-muted-foreground mt-0.5">
-                В режиме превью файлы и видео не будут отображены. Полный отчёт со всеми материалами будет доступен после публикации.
-              </div>
-            </div>
-          </div>
-        )}
         <ReportHeader report={report} />
         <ReportHistoryTimeline
           history={report.history}
