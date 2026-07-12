@@ -53,6 +53,8 @@ export function GalleryTileBody({ item }: { item: GalleryItem }) {
             sizes="(min-width: 1280px) 220px, (min-width: 640px) 33vw, 50vw"
             className="w-full h-full object-cover"
           />
+        ) : isPdf ? (
+          <PdfThumb url={url} alt={item.caption} className="absolute inset-0 w-full h-full" />
         ) : item.isVideo ? (
           <>
             <VideoThumb url={url} isHls={isHls} caption={item.caption} />
