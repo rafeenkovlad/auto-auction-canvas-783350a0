@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { ELEMENT_LABEL } from "@/lib/report.constants";
 import type { InspectionElement } from "@/lib/report.api";
 import frameImg from "@/assets/frame-schema.webp";
 import { SchemaShell, type SchemaCanvasApi } from "@/components/SchemaShell";
@@ -46,7 +47,7 @@ function zoneSideFromElType(t: string): { zone: ZoneKey; side: Side } | null {
 
 function labelForElement(el: InspectionElement): string {
   const zs = zoneSideFromElType(el.elementType);
-  if (!zs) return el.elementType.replace(/_/g, " ");
+  if (!zs) return ELEMENT_LABEL[el.elementType] ?? el.elementType.replace(/_/g, " ");
   const sidePrefix = zs.side === "left" ? "Левая" : "Правая";
   if (zs.zone === "sill") return `${zs.side === "left" ? "Левый" : "Правый"} порог`;
   if (zs.zone === "side_beam") return `${sidePrefix} боковая балка`;
