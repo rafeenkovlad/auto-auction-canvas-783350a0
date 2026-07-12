@@ -4,21 +4,15 @@ import { useEffect, useRef, useState } from "react";
 // worker and renders lazily via IntersectionObserver so tiles offscreen
 // never pay the cost.
 
+// Vite resolves this to a hashed URL served from the app origin, so the
+// worker version always matches the pdfjs-dist package version.
+import pdfWorkerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
+
 let pdfjsPromise: Promise<typeof import("pdfjs-dist")> | null = null;
 function loadPdfjs() {
   if (!pdfjsPromise) {
     pdfjsPromise = import("pdfjs-dist").then((mod) => {
-      // Use the worker bundled with the same version to avoid version mismatch.
-      // Vite handles ?url import; falls back to CDN if unavailable.
-      try {
-        const workerUrl = new URL(
-          "pdfjs-dist/build/pdf.worker.min.mjs",
-          import.meta.url,
-        ).toString();
-        mod.GlobalWorkerOptions.workerSrc = workerUrl;
-      } catch {
-        mod.GlobalWorkerOptions.workerSrc = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${mod.version}/build/pdf.worker.min.mjs`;
-      }
+      mod.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
       return mod;
     });
   }
