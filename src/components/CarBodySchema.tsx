@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { ELEMENT_LABEL } from "@/lib/report.constants";
 import type { InspectionElement } from "@/lib/report.api";
 import carTopImg from "@/assets/car-top.webp";
 import { SchemaShell, type SchemaCanvasApi } from "@/components/SchemaShell";
@@ -145,7 +146,7 @@ export function CarBodySchema({
         zoneKeyForElement={(el) => ELEMENT_ZONE[el.elementType] ?? null}
         zoneLabelForElement={(el) => {
           const z = ELEMENT_ZONE[el.elementType];
-          return ZONE_LABEL[z] ?? el.elementType.replace(/_/g, " ");
+          return ZONE_LABEL[z] ?? ELEMENT_LABEL[el.elementType] ?? el.elementType.replace(/_/g, " ");
         }}
         zoneLabelForKey={(k) => ZONE_LABEL[k] ?? k}
         onElementClick={onElementClick}

@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { ELEMENT_LABEL } from "@/lib/report.constants";
 import type { InspectionElement } from "@/lib/report.api";
 import { type Zone, fillFor, strokeFor } from "@/components/ZoneSchema";
 import { getElementStatus } from "@/lib/report.utils";
@@ -42,7 +43,7 @@ const ALL_ZONES = [...LEFT_SIDE_ZONES, ...RIGHT_SIDE_ZONES];
 function labelFor(el: InspectionElement): string {
   if (SPARE_TYPES.includes(el.elementType)) return SPARE_LABEL;
   for (const z of ALL_ZONES) if (z.types.includes(el.elementType)) return z.label;
-  return el.elementType.replace(/_/g, " ");
+  return ELEMENT_LABEL[el.elementType] ?? el.elementType.replace(/_/g, " ");
 }
 
 function ImagePanel({
