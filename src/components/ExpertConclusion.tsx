@@ -9,9 +9,9 @@ export function ExpertConclusion({
 
   return (
     <section className="panel p-5 md:p-6">
-      <div className="flex items-start gap-4">
+      <div className="flex items-center gap-3 mb-3">
         <span
-          className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0"
+          className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
           style={{
             background: "color-mix(in oklab, var(--grade-good) 25%, white)",
           }}
@@ -21,26 +21,26 @@ export function ExpertConclusion({
             fill="none"
             stroke="var(--grade-good)"
             strokeWidth="2"
-            className="w-6 h-6"
+            className="w-5 h-5"
           >
             <path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z" />
             <path d="M9 12l2 2 4-4" />
           </svg>
         </span>
-        <div className="min-w-0">
-          <h3 className="text-base font-bold ink mb-1">Заключение специалиста</h3>
-          {result.summaryInspectionNote &&
-            result.summaryInspectionNote !== result.resultSpecialistNote && (
-              <p className="text-sm leading-relaxed whitespace-pre-line text-muted-foreground mb-2">
-                {result.summaryInspectionNote}
-              </p>
-            )}
-          {result.resultSpecialistNote && (
-            <p className="text-sm leading-relaxed whitespace-pre-line ink">
-              {result.resultSpecialistNote}
+        <h3 className="text-base font-bold ink">Заключение специалиста</h3>
+      </div>
+      <div className="min-w-0">
+        {result.summaryInspectionNote &&
+          result.summaryInspectionNote !== result.resultSpecialistNote && (
+            <p className="text-sm leading-relaxed whitespace-pre-line text-muted-foreground mb-2">
+              {result.summaryInspectionNote}
             </p>
           )}
-        </div>
+        {result.resultSpecialistNote && (
+          <p className="text-sm leading-relaxed whitespace-pre-line ink">
+            {result.resultSpecialistNote}
+          </p>
+        )}
       </div>
     </section>
   );
