@@ -1,8 +1,9 @@
 import type { GalleryItem } from "@/components/MediaGallery";
 import { isImageFile } from "@/lib/report.utils";
 import { SECTION_LABELS, STEP_LABELS } from "@/lib/report.constants";
-import { thumbSrcSet, thumbUrl } from "@/lib/image";
 import { PdfThumb } from "@/components/PdfThumb";
+import { HlsThumb } from "@/components/HlsThumb";
+
 
 /**
  * Thumbnail body used inside `MediaGallery` and `AdditionalMaterials`.
@@ -135,23 +136,12 @@ export function GalleryTileBody({ item }: { item: GalleryItem }) {
 }
 
 function VideoThumb({ url, isHls, caption }: { url: string; isHls: boolean; caption: string }) {
-  // HLS thumbnails are the most expensive thing on this page — each one
-  // would otherwise spin up hls.js and fetch the manifest + first segment
-  // just to show a poster. Render a neutral placeholder instead and let
-  // the lightbox handle real playback.
+  // For HLS we generate a poster by loading the first frame via hls.js into an
+  // off-DOM <video> and painting it to a canvas. Result is cached per URL.
   if (isHls) {
-    return (
-      <div
-        aria-label={caption}
-        className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-muted to-muted/60 text-muted-foreground"
-      >
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4">
-          <rect x="2" y="4" width="20" height="16" rx="2" />
-          <path d="M10 9l5 3-5 3z" fill="currentColor" stroke="none" />
-        </svg>
-      </div>
-    );
+    return <HlsThumb url={url} caption={caption} />;
   }
+
   // Native MP4/WebM: a metadata preload is cheap and gives a real poster.
   return (
     <video
