@@ -4,6 +4,7 @@ import { GalleryTileBody } from "@/components/GalleryTile";
 import type { LucideIcon } from "lucide-react";
 import type { FileRef } from "@/lib/report.api";
 import { thumbSrcSet, thumbUrl } from "@/lib/image";
+import { PdfThumb } from "@/components/PdfThumb";
 
 export type GalleryItem = {
   file: FileRef;
@@ -185,7 +186,13 @@ export function MediaGallery({
                 className="group relative aspect-[4/3] rounded-lg border border-border bg-card overflow-hidden text-left hover:border-accent hover:shadow-sm transition-all"
                 title={`${g.label} · ${g.count}`}
               >
-                {g.cover && !/\.(m3u8|mp4|webm|mov)(\?|$)/i.test(g.cover) ? (
+                {g.cover && /\.pdf(\?|$)/i.test(g.cover) ? (
+                  <PdfThumb
+                    url={g.cover}
+                    alt={g.label}
+                    className="absolute inset-0 w-full h-full transition-transform duration-300 group-hover:scale-105"
+                  />
+                ) : g.cover && !/\.(m3u8|mp4|webm|mov)(\?|$)/i.test(g.cover) ? (
                   <img
                     src={thumbUrl(g.cover, 400) ?? g.cover}
                     srcSet={thumbSrcSet(g.cover, 400) ?? undefined}
