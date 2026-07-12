@@ -52,11 +52,21 @@ async function generatePoster(url: string): Promise<string | null> {
           cleanup();
           return null;
         }
-        const instance = new Hls({ maxBufferLength: 4, capLevelToPlayerSize: true });
+        const instance = new Hls({ maxBufferLength: 4 });
+        instance.on(Hls.Events.ERROR, (_e, data) => {
+          console.warn("[HlsThumb] hls.js error", url, data.type, data.details, data.fatal);
+        });
+        instance.on(Hls.Events.MANIFEST_PARSED, () => {
+          console.log("[HlsThumb] manifest parsed", url);
+        });
         instance.loadSource(url);
         instance.attachMedia(video);
         hlsInstance = instance;
       }
+      // A muted video may need play() to start decoding frames in some
+      // browsers, even with preload="auto". Ignore autoplay rejection.
+      video.play().catch(() => {});
+
 
       const dataUrl = await new Promise<string | null>((resolve) => {
         let done = false;
