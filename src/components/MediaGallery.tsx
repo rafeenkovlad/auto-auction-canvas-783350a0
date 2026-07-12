@@ -4,6 +4,7 @@ import { GalleryTileBody } from "@/components/GalleryTile";
 import type { LucideIcon } from "lucide-react";
 import type { FileRef } from "@/lib/report.api";
 import { thumbSrcSet, thumbUrl } from "@/lib/image";
+import { PdfThumb } from "@/components/PdfThumb";
 
 export type GalleryItem = {
   file: FileRef;
