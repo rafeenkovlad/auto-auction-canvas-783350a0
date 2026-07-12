@@ -4,19 +4,13 @@ import { useEffect, useRef, useState } from "react";
 // works even when the backend serves the file with `Content-Disposition:
 // attachment` or `X-Frame-Options: deny` (both break plain <iframe>).
 
+import pdfWorkerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
+
 let pdfjsPromise: Promise<typeof import("pdfjs-dist")> | null = null;
 function loadPdfjs() {
   if (!pdfjsPromise) {
     pdfjsPromise = import("pdfjs-dist").then((mod) => {
-      try {
-        const workerUrl = new URL(
-          "pdfjs-dist/build/pdf.worker.min.mjs",
-          import.meta.url,
-        ).toString();
-        mod.GlobalWorkerOptions.workerSrc = workerUrl;
-      } catch {
-        mod.GlobalWorkerOptions.workerSrc = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${mod.version}/build/pdf.worker.min.mjs`;
-      }
+      mod.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
       return mod;
     });
   }
