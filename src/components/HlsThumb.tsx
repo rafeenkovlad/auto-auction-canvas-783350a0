@@ -10,8 +10,10 @@ async function generatePoster(url: string): Promise<string | null> {
   if (existing) return existing;
   const running = inflight.get(url);
   if (running) return running;
+  console.log("[HlsThumb] start", url);
 
   const task = (async () => {
+
     const video = document.createElement("video");
     video.muted = true;
     video.playsInline = true;
