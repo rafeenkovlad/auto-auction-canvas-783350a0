@@ -400,11 +400,7 @@ function VideoPlayer({ src, hls }: { src: string; hls: boolean }) {
         preload="auto"
         className="max-w-full max-h-full"
       />
-      {buffering && !failed ? (
-        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-          <span className="h-10 w-10 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-        </div>
-      ) : null}
+      {/* Buffering spinner is handled by the native <video controls> UI. */}
       {muted && !failed ? (
         <button
           type="button"
