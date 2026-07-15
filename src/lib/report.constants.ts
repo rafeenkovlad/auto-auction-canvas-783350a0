@@ -85,21 +85,33 @@ export const ELEMENT_LABEL: Record<string, string> = {
   trunk: "Крышка багажника",
   trunk_lid: "Крышка багажника",
   trunk_compartment: "Багажный отсек",
+  tailgate: "Крышка багажника",
   front_bumper: "Передний бампер",
   rear_bumper: "Задний бампер",
   front_left_fender: "Переднее левое крыло",
   front_right_fender: "Переднее правое крыло",
   rear_left_fender: "Заднее левое крыло",
   rear_right_fender: "Заднее правое крыло",
+  left_front_fender: "Переднее левое крыло",
+  right_front_fender: "Переднее правое крыло",
+  left_rear_fender: "Заднее левое крыло",
+  right_rear_fender: "Заднее правое крыло",
   front_left_door: "Передняя левая дверь",
   front_right_door: "Передняя правая дверь",
   rear_left_door: "Задняя левая дверь",
   rear_right_door: "Задняя правая дверь",
+  left_front_door: "Передняя левая дверь",
+  right_front_door: "Передняя правая дверь",
+  left_rear_door: "Задняя левая дверь",
+  right_rear_door: "Задняя правая дверь",
   left_threshold: "Левый порог",
   right_threshold: "Правый порог",
   left_sill: "Левый порог",
   right_sill: "Правый порог",
   sill: "Порог",
+  left_mirror: "Левое зеркало",
+  right_mirror: "Правое зеркало",
+  fuel_filler_flap: "Лючок бензобака",
 
   // Усиление кузова / силовые
   front_left_pillar: "Передняя левая стойка",
@@ -114,6 +126,17 @@ export const ELEMENT_LABEL: Record<string, string> = {
   left_side_beam: "Левый лонжерон",
   right_side_beam: "Правый лонжерон",
   side_beam: "Лонжерон",
+  left_frame_rail: "Левый лонжерон",
+  right_frame_rail: "Правый лонжерон",
+  left_frame_rail_engine_bay: "Левый лонжерон (моторный отсек)",
+  right_frame_rail_engine_bay: "Правый лонжерон (моторный отсек)",
+  front_panel: "Телевизор (передняя панель)",
+  front_tv: "Телевизор",
+  front_slam_panel: "Телевизор",
+  firewall: "Моторный щит",
+  floor_panel: "Пол",
+  rear_floor_panel: "Пол багажника",
+  spare_wheel_well: "Ниша запасного колеса",
 
   // Стёкла
   windshield: "Лобовое стекло",
@@ -133,9 +156,12 @@ export const ELEMENT_LABEL: Record<string, string> = {
   front_right_glass: "Переднее правое стекло",
   rear_left_glass: "Заднее левое стекло",
   rear_right_glass: "Заднее правое стекло",
+  sunroof: "Люк",
+  panoramic_roof: "Панорамная крыша",
 
   // Салон
   ceiling: "Потолок",
+  roof_liner: "Обшивка потолка",
   dashboard: "Панель приборов",
   instrument_cluster: "Приборная панель",
   central_monitor: "Центральный монитор",
@@ -146,7 +172,52 @@ export const ELEMENT_LABEL: Record<string, string> = {
   buttons_left_of_steering_wheel: "Кнопки слева от руля",
   front_seats: "Передние сиденья",
   rear_seats: "Задние сиденья",
+  driver_seat: "Сиденье водителя",
+  passenger_seat: "Сиденье пассажира",
+  rear_left_seat: "Заднее левое сиденье",
+  rear_right_seat: "Заднее правое сиденье",
+  rear_center_seat: "Заднее центральное сиденье",
+  seat_belts: "Ремни безопасности",
   srs_airbag: "SRS / Подушки безопасности",
+  door_card_front_left: "Обшивка передней левой двери",
+  door_card_front_right: "Обшивка передней правой двери",
+  door_card_rear_left: "Обшивка задней левой двери",
+  door_card_rear_right: "Обшивка задней правой двери",
+  floor_mats: "Коврики",
+  trunk_trim: "Обшивка багажника",
+  sun_visors: "Солнцезащитные козырьки",
+  rear_view_mirror: "Салонное зеркало",
+  pedals: "Педали",
+  handbrake: "Ручной тормоз",
+  glove_box: "Бардачок",
+  armrest: "Подлокотник",
+  a_pillar_trim_left: "Обшивка левой передней стойки",
+  a_pillar_trim_right: "Обшивка правой передней стойки",
+  b_pillar_trim_left: "Обшивка левой центральной стойки",
+  b_pillar_trim_right: "Обшивка правой центральной стойки",
+  c_pillar_trim_left: "Обшивка левой задней стойки",
+  c_pillar_trim_right: "Обшивка правой задней стойки",
+
+  // Под капотом
+  engine: "Двигатель",
+  engine_bay: "Моторный отсек",
+  under_hood: "Под капотом",
+  battery: "Аккумулятор",
+  radiator: "Радиатор",
+  coolant_reservoir: "Расширительный бачок",
+  washer_reservoir: "Бачок омывателя",
+  brake_fluid_reservoir: "Бачок тормозной жидкости",
+  power_steering_reservoir: "Бачок ГУР",
+  air_filter_box: "Корпус воздушного фильтра",
+  oil_filler_cap: "Крышка маслозаливной горловины",
+  intake_manifold: "Впускной коллектор",
+  belts: "Приводные ремни",
+  wiring: "Проводка",
+  fuse_box_under_hood: "Блок предохранителей (под капотом)",
+  left_wheel_arch: "Левая арка",
+  right_wheel_arch: "Правая арка",
+  left_apron: "Левый брызговик",
+  right_apron: "Правый брызговик",
 
   // Колёса и тормоза
   front_left_wheel: "Переднее левое колесо",
@@ -167,6 +238,8 @@ export const ELEMENT_LABEL: Record<string, string> = {
   rear_right_tire: "Задняя правая шина",
   spare_tire: "Запасное колесо",
   spare_wheel: "Запасное колесо",
+  front_brakes: "Передние тормоза",
+  rear_brakes: "Задние тормоза",
 
   // Освещение
   left_headlight: "Левая фара",
@@ -189,7 +262,91 @@ export const ELEMENT_LABEL: Record<string, string> = {
   rear_right_taillight: "Правый задний фонарь",
   left_rear_light: "Левый задний фонарь",
   right_rear_light: "Правый задний фонарь",
+
+  // Компьютерная диагностика
+  obd_scan: "Сканирование OBD",
+  error_codes: "Коды ошибок",
+  engine_diagnostics: "Диагностика двигателя",
+  transmission_diagnostics: "Диагностика КПП",
+  abs_diagnostics: "Диагностика ABS",
+  srs_diagnostics: "Диагностика SRS",
+  body_control_diagnostics: "Диагностика кузовной электроники",
+  climate_diagnostics: "Диагностика климат-контроля",
+  mileage_verification: "Проверка пробега",
 };
+
+const RU_WORDS: Record<string, string> = {
+  front: "Передний",
+  rear: "Задний",
+  back: "Задний",
+  left: "Левый",
+  right: "Правый",
+  center: "Центральный",
+  centre: "Центральный",
+  upper: "Верхний",
+  lower: "Нижний",
+  inner: "Внутренний",
+  outer: "Наружный",
+  door: "дверь",
+  window: "стекло",
+  glass: "стекло",
+  wheel: "колесо",
+  tire: "шина",
+  tyre: "шина",
+  headlight: "фара",
+  taillight: "задний фонарь",
+  light: "фонарь",
+  fog: "противотуманная",
+  bumper: "бампер",
+  fender: "крыло",
+  pillar: "стойка",
+  sill: "порог",
+  threshold: "порог",
+  hood: "капот",
+  roof: "крыша",
+  trunk: "багажник",
+  mirror: "зеркало",
+  seat: "сиденье",
+  seats: "сиденья",
+  panel: "панель",
+  console: "консоль",
+  engine: "двигатель",
+  battery: "аккумулятор",
+  radiator: "радиатор",
+  reservoir: "бачок",
+  brake: "тормоз",
+  brakes: "тормоза",
+  arch: "арка",
+  apron: "брызговик",
+  frame: "рама",
+  rail: "лонжерон",
+  beam: "лонжерон",
+  firewall: "моторный щит",
+  floor: "пол",
+  ceiling: "потолок",
+  dashboard: "панель приборов",
+  general: "общее",
+  condition: "состояние",
+};
+
+/**
+ * Единая точка перевода `elementType` в русскую подпись.
+ * Если тип не найден в словаре — пытаемся собрать подпись пословно,
+ * иначе форматируем snake_case с заглавной первой буквой.
+ */
+export function translateElementType(type: string | null | undefined): string {
+  if (!type) return "";
+  const direct = ELEMENT_LABEL[type];
+  if (direct) return direct;
+  const parts = type.split("_").filter(Boolean);
+  const translated = parts.map((p) => RU_WORDS[p.toLowerCase()] ?? p);
+  const allKnown = translated.every((w, i) => w !== parts[i]);
+  const joined = translated.join(" ");
+  const humanized = allKnown
+    ? joined
+    : type.replace(/_/g, " ");
+  return humanized.charAt(0).toUpperCase() + humanized.slice(1);
+}
 
 export const STEP_LABELS: Record<string, string> = {
   car: "Авто",
