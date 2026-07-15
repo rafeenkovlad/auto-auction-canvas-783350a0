@@ -92,7 +92,7 @@ const ALL_ZONES = [...FRONT_ZONES, ...REAR_ZONES];
 
 function labelFor(el: InspectionElement): string {
   for (const z of ALL_ZONES) if (z.types.includes(el.elementType)) return z.label;
-  return ELEMENT_LABEL[el.elementType] ?? el.elementType.replace(/_/g, " ");
+  return translateElementType(el.elementType);
 }
 
 function ImagePanel({

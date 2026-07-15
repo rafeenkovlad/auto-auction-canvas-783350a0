@@ -47,7 +47,7 @@ function zoneSideFromElType(t: string): { zone: ZoneKey; side: Side } | null {
 
 function labelForElement(el: InspectionElement): string {
   const zs = zoneSideFromElType(el.elementType);
-  if (!zs) return ELEMENT_LABEL[el.elementType] ?? el.elementType.replace(/_/g, " ");
+  if (!zs) return translateElementType(el.elementType);
   const sidePrefix = zs.side === "left" ? "Левая" : "Правая";
   if (zs.zone === "sill") return `${zs.side === "left" ? "Левый" : "Правый"} порог`;
   if (zs.zone === "side_beam") return `${sidePrefix} боковая балка`;

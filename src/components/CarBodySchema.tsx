@@ -146,7 +146,7 @@ export function CarBodySchema({
         zoneKeyForElement={(el) => ELEMENT_ZONE[el.elementType] ?? null}
         zoneLabelForElement={(el) => {
           const z = ELEMENT_ZONE[el.elementType];
-          return ZONE_LABEL[z] ?? ELEMENT_LABEL[el.elementType] ?? el.elementType.replace(/_/g, " ");
+          return ZONE_LABEL[z] ?? translateElementType(el.elementType);
         }}
         zoneLabelForKey={(k) => ZONE_LABEL[k] ?? k}
         onElementClick={onElementClick}
