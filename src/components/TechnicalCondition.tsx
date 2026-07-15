@@ -37,7 +37,6 @@ function summarizeSection(elements: InspectionElement[]): {
       const name =
         tag?.name ??
         translateElementType(el.elementType);
-        el.elementType.replace(/_/g, " ");
       problems.push({ label: name, severe: s === "serious" });
     }
   }
