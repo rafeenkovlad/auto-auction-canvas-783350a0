@@ -1,65 +1,46 @@
-# План: адаптация отчёта под макет VIN DIEZEL
+# Перевод названий элементов на русский
 
-Сохраняем текущую тёмную тему и вертикальный скролл (без сайдбара). Берём из референса состав и компоновку блоков, бренд меняем на «VIN DIEZEL».
+## Что не так сейчас
 
-## 1. Брендинг
-- В `ReportHeader` заменить логотип/название на **VIN DIEZEL** (моно-логотип, акцент на «DIEZEL»).
-- Сабтайтл «Проверен VIN DIEZEL» как бейдж.
-- Никаких новых шрифтов: текущая типографика остаётся.
+В боковой панели «Заметки» схемы осмотра, а также в карточках «Технического состояния» и в галерее подписи элементов формируются так:
 
-## 2. Шапка отчёта (новый блок сверху)
-Три колонки на десктопе, стек на мобильном:
-```text
-┌─────────────────────────┬──────────────┬──────────────┐
-│ Фото авто + название    │ SCORE 9.1/10 │ Метаданные   │
-│ + бейдж «Рекомендуется» │ круговой     │ дата, город, │
-│ + чипсы (год, топливо,  │ + чек-лист   │ пробег, VIN, │
-│   КПП, привод)          │ ключевых     │ № отчёта     │
-│ + ряд миниатюр фото     │ пунктов      │ + CTA        │
-└─────────────────────────┴──────────────┴──────────────┘
+```ts
+ELEMENT_LABEL[el.elementType] ?? el.elementType.replace(/_/g, " ")
 ```
-Источник данных — существующий `useReportData` (vehicle, score, mileage, VIN, photos).
 
-## 3. «Что важно знать» + карта авто
-Две колонки:
-- **Слева**: чек-лист главных выводов (VIN проверен, ДТП не выявлено, структурные повреждения, окрашенные зоны и т.д.) + ориентировочная стоимость устранения.
-- **Справа**: схема авто со всеми 4 проекциями (top / front / rear / side) одновременно, с подписями толщины ЛКП и легендой цветов. Переиспользуем `CarBodySchema` в режиме «all-views grid».
+Если `elementType` отсутствует в словаре `ELEMENT_LABEL` (`src/lib/report.constants.ts`), выводится сырой английский идентификатор с подчёркиваниями, например `engine_bay`, `battery`, `obd_scan`. Именно поэтому рядом с корректным «Общее состояние» встречаются английские названия.
 
-## 4. Фото по категориям
-Горизонтальный плиточный ряд (Кузов, Салон, Двигатель, Подвеска, VIN, Документы) с превью и счётчиком фото. Каждая плитка открывает уже существующий `ElementViewer` отфильтрованным набором.
+Сейчас в словаре покрыты: кузов, силовые элементы, стёкла, часть салона, колёса, освещение. **Не покрыты**: под капотом, компьютерная диагностика, часть салона (обшивки, ремни, коврики и т.д.), некоторые синонимы из бэкенда.
 
-## 5. Нижние панели (сетка 2×N карточек)
-Каждая — отдельный компонент-карточка с заголовком и ссылкой «Подробнее»:
-- **Техсостояние** — список «Кузов и ЛКП / Двигатель / …» с прогресс-барами и оценкой /10.
-- **Диагностика (OBD)** — список систем со статусом OK / ошибка.
-- **Тест-драйв** — список узлов со статусом «В порядке».
-- **Износ и ресурсы** — компоненты с % и пробегом до замены.
-- **Проверка документов** — соответствие ПТС/СТС.
-- **История замечаний** — таймлайн.
-- **Заключение специалиста** — оценка, комментарий, CTA «Можно покупать».
+## Что сделать
 
-Используем существующие `TechnicalStatePanel`, `ExpertConclusion`, `InspectionHistoryTimeline`, `DocumentsCard`, `TestDriveCard` — приводим к единому виду карточки.
+1. **Расширить `ELEMENT_LABEL`** в `src/lib/report.constants.ts`, добавив недостающие разделы:
+   - **Под капотом**: `engine`, `engine_bay`, `battery`, `radiator`, `coolant_reservoir`, `washer_reservoir`, `brake_fluid_reservoir`, `power_steering_reservoir`, `air_filter_box`, `oil_filler_cap`, `intake_manifold`, `belts`, `wiring`, `fuse_box_under_hood`, `front_panel`/`front_tv`/`front_slam_panel` (телевизор), `left_wheel_arch`, `right_wheel_arch`, `left_apron`, `right_apron`, `left_frame_rail_engine_bay`, `right_frame_rail_engine_bay`, `firewall`.
+   - **Компьютерная диагностика**: `obd_scan`, `error_codes`, `engine_diagnostics`, `transmission_diagnostics`, `abs_diagnostics`, `srs_diagnostics`, `body_control_diagnostics`, `climate_diagnostics`, `mileage_verification`.
+   - **Салон (дополнить)**: `driver_seat`, `passenger_seat`, `rear_left_seat`, `rear_right_seat`, `seat_belts`, `door_card_front_left`, `door_card_front_right`, `door_card_rear_left`, `door_card_rear_right`, `floor_mats`, `trunk_trim`, `sun_visors`, `rear_view_mirror`, `pedals`, `handbrake`, `glove_box`, `armrest`, `roof_liner`, `a_pillar_trim_left`, `a_pillar_trim_right`, `b_pillar_trim_left`, `b_pillar_trim_right`, `c_pillar_trim_left`, `c_pillar_trim_right`.
+   - **Синонимы бэкенда** для уже переведённых элементов (по мере обнаружения при просмотре реальных отчётов).
 
-## 6. Старые элементы
-- `HeroSection`, `SchemaTabs` (с табами), отдельный `MediaGallery` — заменяются новыми блоками сверху и больше не рендерятся.
-- Логика статусов и данные — без изменений.
+2. **Единая функция перевода** `translateElementType(type: string): string` в `src/lib/report.constants.ts`:
+   - Возвращает значение из `ELEMENT_LABEL`, если найдено.
+   - Иначе — форматирует `snake_case` в человекочитаемый вид с первой заглавной буквой, но помечает результат как «неизвестный тип» через возврат исходного значения, чтобы такие случаи было проще замечать в отчётах.
+
+3. **Заменить дублирующийся fallback** во всех местах, где сейчас пишется
+   `ELEMENT_LABEL[el.elementType] ?? el.elementType.replace(/_/g, " ")`,
+   на вызов `translateElementType(el.elementType)`. Файлы:
+   `src/hooks/useReportData.ts`, `src/components/TechnicalCondition.tsx`,
+   `src/components/CarBodySchema.tsx`, `src/components/FrameSchema.tsx`,
+   `src/components/WheelsSchema.tsx`, `src/components/GlassSchema.tsx`,
+   `src/components/LightingSchema.tsx`, `src/components/InteriorSchema.tsx`.
+
+4. **Проверить** превью с текущим токеном отчёта: пройтись по всем вкладкам «Схемы осмотра» и убедиться, что в списке «Заметки» и подписях зон нет английских слов.
+
+## Что не входит
+
+- Перевод названий повреждений (`DamageTag.name`) — они приходят с бэкенда уже локализованными и в вопросе не отмечены.
+- Изменение бизнес-логики, API и структуры данных.
 
 ## Технические детали
-- Главная композиция — в `src/routes/index.tsx`: новая последовательность `<ReportHeaderCard /> <KeyFindingsWithMap /> <PhotoCategories /> <PanelsGrid />`.
-- Новые компоненты:
-  - `src/components/ReportHeaderCard.tsx`
-  - `src/components/KeyFindings.tsx`
-  - `src/components/AllViewsSchema.tsx` (обёртка над схемами, рендерит 4 проекции сразу)
-  - `src/components/PhotoCategories.tsx`
-  - `src/components/PanelsGrid.tsx` (обёртка-сетка)
-- Тёмная тема: токены берём из `src/styles.css`, без хардкода цветов. Аксцент остаётся текущий primary.
-- Адаптив: 1 колонка <768px, 2 колонки 768–1280px, 3 колонки шапки на ≥1280px.
 
-## Порядок реализации
-1. `ReportHeaderCard` + ребренд.
-2. `AllViewsSchema` + `KeyFindings`.
-3. `PhotoCategories`.
-4. `PanelsGrid` с приведением существующих панелей к одному стилю.
-5. Удаление неиспользуемых старых блоков из `routes/index.tsx`.
-
-После каждого шага — проверка превью.
+- Правки только в презентационном слое (`src/lib/report.constants.ts` + компоненты схем).
+- Стили, разметка, поведение ховеров/кликов не меняются.
+- Если пользователь встретит ещё какой-то английский идентификатор, его достаточно будет один раз добавить в `ELEMENT_LABEL`.

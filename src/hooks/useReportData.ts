@@ -9,6 +9,7 @@ import {
   SECTION_KEYS,
   SECTION_LABELS,
   ELEMENT_LABEL,
+  translateElementType,
   STEP_LABELS,
 } from "@/lib/report.constants";
 import {
@@ -43,7 +44,7 @@ function buildSectionsAndGallery(report: CarReport) {
       _status: getElementStatus(el),
       _category: SECTION_LABELS[key] ?? key,
       _displayName:
-        ELEMENT_LABEL[el.elementType] ?? el.elementType.replace(/_/g, " "),
+        translateElementType(el.elementType),
       _sectionKey: key,
     }));
     body.push(...enriched);

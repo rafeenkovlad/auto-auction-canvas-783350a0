@@ -7,6 +7,7 @@ import {
   SECTION_KEYS,
   SECTION_LABELS,
   ELEMENT_LABEL,
+  translateElementType,
 } from "@/lib/report.constants";
 import { Gauge } from "lucide-react";
 
@@ -36,8 +37,7 @@ function summarizeSection(elements: InspectionElement[]): {
       const tag = el.seriousDamageTags[0] ?? el.noSeriousDamageTags[0];
       const name =
         tag?.name ??
-        ELEMENT_LABEL[el.elementType] ??
-        el.elementType.replace(/_/g, " ");
+        translateElementType(el.elementType);
       problems.push({ label: name, severe: s === "serious" });
     }
   }
