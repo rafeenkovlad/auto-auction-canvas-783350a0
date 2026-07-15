@@ -7,6 +7,7 @@ import {
   SECTION_KEYS,
   SECTION_LABELS,
   ELEMENT_LABEL,
+  translateElementType,
 } from "@/lib/report.constants";
 import { Gauge } from "lucide-react";
 

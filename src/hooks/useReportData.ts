@@ -9,6 +9,7 @@ import {
   SECTION_KEYS,
   SECTION_LABELS,
   ELEMENT_LABEL,
+  translateElementType,
   STEP_LABELS,
 } from "@/lib/report.constants";
 import {

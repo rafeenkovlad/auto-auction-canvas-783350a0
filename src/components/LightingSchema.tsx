@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { ELEMENT_LABEL } from "@/lib/report.constants";
+import { ELEMENT_LABEL, translateElementType } from "@/lib/report.constants";
 import type { InspectionElement } from "@/lib/report.api";
 import { type Zone, fillFor, strokeFor } from "@/components/ZoneSchema";
 import { getElementStatus } from "@/lib/report.utils";

@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { ELEMENT_LABEL } from "@/lib/report.constants";
+import { ELEMENT_LABEL, translateElementType } from "@/lib/report.constants";
 import type { InspectionElement } from "@/lib/report.api";
 import frameImg from "@/assets/frame-schema.webp";
 import { SchemaShell, type SchemaCanvasApi } from "@/components/SchemaShell";
